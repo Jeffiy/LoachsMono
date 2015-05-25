@@ -1,33 +1,23 @@
 ﻿using System;
-using System.Data;
-using System.Configuration;
-using System.Collections;
 using System.Collections.Generic;
-using System.Net.Mail;
-using System.Globalization;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-using System.Web.UI.HtmlControls;
-
+using System.Text.RegularExpressions;
+using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
-using Loachs.Business;
+
 namespace Loachs.Web
 {
     public partial class admin_userlist : AdminPage
     {
         /// <summary>
-        /// 用户Id
-        /// </summary>
-        protected int UserId = RequestHelper.QueryInt("UserId");
-
-        /// <summary>
-        /// 修改时提示
+        ///     修改时提示
         /// </summary>
         protected string PasswordMessage = string.Empty;
+
+        /// <summary>
+        ///     用户Id
+        /// </summary>
+        protected int UserId = RequestHelper.QueryInt("UserId");
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -56,7 +46,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 显示结果
+        ///     显示结果
         /// </summary>
         protected void ShowResult()
         {
@@ -81,7 +71,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 绑定实体
+        ///     绑定实体
         /// </summary>
         protected void BindUser()
         {
@@ -107,7 +97,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 绑定列表
+        ///     绑定列表
         /// </summary>
         protected void BindUserList()
         {
@@ -117,32 +107,26 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 删除用户
+        ///     删除用户
         /// </summary>
         protected void DeleteUser()
         {
             if (UserId == PageUtils.CurrentUserId)
             {
                 Response.Redirect("userlist.aspx?result=4");
-                return;
             }
-            else
-            {
-                UserManager.DeleteUser(UserId);
-                Response.Redirect("userlist.aspx?result=3");
-            }
-
+            UserManager.DeleteUser(UserId);
+            Response.Redirect("userlist.aspx?result=3");
         }
-
 
         protected string GetUserType(object userType)
         {
             int type = Convert.ToInt32(userType);
             switch (type)
             {
-                case (int)UserType.Administrator:
+                case (int) UserType.Administrator:
                     return "管理员";
-                case (int)UserType.Author:
+                case (int) UserType.Author:
                     return "写作者";
                 default:
                     return "未知身份";
@@ -150,7 +134,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 编辑用户
+        ///     编辑用户
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -170,9 +154,9 @@ namespace Loachs.Web
             }
 
             u.Email = StringHelper.HtmlEncode(txtEmail.Text.Trim());
-            u.SiteUrl = string.Empty;// StringHelper.HtmlEncode(txtSiteUrl.Text.Trim());
+            u.SiteUrl = string.Empty; // StringHelper.HtmlEncode(txtSiteUrl.Text.Trim());
             u.Status = chkStatus.Checked ? 1 : 0;
-            u.Description = string.Empty;// StringHelper.TextToHtml(txtDescription.Text);
+            u.Description = string.Empty; // StringHelper.TextToHtml(txtDescription.Text);
             u.Type = StringHelper.StrToInt(ddlUserType.SelectedValue, 0);
             u.Name = StringHelper.HtmlEncode(txtNickName.Text.Trim());
             u.AvatarUrl = string.Empty;
@@ -216,7 +200,7 @@ namespace Loachs.Web
                     return;
                 }
 
-                System.Text.RegularExpressions.Regex reg = new System.Text.RegularExpressions.Regex("[A-Za-z0-9\u4e00-\u9fa5-]");
+                Regex reg = new Regex("[A-Za-z0-9\u4e00-\u9fa5-]");
                 if (!reg.IsMatch(u.UserName))
                 {
                     ShowError("用户名限字母,数字,中文,连字符!");

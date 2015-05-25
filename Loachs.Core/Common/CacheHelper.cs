@@ -7,114 +7,110 @@ using System.Web.Caching;
 namespace Loachs.Common
 {
     /// <summary>
-    /// 缓存类
+    ///     缓存类
     /// </summary>
     public class CacheHelper
     {
-        private CacheHelper() { }
-
         /// <summary>
-        /// CacheDependency 说明
-        /// 如果您向 Cache 中添加某个具有依赖项的项，当依赖项更改时，
-        /// 该项将自动从 Cache 中删除。例如，假设您向 Cache 中添加某项，
-        /// 并使其依赖于文件名数组。当该数组中的某个文件更改时，
-        /// 与该数组关联的项将从缓存中删除。
-        /// [C#] 
-        /// Insert the cache item.
-        /// CacheDependency dep = new CacheDependency(fileName, dt);
-        /// cache.Insert("key", "value", dep);
+        ///     CacheDependency 说明
+        ///     如果您向 Cache 中添加某个具有依赖项的项，当依赖项更改时，
+        ///     该项将自动从 Cache 中删除。例如，假设您向 Cache 中添加某项，
+        ///     并使其依赖于文件名数组。当该数组中的某个文件更改时，
+        ///     与该数组关联的项将从缓存中删除。
+        ///     [C#]
+        ///     Insert the cache item.
+        ///     CacheDependency dep = new CacheDependency(fileName, dt);
+        ///     cache.Insert("key", "value", dep);
         /// </summary>
-        //>> Based on Factor = 5 default value
         /// <summary>
-        /// 天
+        ///     天
         /// </summary>
         public static readonly int DayFactor = 17280;
+
         /// <summary>
-        /// 小时
+        ///     小时
         /// </summary>
         public static readonly int HourFactor = 720;
+
         /// <summary>
-        /// 分钟
+        ///     分钟
         /// </summary>
         public static readonly int MinuteFactor = 12;
+
         /// <summary>
-        /// 秒
+        ///     秒
         /// </summary>
         public static readonly double SecondFactor = 0.2;
+
         /// <summary>
-        /// 调节
+        ///     调节
         /// </summary>
         //  private static int Factor = 0;
-        private static int Factor = 5;
-        private static readonly Cache _cache;
+        private static int _factor = 5;
 
+        private static readonly Cache Cache;
         private static readonly string CachePrefix = ConfigHelper.SitePrefix;
 
-
-        public static void ReSetFactor(int cacheFactor)
-        {
-            Factor = cacheFactor;
-        }
-
         /// <summary>
-        /// Static initializer should ensure we only have to look up the current cache
-        /// instance once.
+        ///     Static initializer should ensure we only have to look up the current cache
+        ///     instance once.
         /// </summary>
         static CacheHelper()
         {
             HttpContext context = HttpContext.Current;
-            if (context != null)
-            {
-                _cache = context.Cache;
-            }
-            else
-            {
-                _cache = HttpRuntime.Cache;
-            }
+            Cache = context != null ? context.Cache : HttpRuntime.Cache;
+        }
 
+        private CacheHelper()
+        {
+        }
+
+        public static void ReSetFactor(int cacheFactor)
+        {
+            _factor = cacheFactor;
         }
 
         /// <summary>
-        /// 清除所有缓存
+        ///     清除所有缓存
         /// </summary>
         public static void Clear()
         {
-            IDictionaryEnumerator CacheEnum = _cache.GetEnumerator();
+            IDictionaryEnumerator cacheEnum = Cache.GetEnumerator();
             ArrayList al = new ArrayList();
-            while (CacheEnum.MoveNext())
+            while (cacheEnum.MoveNext())
             {
-                al.Add(CacheEnum.Key);
+                al.Add(cacheEnum.Key);
             }
 
             foreach (string key in al)
             {
-                _cache.Remove(key);
+                Cache.Remove(key);
             }
         }
 
         public static void RemoveByPattern(string pattern)
         {
-            IDictionaryEnumerator CacheEnum = _cache.GetEnumerator();
+            IDictionaryEnumerator cacheEnum = Cache.GetEnumerator();
             Regex regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
             // Regex regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline  );
-            while (CacheEnum.MoveNext())
+            while (cacheEnum.MoveNext())
             {
-                if (regex.IsMatch(CachePrefix + CacheEnum.Key.ToString()))
-                    _cache.Remove(CachePrefix + CacheEnum.Key.ToString());
+                if (regex.IsMatch(CachePrefix + cacheEnum.Key))
+                    Cache.Remove(CachePrefix + cacheEnum.Key);
             }
         }
 
         /// <summary>
-        /// 清除缓存
+        ///     清除缓存
         /// </summary>
         /// <param name="key"></param>
         public static void Remove(string key)
         {
-            _cache.Remove(CachePrefix + key);
+            Cache.Remove(CachePrefix + key);
         }
 
         /// <summary>
-        /// 缓存OBJECT.
+        ///     缓存OBJECT.
         /// </summary>
         /// <param name="key"></param>
         /// <param name="obj"></param>
@@ -122,18 +118,20 @@ namespace Loachs.Common
         {
             Insert(key, obj, null, 1);
         }
+
         /// <summary>
-        /// 缓存obj 并建立依赖项
+        ///     缓存obj 并建立依赖项
         /// </summary>
         /// <param name="key"></param>
         /// <param name="obj"></param>
         /// <param name="dep"></param>
         public static void Insert(string key, object obj, CacheDependency dep)
         {
-            Insert(key, obj, dep, MinuteFactor * 3);
+            Insert(key, obj, dep, MinuteFactor*3);
         }
+
         /// <summary>
-        /// 按秒缓存对象
+        ///     按秒缓存对象
         /// </summary>
         /// <param name="key"></param>
         /// <param name="obj"></param>
@@ -142,8 +140,9 @@ namespace Loachs.Common
         {
             Insert(key, obj, null, seconds);
         }
+
         /// <summary>
-        /// 按秒缓存对象 并存储优先级
+        ///     按秒缓存对象 并存储优先级
         /// </summary>
         /// <param name="key"></param>
         /// <param name="obj"></param>
@@ -153,8 +152,9 @@ namespace Loachs.Common
         {
             Insert(key, obj, null, seconds, priority);
         }
+
         /// <summary>
-        /// 按秒缓存对象 并建立依赖项
+        ///     按秒缓存对象 并建立依赖项
         /// </summary>
         /// <param name="key"></param>
         /// <param name="obj"></param>
@@ -164,8 +164,9 @@ namespace Loachs.Common
         {
             Insert(key, obj, dep, seconds, CacheItemPriority.Normal);
         }
+
         /// <summary>
-        /// 按秒缓存对象 并建立具有优先级的依赖项
+        ///     按秒缓存对象 并建立具有优先级的依赖项
         /// </summary>
         /// <param name="key"></param>
         /// <param name="obj"></param>
@@ -176,9 +177,9 @@ namespace Loachs.Common
         {
             if (obj != null)
             {
-                _cache.Insert(CachePrefix + key, obj, dep, DateTime.Now.AddSeconds(Factor * seconds), TimeSpan.Zero, priority, null);
+                Cache.Insert(CachePrefix + key, obj, dep, DateTime.Now.AddSeconds(_factor*seconds), TimeSpan.Zero,
+                    priority, null);
             }
-
         }
 
         ///// <summary>
@@ -238,23 +239,13 @@ namespace Loachs.Common
         //    }
         //}
         /// <summary>
-        /// 获取缓存
+        ///     获取缓存
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
         public static object Get(string key)
         {
-            return _cache[CachePrefix + key];
+            return Cache[CachePrefix + key];
         }
-
-        ///// <summary>
-        ///// Return int of seconds * SecondFactor
-        ///// </summary>
-        //public static int SecondFactorCalculate(int seconds)
-        //{
-        //    // Insert method below takes integer seconds, so we have to round any fractional values
-        //    return Convert.ToInt32(Math.Round((double)seconds * SecondFactor));
-        //}
-
     }
 }

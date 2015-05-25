@@ -1,57 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Net;
+﻿using System.Net;
 using Loachs.Business;
 
 namespace Loachs.Common
 {
     public class Utils
     {
-
-        private static string rewriteExtension = "unknow";
-
-        private static bool isSupportUrlRewriter = false;
+        private static string _rewriteExtension = "unknow";
+        private static bool _isSupportUrlRewriter;
 
         /// <summary>
-        /// 当前环境是否支持当前配置的URl重写模式
+        ///     当前环境是否支持当前配置的URl重写模式
         /// </summary>
         /// <remarks>
-        /// date:2012.7.5
+        ///     date:2012.7.5
         /// </remarks>
         public static bool IsSupportUrlRewriter
         {
             get
             {
-
-                if (rewriteExtension == "unknow" || rewriteExtension != SettingManager.GetSetting().RewriteExtension)
+                if (_rewriteExtension == "unknow" || _rewriteExtension != SettingManager.GetSetting().RewriteExtension)
                 {
-                    rewriteExtension = SettingManager.GetSetting().RewriteExtension;
+                    _rewriteExtension = SettingManager.GetSetting().RewriteExtension;
 
-                    string url = ConfigHelper.SiteUrl + "checkurlrewriter" + SettingManager.GetSetting().RewriteExtension;
+                    var url = ConfigHelper.SiteUrl + "checkurlrewriter" + SettingManager.GetSetting().RewriteExtension;
 
-                    HttpStatusCode code = NetHelper.GetHttpStatusCode(url);
-                    if (code == HttpStatusCode.OK)
-                    {
-                        isSupportUrlRewriter = true;
-                    }
-                    else
-                    {
-                        isSupportUrlRewriter = false;
-                    }
+                    var code = NetHelper.GetHttpStatusCode(url);
+                    _isSupportUrlRewriter = code == HttpStatusCode.OK;
                 }
-                return isSupportUrlRewriter;
+                return _isSupportUrlRewriter;
             }
         }
 
         /// <summary>
-        /// 预览主题URL
+        ///     预览主题URL
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
         public static string CheckPreviewThemeUrl(string url)
         {
-            string theme = RequestHelper.QueryString("theme");
+            var theme = RequestHelper.QueryString("theme");
             if (!string.IsNullOrEmpty(theme))
             {
                 if (url.IndexOf('?') > 0)

@@ -1,24 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Loachs.Common;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Loachs.Data;
 using Loachs.Entity;
 
 namespace Loachs.Business
 {
     /// <summary>
-    /// 文章管理
+    ///     文章管理
     /// </summary>
     public class PostManager
     {
-        static IPost dao = DataAccess.CreatePost();
-
+        private static readonly IPost dao = DataAccess.CreatePost();
         //private static readonly string CacheKey = "posts";
 
         //// 实体缓存键,如:"/post/detail25"
-
 
 
         ///// <summary>
@@ -36,14 +31,14 @@ namespace Loachs.Business
 
 
         /// <summary>
-        /// 列表
+        ///     列表
         /// </summary>
         private static List<PostInfo> _posts;
 
         /// <summary>
-        /// lock
+        ///     lock
         /// </summary>
-        private static object lockHelper = new object();
+        private static readonly object LockHelper = new object();
 
         static PostManager()
         {
@@ -51,13 +46,13 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 初始化
+        ///     初始化
         /// </summary>
         public static void LoadPost()
         {
             if (_posts == null)
             {
-                lock (lockHelper)
+                lock (LockHelper)
                 {
                     if (_posts == null)
                     {
@@ -66,8 +61,6 @@ namespace Loachs.Business
                 }
             }
         }
-
-
 
         ///// <summary>
         ///// 移动所有文章缓存
@@ -81,7 +74,7 @@ namespace Loachs.Business
         //}
 
         /// <summary>
-        /// 添加文章
+        ///     添加文章
         /// </summary>
         /// <param name="post"></param>
         /// <returns></returns>
@@ -107,30 +100,30 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 修改文章
+        ///     修改文章
         /// </summary>
-        /// <param name="_postinfo"></param>
+        /// <param name="postinfo"></param>
         /// <returns></returns>
-        public static int UpdatePost(PostInfo _postinfo)
+        public static int UpdatePost(PostInfo postinfo)
         {
             //   PostInfo oldPost = GetPost(_postinfo.PostId);   //好像有问题,不能缓存
 
-            PostInfo oldPost = GetPostByDatabase(_postinfo.PostId);
+            PostInfo oldPost = GetPostByDatabase(postinfo.PostId);
 
-            int result = dao.UpdatePost(_postinfo);
+            int result = dao.UpdatePost(postinfo);
 
-            if (oldPost != null && oldPost.CategoryId != _postinfo.CategoryId)
+            if (oldPost != null && oldPost.CategoryId != postinfo.CategoryId)
             {
                 //分类
                 CategoryManager.UpdateCategoryCount(oldPost.CategoryId, -1);
-                CategoryManager.UpdateCategoryCount(_postinfo.CategoryId, 1);
+                CategoryManager.UpdateCategoryCount(postinfo.CategoryId, 1);
             }
 
             //     CacheHelper.Remove(CacheKey);
 
             //标签
             TagManager.UpdateTagUseCount(oldPost.Tag, -1);
-            TagManager.UpdateTagUseCount(_postinfo.Tag, 1);
+            TagManager.UpdateTagUseCount(postinfo.Tag, 1);
 
             //   RemovePostsCache();
 
@@ -138,7 +131,7 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 删除文章
+        ///     删除文章
         /// </summary>
         /// <param name="postid"></param>
         /// <returns></returns>
@@ -168,29 +161,17 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 根据Id获取文章
+        ///     根据Id获取文章
         /// </summary>
         /// <param name="postid"></param>
         /// <returns></returns>
         public static PostInfo GetPost(int postid)
         {
-            //PostInfo p = dao.GetPost(postid);
-            ////  BuildPost(p);
-            //return p;
-
-
-            foreach (PostInfo post in _posts)
-            {
-                if (post.PostId == postid)
-                {
-                    return post;
-                }
-            }
-            return null;
+            return _posts.FirstOrDefault(post => post.PostId == postid);
         }
 
         /// <summary>
-        /// 从数据库获取文章
+        ///     从数据库获取文章
         /// </summary>
         /// <param name="postId"></param>
         /// <returns></returns>
@@ -200,20 +181,13 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 根据别名获取文章
+        ///     根据别名获取文章
         /// </summary>
         /// <param name="slug"></param>
         /// <returns></returns>
         public static PostInfo GetPost(string slug)
         {
-            foreach (PostInfo post in _posts)
-            {
-                if (!string.IsNullOrEmpty(slug) && post.Slug.ToLower() == slug.ToLower())
-                {
-                    return post;
-                }
-            }
-            return null;
+            return _posts.FirstOrDefault(post => !string.IsNullOrEmpty(slug) && post.Slug.ToLower() == slug.ToLower());
         }
 
         ///// <summary>
@@ -230,7 +204,7 @@ namespace Loachs.Business
 
 
         /// <summary>
-        /// 获取全部文章,是缓存的
+        ///     获取全部文章,是缓存的
         /// </summary>
         /// <returns></returns>
         public static List<PostInfo> GetPostList()
@@ -239,7 +213,7 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 获取文章数
+        ///     获取文章数
         /// </summary>
         /// <param name="categoryId"></param>
         /// <param name="tagId"></param>
@@ -248,13 +222,14 @@ namespace Loachs.Business
         public static int GetPostCount(int categoryId, int tagId, int userId)
         {
             int recordCount = 0;
-            GetPostList(1, 1, out recordCount, categoryId, tagId, userId, -1, -1, -1, -1, string.Empty, string.Empty, string.Empty);
+            GetPostList(1, 1, out recordCount, categoryId, tagId, userId, -1, -1, -1, -1, string.Empty, string.Empty,
+                string.Empty);
 
             return recordCount;
         }
 
         /// <summary>
-        /// 获取文章数
+        ///     获取文章数
         /// </summary>
         /// <param name="categoryId"></param>
         /// <param name="tagId"></param>
@@ -262,10 +237,11 @@ namespace Loachs.Business
         /// <param name="status"></param>
         /// <param name="hidestatus"></param>
         /// <returns></returns>
-        public static int GetPostCount(int categoryId, int tagId, int userId,int status,int hidestatus)
+        public static int GetPostCount(int categoryId, int tagId, int userId, int status, int hidestatus)
         {
             int recordCount = 0;
-            GetPostList(1, 1, out recordCount, categoryId, tagId, userId, -1, status, -1, hidestatus,  string.Empty, string.Empty, string.Empty);
+            GetPostList(1, 1, out recordCount, categoryId, tagId, userId, -1, status, -1, hidestatus, string.Empty,
+                string.Empty, string.Empty);
 
             return recordCount;
         }
@@ -273,49 +249,57 @@ namespace Loachs.Business
         /// <summary>
         /// 获取文章列表
         /// </summary>
-        /// <param name="pageSize"></param>
-        /// <param name="pageIndex"></param>
-        /// <param name="recordCount"></param>
-        /// <param name="type"></param>
-        /// <param name="categoryId"></param>
-        /// <param name="userId"></param>
-        /// <param name="status"></param>
-        /// <param name="topstatus"></param>
-        /// <param name="keyword"></param>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="pageIndex">Index of the page.</param>
+        /// <param name="recordCount">The record count.</param>
+        /// <param name="categoryId">The category identifier.</param>
+        /// <param name="tagId">The tag identifier.</param>
+        /// <param name="userId">The user identifier.</param>
+        /// <param name="recommend">The recommend.</param>
+        /// <param name="status">The status.</param>
+        /// <param name="topstatus">The topstatus.</param>
+        /// <param name="hidestatus">The hidestatus.</param>
+        /// <param name="begindate">The begindate.</param>
+        /// <param name="enddate">The enddate.</param>
+        /// <param name="keyword">The keyword.</param>
         /// <returns></returns>
-        public static List<PostInfo> GetPostList(int pageSize, int pageIndex, out int recordCount, int categoryId, int tagId, int userId, int recommend, int status, int topstatus, int hidestatus, string begindate, string enddate, string keyword)
+        public static List<PostInfo> GetPostList(int pageSize, int pageIndex, out int recordCount, int categoryId,
+            int tagId, int userId, int recommend, int status, int topstatus, int hidestatus, string begindate,
+            string enddate, string keyword)
         {
-            List<PostInfo> list = dao.GetPostList(pageSize, pageIndex, out recordCount, categoryId, tagId, userId, recommend, status, topstatus, hidestatus, begindate, enddate, keyword);
+            List<PostInfo> list = dao.GetPostList(pageSize, pageIndex, out recordCount, categoryId, tagId, userId,
+                recommend, status, topstatus, hidestatus, begindate, enddate, keyword);
             return list;
         }
 
-        public static List<PostInfo> GetPostList(int rowCount, int categoryId, int userId, int recommend, int status, int topstatus, int hidestatus)
+        public static List<PostInfo> GetPostList(int rowCount, int categoryId, int userId, int recommend, int status,
+            int topstatus, int hidestatus)
         {
             List<PostInfo> list = _posts;
             if (categoryId != -1)
             {
-                list = list.FindAll(delegate(PostInfo post) { return post.CategoryId == categoryId; });
+                list = list.FindAll(post => post.CategoryId == categoryId);
             }
 
             if (userId != -1)
             {
-                list = list.FindAll(delegate(PostInfo post) { return post.UserId == userId; });
+                list = list.FindAll(post => post.UserId == userId);
             }
             if (recommend != -1)
             {
-                list = list.FindAll(delegate(PostInfo post) { return post.Recommend == recommend; });
+                list = list.FindAll(post => post.Recommend == recommend);
             }
             if (status != -1)
             {
-                list = list.FindAll(delegate(PostInfo post) { return post.Status == status; });
+                list = list.FindAll(post => post.Status == status);
             }
             if (topstatus != -1)
             {
-                list = list.FindAll(delegate(PostInfo post) { return post.TopStatus == topstatus; });
+                list = list.FindAll(post => post.TopStatus == topstatus);
             }
             if (hidestatus != -1)
             {
-                list = list.FindAll(delegate(PostInfo post) { return post.HideStatus == hidestatus; });
+                list = list.FindAll(post => post.HideStatus == hidestatus);
             }
 
             if (rowCount > list.Count)
@@ -330,9 +314,8 @@ namespace Loachs.Business
             return list2;
         }
 
-
         /// <summary>
-        /// 更新点击数
+        ///     更新点击数
         /// </summary>
         /// <param name="postId"></param>
         /// <param name="addCount"></param>
@@ -351,7 +334,7 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 更新评论数
+        ///     更新评论数
         /// </summary>
         /// <param name="postId"></param>
         /// <param name="addCount"></param>
@@ -367,7 +350,6 @@ namespace Loachs.Business
                 return dao.UpdatePost(post);
             }
             return 0;
-
         }
     }
 }

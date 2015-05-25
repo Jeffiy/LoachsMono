@@ -1,56 +1,49 @@
 ﻿using System;
-using System.Data;
-using System.Configuration;
-using System.Collections;
 using System.Collections.Generic;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-using System.Web.UI.HtmlControls;
-using System.Text.RegularExpressions;
 using System.IO;
-using System.Xml;
+using System.Linq;
 using System.Text;
-
+using System.Web;
+using System.Xml;
+using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
-using Loachs.Business;
+using Loachs.MetaWeblog;
+
 namespace Loachs.Web
 {
-    public partial class _Default : Loachs.Web.PageBase
+    public partial class _Default : PageBase
     {
         /// <summary>
-        /// 模板封装类
+        ///     页面类型
         /// </summary>
-        private TemplateHelper th = null;// new TemplateHelper();
+        public string PageType = RequestHelper.QueryString("type", true);
 
         /// <summary>
-        /// 模板路径
+        ///     预览主题名称(文件夹)
         /// </summary>
-        private string templatePath = null;
+        public string PreviewThemeName = RequestHelper.QueryString("theme", true);
 
         /// <summary>
-        /// 页面类型
+        ///     模板路径
         /// </summary>
-        public string pageType = RequestHelper.QueryString("type", true);
+        private string _templatePath;
 
         /// <summary>
-        /// 主题名称(文件夹)
+        ///     模板封装类
         /// </summary>
-        public string themeName;
+        private TemplateHelper th; // new TemplateHelper();
 
         /// <summary>
-        /// 预览主题名称(文件夹)
+        ///     主题名称(文件夹)
         /// </summary>
-        public string previewThemeName = RequestHelper.QueryString("theme", true);
+        public string ThemeName;
 
         protected void Page_Load(object sender, EventArgs e)
         {
             //   Response.Write(Server.UrlDecode(Request.Url.ToString()));
 
-            if (pageType == "checkurlrewriter")
+            if (PageType == "checkurlrewriter")
             {
                 Response.Clear();
                 Response.Write("支持当前设置的URL重写规则");
@@ -64,19 +57,19 @@ namespace Loachs.Web
                 ResponseError("网站已关闭", "网站已关闭,请与站长联系!");
             }
 
-            themeName = SettingManager.GetSetting().Theme;
+            ThemeName = SettingManager.GetSetting().Theme;
             if (RequestHelper.IsMobile)
             {
-                themeName = SettingManager.GetSetting().MobileTheme;
+                ThemeName = SettingManager.GetSetting().MobileTheme;
             }
-            if (!string.IsNullOrEmpty(previewThemeName))
+            if (!string.IsNullOrEmpty(PreviewThemeName))
             {
-                themeName = previewThemeName;
+                ThemeName = PreviewThemeName;
             }
             // Response.Write("ismobile:" + RequestHelper.IsMobile + ",IsMobileDevice:" + Request.Browser.IsMobileDevice + ",BrowserType:" + Request.Browser.Type + ",UserAgent:" + Request.UserAgent + ",HTTP_ACCEPT:" + Request.ServerVariables["HTTP_ACCEPT"]);
 
 
-            templatePath = Server.MapPath(string.Format("{0}/themes/{1}/template/", ConfigHelper.SitePath, themeName));
+            _templatePath = Server.MapPath(string.Format("{0}/themes/{1}/template/", ConfigHelper.SitePath, ThemeName));
 
             //if (!System.IO.Directory.Exists(templatePath) && !string.IsNullOrEmpty(previewThemeName))
             //{
@@ -84,7 +77,7 @@ namespace Loachs.Web
             //}
 
             //非预览时
-            if (!System.IO.Directory.Exists(templatePath) && string.IsNullOrEmpty(previewThemeName))
+            if (!Directory.Exists(_templatePath) && string.IsNullOrEmpty(PreviewThemeName))
             {
                 SettingInfo s = SettingManager.GetSetting();
                 if (RequestHelper.IsMobile)
@@ -95,15 +88,14 @@ namespace Loachs.Web
                 {
                     s.Theme = "default";
                 }
-                themeName = "default";
+                ThemeName = "default";
 
                 SettingManager.UpdateSetting();
 
-                templatePath = Server.MapPath(string.Format("{0}/themes/default/template/", ConfigHelper.SitePath));
+                _templatePath = Server.MapPath(string.Format("{0}/themes/default/template/", ConfigHelper.SitePath));
             }
 
-            th = new TemplateHelper(templatePath);
-
+            th = new TemplateHelper(_templatePath);
 
 
             LoadDefault();
@@ -112,7 +104,7 @@ namespace Loachs.Web
 
             th.Put("loachs", loachs);
 
-            switch (pageType)
+            switch (PageType)
             {
                 case "feed":
                     LoadFeed();
@@ -143,8 +135,8 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// Rsd
-        /// from BlogEngine Source
+        ///     Rsd
+        ///     from BlogEngine Source
         /// </summary>
         protected void LoadRsd()
         {
@@ -201,77 +193,70 @@ namespace Loachs.Web
                 rsd.WriteEndElement();
 
                 rsd.WriteEndDocument();
-
             }
         }
 
         /// <summary>
-        /// 加载WLW配置
+        ///     加载WLW配置
         /// </summary>
         protected void LoadWlwmanifest()
         {
             string xml = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
-        + "<manifest xmlns=\"http://schemas.microsoft.com/wlw/manifest/weblog\">"
-         + " <options>"
-          + "  <clientType>Metaweblog</clientType>"
-          + "  <supportsKeywords>Yes</supportsKeywords>"
-          + "  <supportsNewCategories>Yes</supportsNewCategories>"
-           + " <supportsMultipleCategories>No</supportsMultipleCategories>"
-            + "<supportsNewCategoriesInline>Yes</supportsNewCategoriesInline>"
-           + " <supportsCommentPolicy>Yes</supportsCommentPolicy>"
-            + "<supportsSlug>Yes</supportsSlug>"
-            + "<supportsExcerpt>Yes</supportsExcerpt>"
-            + "<supportsGetTags>Yes</supportsGetTags>"
-            + "<supportsPages>No</supportsPages>"
-            + "<supportsAuthor>No</supportsAuthor>"
-            + "<supportsCustomDate>No</supportsCustomDate>"
-            + "<requiresHtmlTitles>No</requiresHtmlTitles>"
-          + "</options>"
-          + "<weblog>"
-        + "    <ServiceName>Loachs</ServiceName>"
+                         + "<manifest xmlns=\"http://schemas.microsoft.com/wlw/manifest/weblog\">"
+                         + " <options>"
+                         + "  <clientType>Metaweblog</clientType>"
+                         + "  <supportsKeywords>Yes</supportsKeywords>"
+                         + "  <supportsNewCategories>Yes</supportsNewCategories>"
+                         + " <supportsMultipleCategories>No</supportsMultipleCategories>"
+                         + "<supportsNewCategoriesInline>Yes</supportsNewCategoriesInline>"
+                         + " <supportsCommentPolicy>Yes</supportsCommentPolicy>"
+                         + "<supportsSlug>Yes</supportsSlug>"
+                         + "<supportsExcerpt>Yes</supportsExcerpt>"
+                         + "<supportsGetTags>Yes</supportsGetTags>"
+                         + "<supportsPages>No</supportsPages>"
+                         + "<supportsAuthor>No</supportsAuthor>"
+                         + "<supportsCustomDate>No</supportsCustomDate>"
+                         + "<requiresHtmlTitles>No</requiresHtmlTitles>"
+                         + "</options>"
+                         + "<weblog>"
+                         + "    <ServiceName>Loachs</ServiceName>"
 
 
-            //+ "<imageUrl>../common/images/logo.gif</imageUrl>"  //ICO?
+                //+ "<imageUrl>../common/images/logo.gif</imageUrl>"  //ICO?
                 //+ "<watermarkImageUrl>../common/images/watermark/watermark.gif</watermarkImageUrl>" //LOGO
-
-
-            + "<imageUrl>../common/images/wlw/icon.png</imageUrl>"  //ICO?
-            + "<watermarkImageUrl>../common/images/wlw/watermark.png</watermarkImageUrl>" //LOGO  Live Writer version:14.0 , 83*83
-
-
-            + "<homepageLinkText>查看网站</homepageLinkText>"
-            + "<adminLinkText>管理网站</adminLinkText>"
-            + "<adminUrl><![CDATA[{blog-homepage-url}admin]]></adminUrl>"
-          + "</weblog>"
-          + "<buttons>"
-        + "    <button>"
-              + "<id>1</id>"
-              + "<text>网站预览</text>"
-              + "<imageUrl>../common/images/wlw/sitepreview.png</imageUrl>"
-              + "<contentUrl><![CDATA[{blog-homepage-url}]]></contentUrl>"
-              + "<contentDisplaySize>980,550</contentDisplaySize>"
-            + "</button>"
-          + "</buttons>"
-        + "</manifest>";
+                         + "<imageUrl>../common/images/wlw/icon.png</imageUrl>" //ICO?
+                         + "<watermarkImageUrl>../common/images/wlw/watermark.png</watermarkImageUrl>"
+                //LOGO  Live Writer version:14.0 , 83*83
+                         + "<homepageLinkText>查看网站</homepageLinkText>"
+                         + "<adminLinkText>管理网站</adminLinkText>"
+                         + "<adminUrl><![CDATA[{blog-homepage-url}admin]]></adminUrl>"
+                         + "</weblog>"
+                         + "<buttons>"
+                         + "    <button>"
+                         + "<id>1</id>"
+                         + "<text>网站预览</text>"
+                         + "<imageUrl>../common/images/wlw/sitepreview.png</imageUrl>"
+                         + "<contentUrl><![CDATA[{blog-homepage-url}]]></contentUrl>"
+                         + "<contentDisplaySize>980,550</contentDisplaySize>"
+                         + "</button>"
+                         + "</buttons>"
+                         + "</manifest>";
 
             Response.ContentType = "text/xml";
             Response.Write(xml);
         }
 
         /// <summary>
-        /// Metaweblog 接口操作
+        ///     Metaweblog 接口操作
         /// </summary>
         public void LoadMetaweblog()
         {
-
-            Loachs.MetaWeblog.MetaWeblogHelper mw = new Loachs.MetaWeblog.MetaWeblogHelper();
+            MetaWeblogHelper mw = new MetaWeblogHelper();
             mw.ProcessRequest(HttpContext.Current);
-
-
         }
 
         /// <summary>
-        /// 更新访问次数
+        ///     更新访问次数
         /// </summary>
         protected void UpdateViewCount()
         {
@@ -292,14 +277,14 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 生成分页
+        ///     生成分页
         /// </summary>
         /// <param name="type"></param>
-        /// <param name="slug"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
         /// <returns></returns>
         protected string MakeUrl(string type, string key, string value)
         {
-
             string url = string.Empty;
 
             if (Utils.IsSupportUrlRewriter == false)
@@ -308,20 +293,23 @@ namespace Loachs.Web
             }
             else
             {
-                if (string.IsNullOrEmpty(type) == true && string.IsNullOrEmpty(key) == true)
+                if (string.IsNullOrEmpty(type) && string.IsNullOrEmpty(key))
                 {
-                    url = (ConfigHelper.SiteUrl.EndsWith("/") ? ConfigHelper.SiteUrl + "page/{0}" : ConfigHelper.SiteUrl + "/page/{0}") + SettingManager.GetSetting().RewriteExtension;
+                    url = (ConfigHelper.SiteUrl.EndsWith("/")
+                        ? ConfigHelper.SiteUrl + "page/{0}"
+                        : ConfigHelper.SiteUrl + "/page/{0}") + SettingManager.GetSetting().RewriteExtension;
                 }
                 else
                 {
-                    url = ConfigHelper.SiteUrl + type + "/" + value + "/page/{0}" + SettingManager.GetSetting().RewriteExtension;
+                    url = ConfigHelper.SiteUrl + type + "/" + value + "/page/{0}" +
+                          SettingManager.GetSetting().RewriteExtension;
                 }
             }
             return Utils.CheckPreviewThemeUrl(url);
         }
 
         /// <summary>
-        /// 加载文章列表
+        ///     加载文章列表
         /// </summary>
         protected void LoadPostList()
         {
@@ -339,7 +327,7 @@ namespace Loachs.Web
 
             string url = MakeUrl(string.Empty, string.Empty, string.Empty);
 
-            if (pageType == "category")
+            if (PageType == "category")
             {
                 string slug = RequestHelper.QueryString("slug");
                 CategoryInfo cate = CategoryManager.GetCategory(slug);
@@ -354,7 +342,7 @@ namespace Loachs.Web
                     url = MakeUrl("category", "slug", Server.UrlEncode(slug));
                 }
             }
-            else if (pageType == "tag")
+            else if (PageType == "tag")
             {
                 string slug = RequestHelper.QueryString("slug");
                 TagInfo tag = TagManager.GetTagBySlug(slug);
@@ -367,12 +355,9 @@ namespace Loachs.Web
                     messageinfo = string.Format("<h2 class=\"post-message\">标签:{0}</h2>", tag.Name);
 
                     url = MakeUrl("tag", "slug", Server.UrlEncode(slug));
-
-
                 }
-
             }
-            else if (pageType == "author")
+            else if (PageType == "author")
             {
                 string userName = RequestHelper.QueryString("username");
                 UserInfo user = UserManager.GetUser(userName);
@@ -387,7 +372,7 @@ namespace Loachs.Web
                     url = MakeUrl("author", "username", Server.UrlEncode(userName));
                 }
             }
-            else if (pageType == "search")
+            else if (PageType == "search")
             {
                 keyword = StringHelper.CutString(StringHelper.SqlEncode(RequestHelper.QueryString("keyword")), 15);
                 th.Put(TagFields.META_KEYWORDS, keyword);
@@ -397,9 +382,8 @@ namespace Loachs.Web
                 messageinfo = string.Format("<h2 class=\"post-message\">搜索:{0}</h2>", keyword);
 
                 url = MakeUrl("search", "keyword", Server.UrlEncode(keyword));
-
             }
-            else if (pageType == "archive")     //先按月归档
+            else if (PageType == "archive") //先按月归档
             {
                 string datestr = RequestHelper.QueryString("date");
 
@@ -409,14 +393,15 @@ namespace Loachs.Web
                 begindate = date.ToString("yyy-MM-dd");
                 enddate = date.AddMonths(1).ToString("yyy-MM-dd");
                 th.Put(TagFields.META_KEYWORDS, "归档");
-                th.Put(TagFields.META_DESCRIPTION, SettingManager.GetSetting().SiteName + date.ToString("yyyy-MM") + "的归档");
+                th.Put(TagFields.META_DESCRIPTION,
+                    SettingManager.GetSetting().SiteName + date.ToString("yyyy-MM") + "的归档");
                 th.Put(TagFields.PAGE_TITLE, "归档:" + date.ToString("yyyy-MM"));
                 messageinfo = string.Format("<h2 class=\"post-message\">归档:{0}</h2>", date.ToString("yyyy-MM"));
 
                 url = MakeUrl("archive", "date", datestr);
             }
 
-            else    //首页
+            else //首页
             {
                 if (pageindex == 1)
                 {
@@ -428,19 +413,20 @@ namespace Loachs.Web
             //     th.Put(TagFields.PAGER_INDEX, pageindex);
 
             int recordCount = 0;
-            th.Put(TagFields.POSTS, PostManager.GetPostList(SettingManager.GetSetting().PageSizePostCount, pageindex, out recordCount, categoryId, tagId, userId, -1, 1, -1, 0, begindate, enddate, keyword));
+            th.Put(TagFields.POSTS,
+                PostManager.GetPostList(SettingManager.GetSetting().PageSizePostCount, pageindex, out recordCount,
+                    categoryId, tagId, userId, -1, 1, -1, 0, begindate, enddate, keyword));
             th.Put(TagFields.PAGER, Pager.CreateHtml(SettingManager.GetSetting().PageSizePostCount, recordCount, url));
 
             Display("default.html");
         }
 
         /// <summary>
-        /// 添加评论
+        ///     添加评论
         /// </summary>
         protected void AddComment()
         {
-
-            int contentMaxLength = 1000;    //内容最长长度
+            int contentMaxLength = 1000; //内容最长长度
 
             int postid = RequestHelper.FormInt("postid", 0);
             string author = StringHelper.CutString(RequestHelper.FormString("commentauthor"), 20);
@@ -473,7 +459,8 @@ namespace Loachs.Web
             th.Put(TagFields.COMMENT_CONTENT, content);
 
 
-            if (SettingManager.GetSetting().EnableVerifyCode == 1 && (verifycode != PageUtils.VerifyCode || string.IsNullOrEmpty(verifycode)))
+            if (SettingManager.GetSetting().EnableVerifyCode == 1 &&
+                (verifycode != PageUtils.VerifyCode || string.IsNullOrEmpty(verifycode)))
             {
                 th.Put(TagFields.COMMENT_MESSAGE, "<div>验证码输入错误!</div>");
                 return;
@@ -520,34 +507,28 @@ namespace Loachs.Web
             switch (SettingManager.GetSetting().CommentApproved)
             {
                 case 1:
-                    c.Approved = (int)ApprovedStatus.Success;
+                    c.Approved = (int) ApprovedStatus.Success;
                     break;
                 case 2:
                     string[] blackwords = SettingManager.GetSetting().CommentSpamwords.Split(',');
-                    bool hasBlackword = false;
-                    foreach (string word in blackwords)
-                    {
-                        if (c.Content.IndexOf(word) != -1)
-                        {
-                            hasBlackword = true;
-                            break;
-                        }
-                    }
-                    c.Approved = hasBlackword ? (int)ApprovedStatus.Wait : (int)ApprovedStatus.Success;
+                    bool hasBlackword = blackwords.Any(word => c.Content.IndexOf(word) != -1);
+                    c.Approved = hasBlackword ? (int) ApprovedStatus.Wait : (int) ApprovedStatus.Success;
                     break;
                 case 3:
                 default:
-                    c.Approved = (int)ApprovedStatus.Wait;
+                    c.Approved = (int) ApprovedStatus.Wait;
                     break;
             }
 
             int newID = CommentManager.InsertComment(c);
 
             #region 发邮件
+
             if (SettingManager.GetSetting().SendMailNotifyByComment == 1) //给订阅者发邮件
             {
                 //先不考虑审核的问题
-                List<CommentInfo> list = CommentManager.GetCommentList(int.MaxValue, 1, -1, postid, 0, -1, 1, string.Empty);
+                List<CommentInfo> list = CommentManager.GetCommentList(int.MaxValue, 1, -1, postid, 0, -1, 1,
+                    string.Empty);
 
                 List<string> emailList = new List<string>();
 
@@ -593,7 +574,7 @@ namespace Loachs.Web
                 }
             }
 
-            if (SettingManager.GetSetting().SendMailAuthorByComment == 1)       //给文章作者发邮件
+            if (SettingManager.GetSetting().SendMailAuthorByComment == 1) //给文章作者发邮件
             {
                 string subject = string.Empty;
                 string body = string.Empty;
@@ -636,24 +617,23 @@ namespace Loachs.Web
                     {
                         int commentCount = CommentManager.GetCommentCount(postid, false);
 
-                        int pageCount = commentCount / SettingManager.GetSetting().PageSizeCommentCount;
+                        int pageCount = commentCount/SettingManager.GetSetting().PageSizeCommentCount;
 
 
-                        if (commentCount % SettingManager.GetSetting().PageSizeCommentCount > 0)
+                        if (commentCount%SettingManager.GetSetting().PageSizeCommentCount > 0)
                         {
                             pageCount += 1;
                         }
                         string url = string.Format(post.PageUrl + "#comment-" + newID, pageCount);
 
                         Response.Redirect(url);
-
                     }
                 }
             }
         }
 
         /// <summary>
-        /// 加载通用标签
+        ///     加载通用标签
         /// </summary>
         protected void LoadDefault()
         {
@@ -673,8 +653,8 @@ namespace Loachs.Web
             th.Put(TagFields.SITE_PATH, ConfigHelper.SitePath);
             th.Put(TagFields.SITE_URL, ConfigHelper.SiteUrl);
 
-            th.Put(TagFields.THEME_PATH, ConfigHelper.SitePath + "themes/" + themeName + "/");
-            th.Put(TagFields.THEME_URL, ConfigHelper.SiteUrl + "themes/" + themeName + "/");
+            th.Put(TagFields.THEME_PATH, ConfigHelper.SitePath + "themes/" + ThemeName + "/");
+            th.Put(TagFields.THEME_URL, ConfigHelper.SiteUrl + "themes/" + ThemeName + "/");
 
             th.Put(TagFields.IS_DEFAULT, "0");
             th.Put(TagFields.IS_POST, "0");
@@ -702,12 +682,23 @@ namespace Loachs.Web
 
             string headhtml = string.Empty;
 
-            headhtml += string.Format("<meta name=\"generator\" content=\"Loachs {0}\" />\n", SettingManager.GetSetting().Version);
+            headhtml += string.Format("<meta name=\"generator\" content=\"Loachs {0}\" />\n",
+                SettingManager.GetSetting().Version);
             headhtml += "<meta name=\"author\" content=\"Loachs Team\" />\n";
-            headhtml += string.Format("<meta name=\"copyright\" content=\"2008-{0} Loachs Team.\" />\n", DateTime.Now.Year);
-            headhtml += string.Format("<link rel=\"alternate\" type=\"application/rss+xml\" title=\"{0}\"  href=\"{1}\"  />\n", SettingManager.GetSetting().SiteName, ConfigHelper.SiteUrl + "feed/post" + SettingManager.GetSetting().RewriteExtension);
-            headhtml += string.Format("<link rel=\"EditURI\" type=\"application/rsd+xml\" title=\"RSD\" href=\"{0}xmlrpc/rsd.aspx\" />\n", ConfigHelper.SiteUrl);
-            headhtml += string.Format("<link rel=\"wlwmanifest\" type=\"application/wlwmanifest+xml\" href=\"{0}xmlrpc/wlwmanifest.aspx\" />", ConfigHelper.SiteUrl);
+            headhtml += string.Format("<meta name=\"copyright\" content=\"2008-{0} Loachs Team.\" />\n",
+                DateTime.Now.Year);
+            headhtml +=
+                string.Format("<link rel=\"alternate\" type=\"application/rss+xml\" title=\"{0}\"  href=\"{1}\"  />\n",
+                    SettingManager.GetSetting().SiteName,
+                    ConfigHelper.SiteUrl + "feed/post" + SettingManager.GetSetting().RewriteExtension);
+            headhtml +=
+                string.Format(
+                    "<link rel=\"EditURI\" type=\"application/rsd+xml\" title=\"RSD\" href=\"{0}xmlrpc/rsd.aspx\" />\n",
+                    ConfigHelper.SiteUrl);
+            headhtml +=
+                string.Format(
+                    "<link rel=\"wlwmanifest\" type=\"application/wlwmanifest+xml\" href=\"{0}xmlrpc/wlwmanifest.aspx\" />",
+                    ConfigHelper.SiteUrl);
 
             th.Put(TagFields.HEAD, headhtml);
 
@@ -728,9 +719,11 @@ namespace Loachs.Web
             //th.Put(TagFields.POST_MESSAGE, null);
             //th.Put(TagFields.POSTS, null);
 
-            th.Put(TagFields.RECENT_POSTS, PostManager.GetPostList(SettingManager.GetSetting().SidebarPostCount, -1, -1, -1, 1, -1, 0));
-            th.Put(TagFields.RECOMMEND_POSTS, PostManager.GetPostList(SettingManager.GetSetting().SidebarPostCount, -1, -1, 1, 1, -1, 0));
-            th.Put(TagFields.TOP_POSTS, PostManager.GetPostList(Int32.MaxValue, -1, -1, -1, 1, 1, 0));
+            th.Put(TagFields.RECENT_POSTS,
+                PostManager.GetPostList(SettingManager.GetSetting().SidebarPostCount, -1, -1, -1, 1, -1, 0));
+            th.Put(TagFields.RECOMMEND_POSTS,
+                PostManager.GetPostList(SettingManager.GetSetting().SidebarPostCount, -1, -1, 1, 1, -1, 0));
+            th.Put(TagFields.TOP_POSTS, PostManager.GetPostList(int.MaxValue, -1, -1, -1, 1, 1, 0));
 
             //th.Put(TagFields.FEED_POSTS, null);
 
@@ -740,7 +733,8 @@ namespace Loachs.Web
 
             //th.Put(TagFields.COMMENTS, null);
 
-            th.Put(TagFields.RECENT_COMMENTS, CommentManager.GetCommentListByRecent(SettingManager.GetSetting().SidebarCommentCount));
+            th.Put(TagFields.RECENT_COMMENTS,
+                CommentManager.GetCommentListByRecent(SettingManager.GetSetting().SidebarCommentCount));
 
             if (PageUtils.IsLogin)
             {
@@ -765,7 +759,8 @@ namespace Loachs.Web
 
             #region 作者,分类,标签
 
-            th.Put(TagFields.AUTHORS, UserManager.GetUserList().FindAll(delegate(UserInfo user) { return user.Status == 1; }));
+            th.Put(TagFields.AUTHORS,
+                UserManager.GetUserList().FindAll(delegate(UserInfo user) { return user.Status == 1; }));
             th.Put(TagFields.CATEGORIES, CategoryManager.GetCategoryList());
             th.Put(TagFields.RECENT_TAGS, TagManager.GetTagList(SettingManager.GetSetting().SidebarTagCount));
 
@@ -774,8 +769,8 @@ namespace Loachs.Web
             #region 连接
 
             th.Put(TagFields.LINKS, LinkManager.GetLinkList(-1, 1));
-            th.Put(TagFields.NAV_LINKS, LinkManager.GetLinkList((int)LinkPosition.Navigation, 1));
-            th.Put(TagFields.GENERAL_LINKS, LinkManager.GetLinkList((int)LinkPosition.General, 1));
+            th.Put(TagFields.NAV_LINKS, LinkManager.GetLinkList((int) LinkPosition.Navigation, 1));
+            th.Put(TagFields.GENERAL_LINKS, LinkManager.GetLinkList((int) LinkPosition.General, 1));
 
             #endregion
 
@@ -784,13 +779,14 @@ namespace Loachs.Web
             th.Put(TagFields.POST_COUNT, StatisticsManager.GetStatistics().PostCount);
             th.Put(TagFields.COMMENT_COUNT, StatisticsManager.GetStatistics().CommentCount);
             th.Put(TagFields.VIEW_COUNT, StatisticsManager.GetStatistics().VisitCount);
-            th.Put(TagFields.AUTHOR_COUNT, UserManager.GetUserList().FindAll(delegate(UserInfo user) { return user.Status == 1; }).Count);
+            th.Put(TagFields.AUTHOR_COUNT,
+                UserManager.GetUserList().FindAll(delegate(UserInfo user) { return user.Status == 1; }).Count);
 
             #endregion
         }
 
         /// <summary>
-        /// 加载文章
+        ///     加载文章
         /// </summary>
         protected void LoadPost()
         {
@@ -803,7 +799,6 @@ namespace Loachs.Web
 
             PostInfo post = null;
 
-            int postId = -1;
             string name = RequestHelper.QueryString("name");
 
             if (StringHelper.IsInt(name))
@@ -820,7 +815,7 @@ namespace Loachs.Web
                 ResponseError("文章未找到", "囧！没有找到此文章！", 404);
             }
 
-            if (post.Status == (int)PostStatus.Draft)
+            if (post.Status == (int) PostStatus.Draft)
             {
                 ResponseError("文章未发布", "囧！此文章未发布！");
             }
@@ -841,11 +836,7 @@ namespace Loachs.Web
             th.Put(TagFields.POST, post);
             th.Put(TagFields.PAGE_TITLE, post.Title);
 
-            string metaKeywords = string.Empty;
-            foreach (TagInfo tag in post.Tags)
-            {
-                metaKeywords += tag.Name + ",";
-            }
+            string metaKeywords = post.Tags.Aggregate(string.Empty, (current, tag) => current + (tag.Name + ","));
             if (metaKeywords.Length > 0)
             {
                 metaKeywords = metaKeywords.TrimEnd(',');
@@ -857,24 +848,31 @@ namespace Loachs.Web
             {
                 metaDescription = post.Content;
             }
-            th.Put(TagFields.META_DESCRIPTION, StringHelper.CutString(StringHelper.RemoveHtml(metaDescription), 50).Replace("\n", ""));
+            th.Put(TagFields.META_DESCRIPTION,
+                StringHelper.CutString(StringHelper.RemoveHtml(metaDescription), 50).Replace("\n", ""));
 
             int recordCount = 0;
-            List<CommentInfo> commentList = CommentManager.GetCommentList(SettingManager.GetSetting().PageSizeCommentCount, Pager.PageIndex, out recordCount, SettingManager.GetSetting().CommentOrder, -1, post.PostId, 0, -1, -1, null);
+            List<CommentInfo> commentList =
+                CommentManager.GetCommentList(SettingManager.GetSetting().PageSizeCommentCount, Pager.PageIndex,
+                    out recordCount, SettingManager.GetSetting().CommentOrder, -1, post.PostId, 0, -1, -1, null);
             th.Put(TagFields.COMMENTS, commentList);
-            th.Put(TagFields.PAGER, Pager.CreateHtml(SettingManager.GetSetting().PageSizeCommentCount, recordCount, post.PageUrl + "#comments"));
+            th.Put(TagFields.PAGER,
+                Pager.CreateHtml(SettingManager.GetSetting().PageSizeCommentCount, recordCount,
+                    post.PageUrl + "#comments"));
 
             //同时判断评论数是否一致
             if (recordCount != post.CommentCount)
             {
                 post.CommentCount = recordCount;
                 PostManager.UpdatePost(post);
-
             }
 
             th.Put(TagFields.LOACHS, new LoachsDataManager());
 
-            if (System.IO.File.Exists(Server.MapPath(string.Format("{0}/themes/{1}/template/{2}", ConfigHelper.SitePath, themeName, post.Template))))
+            if (
+                File.Exists(
+                    Server.MapPath(string.Format("{0}/themes/{1}/template/{2}", ConfigHelper.SitePath, ThemeName,
+                        post.Template))))
             {
                 Display(post.Template);
             }
@@ -885,7 +883,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 加载feed
+        ///     加载feed
         /// </summary>
         protected void LoadFeed()
         {
@@ -900,25 +898,34 @@ namespace Loachs.Web
                 switch (action)
                 {
                     case "comment":
-                        List<CommentInfo> commentList = CommentManager.GetCommentList(SettingManager.GetSetting().RssRowCount, 1, -1, postId, 0, 1, -1, null);
+                        List<CommentInfo> commentList =
+                            CommentManager.GetCommentList(SettingManager.GetSetting().RssRowCount, 1, -1, postId, 0, 1,
+                                -1, null);
                         PostInfo commentPost = PostManager.GetPost(postId);
-                        Response.Write("<rss version=\"2.0\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:trackback=\"http://madskills.com/public/xml/rss/module/trackback/\" xmlns:wfw=\"http://wellformedweb.org/CommentAPI/\" xmlns:slash=\"http://purl.org/rss/1.0/modules/slash/\">\r\n");
+                        Response.Write(
+                            "<rss version=\"2.0\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:trackback=\"http://madskills.com/public/xml/rss/module/trackback/\" xmlns:wfw=\"http://wellformedweb.org/CommentAPI/\" xmlns:slash=\"http://purl.org/rss/1.0/modules/slash/\">\r\n");
                         Response.Write("    <channel>\r\n");
-                        Response.Write("        <title><![CDATA[" + (commentPost == null ? SettingManager.GetSetting().SiteName : commentPost.Title) + "的评论]]></title>\r\n");
-                        Response.Write("        <link><![CDATA[" + (commentPost == null ? ConfigHelper.SiteUrl : commentPost.Url) + "]]></link>\r\n");
-                        Response.Write("        <description><![CDATA[" + SettingManager.GetSetting().SiteDescription + "]]></description>\r\n");
+                        Response.Write("        <title><![CDATA[" +
+                                       (commentPost == null ? SettingManager.GetSetting().SiteName : commentPost.Title) +
+                                       "的评论]]></title>\r\n");
+                        Response.Write("        <link><![CDATA[" +
+                                       (commentPost == null ? ConfigHelper.SiteUrl : commentPost.Url) + "]]></link>\r\n");
+                        Response.Write("        <description><![CDATA[" + SettingManager.GetSetting().SiteDescription +
+                                       "]]></description>\r\n");
                         Response.Write("        <pubDate>" + DateTime.Now.ToString("r") + "</pubDate>\r\n");
                         Response.Write("        <generator>Loachs</generator>\r\n");
                         Response.Write("        <language>zh-cn</language>\r\n");
                         foreach (CommentInfo comment in commentList)
                         {
                             Response.Write("        <item>\r\n");
-                            Response.Write("            <title><![CDATA[" + comment.Name + "对" + comment.Post.Title + "的评论]]></title>\r\n");
+                            Response.Write("            <title><![CDATA[" + comment.Name + "对" + comment.Post.Title +
+                                           "的评论]]></title>\r\n");
                             Response.Write("            <link><![CDATA[" + comment.Url + "]]></link>\r\n");
                             Response.Write("            <guid><![CDATA[" + comment.Url + "]]></guid>\r\n");
                             Response.Write("            <author><![CDATA[" + comment.Name + "]]></author>\r\n");
 
-                            Response.Write(string.Format("          <description><![CDATA[{0}]]></description>\r\n", comment.Content));
+                            Response.Write(string.Format("          <description><![CDATA[{0}]]></description>\r\n",
+                                comment.Content));
                             Response.Write("            <pubDate>" + comment.CreateDate.ToString("r") + "</pubDate>\r\n");
                             Response.Write("        </item>\r\n");
                         }
@@ -926,9 +933,10 @@ namespace Loachs.Web
                         Response.Write("</rss>\r\n");
                         break;
                     default:
-                        List<PostInfo> list = PostManager.GetPostList(SettingManager.GetSetting().RssRowCount, categoryId, -1, -1, 1, -1, 0);
-                        templatePath = Server.MapPath(ConfigHelper.SitePath + "common/config/");
-                        th = new TemplateHelper(templatePath);
+                        List<PostInfo> list = PostManager.GetPostList(SettingManager.GetSetting().RssRowCount,
+                            categoryId, -1, -1, 1, -1, 0);
+                        _templatePath = Server.MapPath(ConfigHelper.SitePath + "common/config/");
+                        th = new TemplateHelper(_templatePath);
 
                         LoadDefault();
                         th.Put(TagFields.FEED_POSTS, list);
@@ -944,15 +952,14 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 显示模板
+        ///     显示模板
         /// </summary>
-        /// <param name="templatFileName">模板文件名</param>
+        /// <param name="templateFile">模板文件名</param>
         protected void Display(string templateFile)
         {
-
             //全局
             th.Put(TagFields.QUERY_COUNT, querycount);
-            th.Put(TagFields.PROCESS_TIME, DateTime.Now.Subtract(starttick).TotalMilliseconds / 1000);
+            th.Put(TagFields.PROCESS_TIME, DateTime.Now.Subtract(starttick).TotalMilliseconds/1000);
 
             // HttpContext.Current.Response.Clear();
             //   HttpContext.Current.Response.Write(writer.ToString());
@@ -960,34 +967,5 @@ namespace Loachs.Web
 
             //  HttpContext.Current.Response.End();
         }
-
-        ///// <summary>
-        ///// 是否为离线写作工具提交
-        ///// </summary>
-        ///// <returns></returns>
-        //protected bool IsXmlrpcPost()
-        //{
-        //    string s = Request.HttpMethod;
-
-        //    string ss = Request.UserAgent;
-
-        //    byte[] buffer = new byte[HttpContext.Current.Request.InputStream.Length];
-
-        //    HttpContext.Current.Request.InputStream.Read(buffer, 0, buffer.Length);
-
-        //    string str = System.Text.Encoding.UTF8.GetString(buffer);
-        //    if (str.Length > 0)
-        //    {
-        //        if (str.IndexOf("metaWeblog.") > 0 || str.IndexOf("blogger.") > 0 || str.IndexOf("wp.") > 0)
-        //        {
-        //            return true;
-        //        }
-        //    }
-
-        //    return false;
-        //}
-
     }
-
-
 }

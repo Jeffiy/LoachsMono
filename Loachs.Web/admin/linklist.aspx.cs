@@ -1,29 +1,17 @@
-﻿
-using System;
-using System.Data;
-using System.Configuration;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.Net.Mail;
-using System.Globalization;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-using System.Web.UI.HtmlControls;
-
+using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
-using Loachs.Business;
+
 namespace Loachs.Web
 {
     public partial class admin_linklist : AdminPage
     {
         /// <summary>
-        /// 分类ID
+        ///     分类ID
         /// </summary>
-        protected int linkId = RequestHelper.QueryInt("linkid");
+        protected int LinkId = RequestHelper.QueryInt("linkid");
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -50,7 +38,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 显示结果
+        ///     显示结果
         /// </summary>
         protected void ShowResult()
         {
@@ -75,7 +63,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 删除
+        ///     删除
         /// </summary>
         protected void DeleteLink()
         {
@@ -84,31 +72,30 @@ namespace Loachs.Web
             //{
             //    Response.Redirect("linklist.aspx?result=4");
             //}
-            LinkManager.DeleteLink(linkId);
+            LinkManager.DeleteLink(LinkId);
             Response.Redirect("linklist.aspx?result=3");
         }
 
         /// <summary>
-        /// 绑定链接
+        ///     绑定链接
         /// </summary>
         protected void BindLink()
         {
-            LinkInfo link = LinkManager.GetLink(linkId);
+            LinkInfo link = LinkManager.GetLink(LinkId);
             if (link != null)
             {
                 txtName.Text = StringHelper.HtmlDecode(link.Name);
                 txtHref.Text = StringHelper.HtmlDecode(link.Href);
                 txtDescription.Text = StringHelper.HtmlDecode(link.Description);
                 txtDisplayOrder.Text = link.Displayorder.ToString();
-                chkStatus.Checked = link.Status == 1 ? true : false;
-                chkPosition.Checked = link.Position == (int)LinkPosition.Navigation ? true : false;
-                chkTarget.Checked = link.Target == "_blank" ? true : false;
-
+                chkStatus.Checked = link.Status == 1;
+                chkPosition.Checked = link.Position == (int) LinkPosition.Navigation;
+                chkTarget.Checked = link.Target == "_blank";
             }
         }
 
         /// <summary>
-        /// 绑定列表
+        ///     绑定列表
         /// </summary>
         protected void BindLinkList()
         {
@@ -118,7 +105,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 编辑
+        ///     编辑
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -127,19 +114,19 @@ namespace Loachs.Web
             LinkInfo link = new LinkInfo();
             if (Operate == OperateType.Update)
             {
-                link = LinkManager.GetLink(linkId);
+                link = LinkManager.GetLink(LinkId);
             }
             else
             {
                 link.CreateDate = DateTime.Now;
-                link.Type = 0;// (int)LinkType.Custom;
+                link.Type = 0; // (int)LinkType.Custom;
             }
             link.Name = StringHelper.HtmlEncode(txtName.Text.Trim());
             link.Href = StringHelper.HtmlEncode(txtHref.Text.Trim());
             link.Description = StringHelper.HtmlEncode(txtDescription.Text);
             link.Displayorder = StringHelper.StrToInt(txtDisplayOrder.Text, 1000);
             link.Status = chkStatus.Checked ? 1 : 0;
-            link.Position = chkPosition.Checked ? (int)LinkPosition.Navigation : (int)LinkPosition.General;
+            link.Position = chkPosition.Checked ? (int) LinkPosition.Navigation : (int) LinkPosition.General;
             link.Target = chkTarget.Checked ? "_blank" : "_self";
 
             if (link.Name == "")

@@ -1,20 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Configuration;
-using System.Data;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-using System.IO;
-using System.Text;
-using System.Xml;
 
-using Loachs.Common;
-using Loachs.Entity;
-using Loachs.Business;
 namespace Loachs.Web
 {
     public partial class admin_upfilelist : AdminPage
@@ -23,6 +8,5 @@ namespace Loachs.Web
         {
             SetPageTitle("附件管理");
         }
-
     }
 }

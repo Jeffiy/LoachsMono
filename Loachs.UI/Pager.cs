@@ -1,17 +1,9 @@
-﻿using System;
-using System.Data;
-using System.Configuration;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-using Loachs.Common;
+﻿using Loachs.Common;
+
 namespace Loachs.Web
 {
     /// <summary>
-    ///前台分页类
+    ///     前台分页类
     /// </summary>
     public class Pager
     {
@@ -20,16 +12,12 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 当前页
+        ///     当前页
         /// </summary>
         public static int PageIndex
         {
-            get
-            {
-                return RequestHelper.QueryInt("page", 1);
-            }
+            get { return RequestHelper.QueryInt("page", 1); }
         }
-
 
         public static string CreateHtml(int pageSize, int recordCount, string url)
         {
@@ -40,10 +28,10 @@ namespace Loachs.Web
                 return html;
             }
 
-            int pageCount = recordCount / pageSize;
+            int pageCount = recordCount/pageSize;
 
 
-            if (recordCount % pageSize > 0)
+            if (recordCount%pageSize > 0)
             {
                 pageCount += 1;
             }
@@ -67,8 +55,8 @@ namespace Loachs.Web
                 right += "<a href=\"" + string.Format(url, pageCount) + "\">尾页</a>";
             }
 
-            int min = 1;	//要显示的页面数最小值
-            int max = pageCount;   	//要显示的页面数最大值
+            int min = 1; //要显示的页面数最小值
+            int max = pageCount; //要显示的页面数最大值
 
             if (pageCount > 5)
             {
@@ -94,7 +82,7 @@ namespace Loachs.Web
             //循环显示数字
             for (int i = min; i <= max; i++)
             {
-                if (PageIndex == i)	//如果是当前页，用粗体和红色显示
+                if (PageIndex == i) //如果是当前页，用粗体和红色显示
                 {
                     center += "<span class=\"current\">" + i + "</span>";
                 }
@@ -114,7 +102,6 @@ namespace Loachs.Web
 
 
             return html;
-
         }
     }
 }

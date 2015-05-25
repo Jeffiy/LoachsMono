@@ -1,14 +1,14 @@
 ﻿using System;
+using System.Web.UI;
 using Loachs.Common;
+
 namespace Loachs.Web
 {
-    public partial class admin_admin : System.Web.UI.MasterPage
+    public partial class admin_admin : MasterPage
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
         }
-
 
         protected string GetCssName(string fileType)
         {
@@ -19,7 +19,6 @@ namespace Loachs.Web
                 return "current";
             }
             return string.Empty;
-
         }
     }
 }

@@ -1,22 +1,14 @@
 ﻿using System;
-using System.Data;
-using System.Configuration;
-using System.Collections;
-using System.Collections.Generic;
-using System.Net.Mail;
-using System.Globalization;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-using System.Web.UI.HtmlControls;
 using System.Drawing;
 using System.Drawing.Text;
-
+using System.Globalization;
+using System.Net;
+using System.Net.Mail;
+using System.Web.UI.WebControls;
+using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
-using Loachs.Business;
+
 namespace Loachs.Web
 {
     public partial class admin_setting : AdminPage
@@ -34,7 +26,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 显示结果
+        ///     显示结果
         /// </summary>
         protected void ShowResult()
         {
@@ -51,7 +43,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 绑定
+        ///     绑定
         /// </summary>
         protected void BindSetting()
         {
@@ -65,10 +57,10 @@ namespace Loachs.Web
                 txtMetaKeywords.Text = StringHelper.HtmlDecode(s.MetaKeywords);
                 txtMetaDescription.Text = StringHelper.HtmlDecode(s.MetaDescription);
 
-                chkSiteStatus.Checked = s.SiteStatus == 1 ? true : false;
+                chkSiteStatus.Checked = s.SiteStatus == 1;
 
 
-                chkEnableVerifyCode.Checked = s.EnableVerifyCode == 1 ? true : false;
+                chkEnableVerifyCode.Checked = s.EnableVerifyCode == 1;
 
 
                 txtSidebarPostCount.Text = s.SidebarPostCount.ToString();
@@ -98,13 +90,13 @@ namespace Loachs.Web
                 ddlWatermarkQuality.SelectedValue = s.WatermarkQuality.ToString();
 
                 //评论
-                chkCommentStatus.Checked = s.CommentStatus == 1 ? true : false;
+                chkCommentStatus.Checked = s.CommentStatus == 1;
                 ddlCommentOrder.SelectedValue = s.CommentOrder.ToString();
                 ddlCommentApproved.SelectedValue = s.CommentApproved.ToString();
                 txtCommentSpamwords.Text = s.CommentSpamwords;
 
                 //rss
-                chkRssStatus.Checked = s.RssStatus == 1 ? true : false;
+                chkRssStatus.Checked = s.RssStatus == 1;
                 txtRssRowCount.Text = s.RssRowCount.ToString();
                 ddlRssShowType.SelectedValue = s.RssShowType.ToString();
 
@@ -123,24 +115,20 @@ namespace Loachs.Web
                 txtSmtpServerPort.Text = s.SmtpServerPost.ToString();
                 txtSmtpUserName.Text = s.SmtpUserName;
                 txtSmtpPassword.Text = s.SmtpPassword;
-                chkSmtpEnableSsl.Checked = s.SmtpEnableSsl == 1 ? true : false;
+                chkSmtpEnableSsl.Checked = s.SmtpEnableSsl == 1;
 
                 //发送邮件设置
-                chkSendMailAuthorByPost.Checked = s.SendMailAuthorByPost == 1 ? true : false;
-                chkSendMailAuthorByComment.Checked = s.SendMailAuthorByComment == 1 ? true : false;
-                chkSendMailNotifyByComment.Checked = s.SendMailNotifyByComment == 1 ? true : false;
-
-
+                chkSendMailAuthorByPost.Checked = s.SendMailAuthorByPost == 1;
+                chkSendMailAuthorByComment.Checked = s.SendMailAuthorByComment == 1;
+                chkSendMailNotifyByComment.Checked = s.SendMailNotifyByComment == 1;
             }
-
         }
 
         /// <summary>
-        /// 加载默认数据
+        ///     加载默认数据
         /// </summary>
         private void LoadDefaultData()
         {
-
             ddlWatermarkFontName.Items.Clear();
             InstalledFontCollection fonts = new InstalledFontCollection();
             foreach (FontFamily family in fonts.Families)
@@ -161,7 +149,6 @@ namespace Loachs.Web
                     text += "(推荐)";
                 }
                 ddlWatermarkQuality.Items.Add(new ListItem(text, i.ToString()));
-
             }
 
             ddlWatermarkTransparency.Items.Clear();
@@ -174,12 +161,11 @@ namespace Loachs.Web
                 }
 
                 ddlWatermarkTransparency.Items.Add(new ListItem(text, i.ToString()));
-
             }
         }
 
         /// <summary>
-        /// 编辑
+        ///     编辑
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -199,7 +185,6 @@ namespace Loachs.Web
                 //  s.CommentApproved = chkCommentApproved.Checked ? 1 : 0;
                 //    //c.GuestBookVerifyStatus = chkGuestBookVerifyStatus.Checked ? 1 : 0;
                 s.EnableVerifyCode = chkEnableVerifyCode.Checked ? 1 : 0;
-
 
 
                 //  s.PageSizeTagCount = StringHelper.StrToInt(txtPageSizeTagCount.Text, 10);
@@ -256,24 +241,22 @@ namespace Loachs.Web
                 s.SmtpServerPost = StringHelper.StrToInt(txtSmtpServerPort.Text, 25);
                 s.SmtpUserName = txtSmtpUserName.Text.Trim();
                 s.SmtpPassword = txtSmtpPassword.Text.Trim();
-                s.SmtpEnableSsl = chkSmtpEnableSsl.Checked == true ? 1 : 0;
+                s.SmtpEnableSsl = chkSmtpEnableSsl.Checked ? 1 : 0;
 
                 //发送邮件设置
-                s.SendMailAuthorByPost = chkSendMailAuthorByPost.Checked == true ? 1 : 0;
-                s.SendMailAuthorByComment = chkSendMailAuthorByComment.Checked == true ? 1 : 0;
-                s.SendMailNotifyByComment = chkSendMailNotifyByComment.Checked == true ? 1 : 0;
+                s.SendMailAuthorByPost = chkSendMailAuthorByPost.Checked ? 1 : 0;
+                s.SendMailAuthorByComment = chkSendMailAuthorByComment.Checked ? 1 : 0;
+                s.SendMailNotifyByComment = chkSendMailNotifyByComment.Checked ? 1 : 0;
 
                 if (SettingManager.UpdateSetting())
                 {
-
-
                     Response.Redirect("setting.aspx?result=2");
                 }
             }
         }
 
         /// <summary>
-        /// 测试邮箱设置
+        ///     测试邮箱设置
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -287,15 +270,16 @@ namespace Loachs.Web
                     ShowError("请输入正确的测试邮箱!");
                     return;
                 }
-                MailMessage mail = new MailMessage();
-                mail.From = new MailAddress(txtSmtpEmail.Text, txtSiteName.Text);
+                MailMessage mail = new MailMessage {From = new MailAddress(txtSmtpEmail.Text, txtSiteName.Text)};
                 mail.To.Add(txtTestEmail.Text);
                 mail.Subject = "这封邮件来自" + txtSiteName.Text;
                 mail.Body = "测试邮件发送成功!";
-                SmtpClient smtp = new SmtpClient(txtSmtpServer.Text);
-                smtp.Credentials = new System.Net.NetworkCredential(txtSmtpUserName.Text, txtSmtpPassword.Text);
-                smtp.EnableSsl = chkSmtpEnableSsl.Checked;
-                smtp.Port = int.Parse(txtSmtpServerPort.Text, CultureInfo.InvariantCulture);
+                SmtpClient smtp = new SmtpClient(txtSmtpServer.Text)
+                {
+                    Credentials = new NetworkCredential(txtSmtpUserName.Text, txtSmtpPassword.Text),
+                    EnableSsl = chkSmtpEnableSsl.Checked,
+                    Port = int.Parse(txtSmtpServerPort.Text, CultureInfo.InvariantCulture)
+                };
                 smtp.Send(mail);
                 ltTestSendMessage.Text = "<span class=\"m_pass\" >发送成功!</span>";
                 ShowMessage("发送成功!");

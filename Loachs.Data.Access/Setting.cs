@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Data.OleDb;
 using System.Data;
-using System.Xml;
 using System.IO;
+using System.Text;
+using System.Xml;
 using System.Xml.Serialization;
-
 using Loachs.Entity;
-using Loachs.Data;
 using Mono.Data.Sqlite;
 
 namespace Loachs.Data.Access
@@ -18,9 +14,10 @@ namespace Loachs.Data.Access
         public bool UpdateSetting(SettingInfo setting)
         {
             string cmdText = @"update [loachs_sites] set [setting]=@setting";
-            SqliteParameter[] prams = {
-                                        SqliteDbHelper.MakeInParam("@setting", DbType.String,0,Serialize(setting)),
-                                     };
+            SqliteParameter[] prams =
+            {
+                SqliteDbHelper.MakeInParam("@setting", DbType.String, 0, Serialize(setting))
+            };
 
             return SqliteDbHelper.ExecuteNonQuery(CommandType.Text, cmdText, prams) == 1;
         }
@@ -31,19 +28,17 @@ namespace Loachs.Data.Access
 
             string str = Convert.ToString(SqliteDbHelper.ExecuteScalar(cmdText));
 
-            object obj = DeSerialize(typeof(SettingInfo), str);
+            object obj = DeSerialize(typeof (SettingInfo), str);
             if (obj == null)
             {
                 return new SettingInfo();
             }
 
-            return (SettingInfo)obj;
+            return (SettingInfo) obj;
         }
 
-
-
         /// <summary>
-        /// xml序列化成字符串
+        ///     xml序列化成字符串
         /// </summary>
         /// <param name="obj">对象</param>
         /// <returns>xml字符串</returns>
@@ -59,8 +54,7 @@ namespace Loachs.Data.Access
             StreamReader sr = null;
             try
             {
-                xtw = new System.Xml.XmlTextWriter(ms, Encoding.UTF8);
-                xtw.Formatting = System.Xml.Formatting.Indented;
+                xtw = new XmlTextWriter(ms, Encoding.UTF8) {Formatting = Formatting.Indented};
                 serializer.Serialize(xtw, obj);
                 ms.Seek(0, SeekOrigin.Begin);
                 sr = new StreamReader(ms);
@@ -79,18 +73,17 @@ namespace Loachs.Data.Access
                 ms.Close();
             }
             return returnStr;
-
         }
 
         /// <summary>
-        /// 反序列化
+        ///     反序列化
         /// </summary>
         /// <param name="type"></param>
         /// <param name="s"></param>
         /// <returns></returns>
         public static object DeSerialize(Type type, string s)
         {
-            byte[] b = System.Text.Encoding.UTF8.GetBytes(s);
+            byte[] b = Encoding.UTF8.GetBytes(s);
             try
             {
                 XmlSerializer serializer = new XmlSerializer(type);
@@ -103,7 +96,5 @@ namespace Loachs.Data.Access
                 return null;
             }
         }
-
-
     }
 }

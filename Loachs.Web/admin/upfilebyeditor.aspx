@@ -10,8 +10,8 @@
     <style type="text/css">
         #content
         {
-            margin: 0px;
-            border: 0px;
+            margin: 0;
+            border: 0;
         }
     </style>
 </head>

@@ -80,7 +80,7 @@
         </tr>
         <tr class="rowend">
             <td>程序版本:</td>
-            <td><%= setting.Version %> <a href="http://www.loachs.com" target="_blank">去官网查看新版</a></td>
+            <td><%= Setting.Version %></td>
         </tr>
         <tr class="category">
             <td>服务器信息</td>
@@ -110,8 +110,6 @@
             <td>服务器IP:</td>
             <td><%=Request.ServerVariables["LOCAl_ADDR"]%></td>
         </tr>
-        
-       
     </table>
 </div>
 </asp:Content>

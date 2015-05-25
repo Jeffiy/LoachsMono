@@ -1,44 +1,36 @@
 ﻿using System;
-using System.Collections;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Drawing.Text;
-using System.Web;
-using System.Web.SessionState;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Web.UI.HtmlControls;
+using System.IO;
 using System.Security.Cryptography;
+using System.Web.UI;
 
-
-using Loachs.Common;
 namespace Loachs.Web
 {
-    public partial class common_tools_verifyimage : System.Web.UI.Page
+    public partial class common_tools_verifyimage : Page
     {
+        private static readonly byte[] Randb = new byte[4];
+        private static readonly RNGCryptoServiceProvider Rand = new RNGCryptoServiceProvider();
+        private readonly Bitmap _charbmp = new Bitmap(30, 30);
 
-        private static byte[] randb = new byte[4];
-        private static RNGCryptoServiceProvider rand = new RNGCryptoServiceProvider();
-        private Matrix m = new Matrix();
-        private Bitmap charbmp = new Bitmap(30, 30);
-
-        private Font[] fonts = {
-                                        new Font(new FontFamily("Times New Roman"), 16 + Next(3), FontStyle.Regular),
-                                        new Font(new FontFamily("Georgia"), 16 + Next(3), FontStyle.Regular),
-                                        new Font(new FontFamily("Arial"), 16 + Next(3), FontStyle.Regular),
-                                        new Font(new FontFamily("Comic Sans MS"), 16 + Next(3), FontStyle.Regular)
-                                     };
-
-        protected void Page_Load(object sender, System.EventArgs e)
+        private readonly Font[] _fonts =
         {
-            this.CreateCheckCodeImage(GenerateCheckCode());
+            new Font(new FontFamily("Times New Roman"), 16 + Next(3), FontStyle.Regular),
+            new Font(new FontFamily("Georgia"), 16 + Next(3), FontStyle.Regular),
+            new Font(new FontFamily("Arial"), 16 + Next(3), FontStyle.Regular),
+            new Font(new FontFamily("Comic Sans MS"), 16 + Next(3), FontStyle.Regular)
+        };
+
+        private readonly Matrix m = new Matrix();
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            CreateCheckCodeImage(GenerateCheckCode());
         }
 
         /// <summary>
-        /// 生成随机数
+        ///     生成随机数
         /// </summary>
         /// <returns></returns>
         private string GenerateCheckCode()
@@ -46,28 +38,25 @@ namespace Loachs.Web
             //  PageUtils.VerifyCode = checkCode.ToLower();
 
 
-
-
-            int number;
-            char code;
             string checkCode = PageUtils.VerifyCode;
 
             if (!string.IsNullOrEmpty(checkCode))
             {
                 return checkCode;
             }
-            System.Random random = new Random();
+            Random random = new Random();
             for (int i = 0; i < 4; i++)
             {
-                number = random.Next();
-                if (number % 2 == 0)
+                var number = random.Next();
+                char code;
+                if (number%2 == 0)
                 {
-                    code = (char)('0' + (char)(number % 10));
+                    code = (char) ('0' + (char) (number%10));
                 }
                 else
                 {
                     //	code = (char)('a' + (char)(number % 26));
-                    code = (char)('0' + (char)(number % 10));
+                    code = (char) ('0' + (char) (number%10));
                 }
                 checkCode += code.ToString();
             }
@@ -78,23 +67,23 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 生成验证码
+        ///     生成验证码
         /// </summary>
         /// <param name="checkCode"></param>
         private void CreateCheckCodeImage(string checkCode)
         {
-            if (checkCode == null || checkCode.Trim() == String.Empty) return;
+            if (checkCode == null || checkCode.Trim() == string.Empty) return;
 
-            System.Drawing.Bitmap image = new System.Drawing.Bitmap((int)Math.Ceiling((checkCode.Length * 22.5)), 30);
+            Bitmap image = new Bitmap((int) Math.Ceiling((checkCode.Length*22.5)), 30);
             Graphics g = Graphics.FromImage(image);
 
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
+            g.SmoothingMode = SmoothingMode.HighSpeed;
             g.Clear(Color.White);
             try
             {
-                Random random = new Random();		//生成随机生成器
-                g.Clear(Color.White);				//清空图片背景色
-                for (int i = 0; i < 2; i++)				//画图片的背景噪音线
+                Random random = new Random(); //生成随机生成器
+                g.Clear(Color.White); //清空图片背景色
+                for (int i = 0; i < 2; i++) //画图片的背景噪音线
                 {
                     int x1 = random.Next(image.Width);
                     int x2 = random.Next(image.Width);
@@ -108,7 +97,7 @@ namespace Loachs.Web
                 //System.Drawing.Drawing2D.LinearGradientBrush brush = new System.Drawing.Drawing2D.LinearGradientBrush(new Rectangle(0, 0, image.Width, image.Height), Color.Gray, Color.Blue, 1.2f, true);
                 //g.DrawString(checkCode, font, brush, 2, 2);
 
-                Graphics charg = Graphics.FromImage(charbmp);
+                Graphics charg = Graphics.FromImage(_charbmp);
 
                 SolidBrush drawBrush = new SolidBrush(Color.FromArgb(Next(100), Next(100), Next(100)));
                 float charx = -18;
@@ -124,11 +113,11 @@ namespace Loachs.Web
 
                     charx = charx + 20 + Next(2);
                     PointF drawPoint = new PointF(charx, 0.1F);
-                    charg.DrawString(checkCode[i].ToString(), fonts[Next(fonts.Length - 1)], drawBrush, new PointF(0, 0));
+                    charg.DrawString(checkCode[i].ToString(), _fonts[Next(_fonts.Length - 1)], drawBrush, new PointF(0, 0));
 
                     charg.ResetTransform();
 
-                    g.DrawImage(charbmp, drawPoint);
+                    g.DrawImage(_charbmp, drawPoint);
                 }
 
 
@@ -145,8 +134,8 @@ namespace Loachs.Web
                 g.DrawRectangle(new Pen(Color.Silver), 0, 0, image.Width - 1, image.Height - 1);
 
                 //输出
-                System.IO.MemoryStream ms = new System.IO.MemoryStream();
-                image.Save(ms, System.Drawing.Imaging.ImageFormat.Gif);
+                MemoryStream ms = new MemoryStream();
+                image.Save(ms, ImageFormat.Gif);
                 Response.ClearContent();
                 Response.ContentType = "image/Gif";
                 Response.BinaryWrite(ms.ToArray());
@@ -159,22 +148,22 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 获得下一个随机数
+        ///     获得下一个随机数
         /// </summary>
         /// <param name="max">最大值</param>
         /// <returns></returns>
         private static int Next(int max)
         {
-            rand.GetBytes(randb);
-            int value = BitConverter.ToInt32(randb, 0);
-            value = value % (max + 1);
+            Rand.GetBytes(Randb);
+            int value = BitConverter.ToInt32(Randb, 0);
+            value = value%(max + 1);
             if (value < 0)
                 value = -value;
             return value;
         }
 
         /// <summary>
-        /// 获得下一个随机数
+        ///     获得下一个随机数
         /// </summary>
         /// <param name="min">最小值</param>
         /// <param name="max">最大值</param>

@@ -1,22 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Loachs.Common;
 using Loachs.Business;
+using Loachs.Common;
 
 namespace Loachs.Entity
 {
     /// <summary>
-    /// 归档实体
+    ///     归档实体
     /// </summary>
     public class ArchiveInfo
     {
-      //  private string _name;
-        private DateTime _date;
-      //  private string _url;
-      //  private string _link;
-        private int _count;
+        //  private string _name;
+        //  private string _url;
+        //  private string _link;
 
         //[Obsolete]
         ///// <summary>
@@ -28,54 +23,44 @@ namespace Loachs.Entity
         //    get { return _name; }
         //}
         /// <summary>
-        /// 日期,用于拼Url
+        ///     日期,用于拼Url
         /// </summary>
-        public DateTime Date
-        {
-            set { _date = value; }
-            get { return _date; }
-        }
+        public DateTime Date { set; get; }
+
         /// <summary>
-        /// url地址
+        ///     url地址
         /// </summary>
         public string Url
         {
-
             get
             {
                 string url = string.Empty;
 
                 if (Utils.IsSupportUrlRewriter == false)
                 {
-                    url = string.Format("{0}default.aspx?type=archive&date={1}", ConfigHelper.SiteUrl, this.Date.ToString("yyyyMM"));
+                    url = string.Format("{0}default.aspx?type=archive&date={1}", ConfigHelper.SiteUrl,
+                        Date.ToString("yyyyMM"));
                 }
                 else
                 {
-                    return ConfigHelper.SiteUrl + "archive/" + this.Date.ToString("yyyyMM") + SettingManager.GetSetting().RewriteExtension;
+                    return ConfigHelper.SiteUrl + "archive/" + Date.ToString("yyyyMM") +
+                           SettingManager.GetSetting().RewriteExtension;
                 }
                 return Utils.CheckPreviewThemeUrl(url);
             }
         }
 
         /// <summary>
-        /// 连接
+        ///     连接
         /// </summary>
         public string Link
         {
-
-            get
-            {
-                return string.Format("<a href=\"{0}\" >{1}</a>", this.Url, this.Date.ToString("yyyyMM"));
-            }
+            get { return string.Format("<a href=\"{0}\" >{1}</a>", Url, Date.ToString("yyyyMM")); }
         }
 
         /// <summary>
-        /// 数量
+        ///     数量
         /// </summary>
-        public int Count
-        {
-            set { _count = value; }
-            get { return _count; }
-        }
+        public int Count { set; get; }
     }
 }

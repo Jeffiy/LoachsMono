@@ -1,85 +1,70 @@
 ﻿using System;
-using System.Collections;
-using System.Configuration;
-using System.Data;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
 using System.IO;
-using System.Text;
-using System.Xml;
-
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
-using Loachs.Business;
+
 namespace Loachs.Web
 {
-    public partial class admin_usercontrols_upfilemanager : System.Web.UI.UserControl
+    public partial class admin_usercontrols_upfilemanager : UserControl
     {
+        /// <summary>
+        ///     允许上传的文件格式
+        /// </summary>
+        public string AllowFileExtension =
+            "jpg,jpeg,gif,png,bmp,ico,rar,zip,7z,txt,html,js,css,chm,doc,docx,xls,xlsx,csv,ppt,pptx,psd,pdf,swf,mp3,wma";
 
         /// <summary>
-        /// 当前路径
+        ///     当前文件夹
         /// </summary>
-        protected string path = RequestHelper.QueryString("path");
+        protected DirectoryInfo CurrentDirectory;
 
         /// <summary>
-        /// 上传结果
+        ///     页面文件名称
         /// </summary>
-        protected int result = RequestHelper.QueryInt("result", 0);
-
-        /// <summary>
-        /// 当前文件夹
-        /// </summary>
-        protected DirectoryInfo currentDirectory;
-
-        /// <summary>
-        /// 允许上传的文件格式
-        /// </summary>
-        public string AllowFileExtension = "jpg,jpeg,gif,png,bmp,ico,rar,zip,7z,txt,html,js,css,chm,doc,docx,xls,xlsx,csv,ppt,pptx,psd,pdf,swf,mp3,wma";
-
+        protected string FileName;
 
         protected string OperateString = RequestHelper.QueryString("operate", true);
 
         /// <summary>
-        /// 输出信息
+        ///     当前路径
+        /// </summary>
+        protected string Path = RequestHelper.QueryString("path");
+
+        /// <summary>
+        ///     输出信息
         /// </summary>
         public string ResponseMessage = string.Empty;
 
         /// <summary>
-        /// 错误提示
+        ///     上传结果
+        /// </summary>
+        protected int Result = RequestHelper.QueryInt("result", 0);
+
+        /// <summary>
+        ///     错误提示
         /// </summary>
         /// <param name="error"></param>
         /// <returns></returns>
         public string ShowError(string error)
         {
-            ResponseMessage = "<div class=\"p_error\">";
-            ResponseMessage += error;
-            ResponseMessage += "</div>";
+            ResponseMessage = string.Format("<div class=\"p_error\">{0}</div>", error);
             return ResponseMessage;
         }
 
         /// <summary>
-        /// 正确提示
+        ///     正确提示
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
         public string ShowMessage(string message)
         {
-
-            ResponseMessage = "<div class=\"p_message\">";
-            ResponseMessage += message;
-            ResponseMessage += "</div>";
+            ResponseMessage = string.Format("<div class=\"p_message\">{0}</div>", message);
             return ResponseMessage;
         }
-
-
-        /// <summary>
-        /// 页面文件名称
-        /// </summary>
-        protected string FileName;
 
         ///// <summary>
         ///// 目的是获取附件
@@ -89,13 +74,9 @@ namespace Loachs.Web
 
         protected void Page_Load(object sender, EventArgs e)
         {
-
             FileName = System.IO.Path.GetFileName(Request.Url.AbsolutePath);
             //  Response.Write(FileName);
-
-
-
-
+            
             CheckPath();
 
             // if (Operate == OperateType.Delete)
@@ -104,59 +85,55 @@ namespace Loachs.Web
                 Delete();
             }
 
-            if (result == 1)
+            if (Result == 1)
             {
                 ShowError("同名文件已存在,上传取消!");
             }
-            else if (result == 2)
+            else if (Result == 2)
             {
                 ShowMessage("上传成功!");
             }
-            else if (result == 3)
+            else if (Result == 3)
             {
                 ShowMessage("删除成功!");
             }
-            else if (result == 444)
+            else if (Result == 444)
             {
                 ShowMessage("权限不够!");
             }
-
-
         }
 
         /// <summary>
-        /// 检查路径
+        ///     检查路径
         /// </summary>
         protected void CheckPath()
         {
-            if (string.IsNullOrEmpty(path) || path.IndexOf("upfiles") == -1)
+            if (string.IsNullOrEmpty(Path) || Path.IndexOf("upfiles") == -1)
             {
-                path = ConfigHelper.SitePath + "upfiles/";
+                Path = ConfigHelper.SitePath + "upfiles/";
             }
 
-            if (!Directory.Exists(Server.MapPath(path)))
+            if (!Directory.Exists(Server.MapPath(Path)))
             {
                 Response.Redirect(FileName);
-
             }
 
-            currentDirectory = new DirectoryInfo(Server.MapPath(path));
+            CurrentDirectory = new DirectoryInfo(Server.MapPath(Path));
         }
 
         /// <summary>
-        /// 删除文件夹或文件
+        ///     删除文件夹或文件
         /// </summary>
         protected void Delete()
         {
-            string res = "";
             string deletepath = RequestHelper.QueryString("deletepath");
             string category = RequestHelper.QueryString("category", true);
 
-            string return_deletepath = deletepath.Substring(0, deletepath.LastIndexOf('/') + 1);
+            string returnDeletepath = deletepath.Substring(0, deletepath.LastIndexOf('/') + 1);
 
-            if (PageUtils.CurrentUser.Type != (int)UserType.Administrator)
+            if (PageUtils.CurrentUser.Type != (int) UserType.Administrator)
             {
-                Response.Redirect(FileName + "?path=" + return_deletepath + "&result=444");
+                Response.Redirect(FileName + "?path=" + returnDeletepath + "&result=444");
             }
 
             if (deletepath.IndexOf("upfiles") != -1)
@@ -178,17 +155,17 @@ namespace Loachs.Web
                 }
             }
 
-            Response.Redirect(FileName + "?path=" + return_deletepath + "&result=3");
+            Response.Redirect(FileName + "?path=" + returnDeletepath + "&result=3");
         }
 
         /// <summary>
-        /// 获取当前路径所有连接
+        ///     获取当前路径所有连接
         /// </summary>
         protected string GetPathUrl()
         {
             string pathLink = string.Empty;
 
-            string path2 = path.Substring(1, path.Length - 2);
+            string path2 = Path.Substring(1, Path.Length - 2);
 
             string[] tempPath = path2.Split('/');
 
@@ -198,7 +175,6 @@ namespace Loachs.Web
 
             for (int i = 0; i < tempPath.Length; i++)
             {
-
                 temp += tempPath[i] + "/";
                 if (i == 0 && ConfigHelper.SitePath.Length > 1) //有虚拟目录
                 {
@@ -210,7 +186,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 获取文件对应的图标
+        ///     获取文件对应的图标
         /// </summary>
         /// <param name="fileExtension"></param>
         /// <returns></returns>
@@ -289,12 +265,13 @@ namespace Loachs.Web
                 case ".db":
                     return "exe.gif";
 
-                default: return "default.gif";
+                default:
+                    return "default.gif";
             }
         }
 
         /// <summary>
-        /// 是否为图片
+        ///     是否为图片
         /// </summary>
         /// <param name="ext"></param>
         /// <returns></returns>
@@ -304,17 +281,11 @@ namespace Loachs.Web
             {
                 ext = ext.ToLower();
             }
-            if (ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp" || ext == ".png")
-            {
-                return true;
-            }
-            return false;
+            return ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp" || ext == ".png";
         }
 
-
-
         /// <summary>
-        /// 上传附件
+        ///     上传附件
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -322,11 +293,11 @@ namespace Loachs.Web
         {
             HttpPostedFile postedFile = FileUpload1.PostedFile;
 
-            string uploadPath = ConfigHelper.SitePath + "upfiles/" + DateTime.Now.ToString("yyyyMM") + "/";      //文件保存相对路径
-            string saveDirectory = Server.MapPath(uploadPath);                                                  //文件保存绝对文件夹
+            string uploadPath = ConfigHelper.SitePath + "upfiles/" + DateTime.Now.ToString("yyyyMM") + "/"; //文件保存相对路径
+            string saveDirectory = Server.MapPath(uploadPath); //文件保存绝对文件夹
             //  string waterPath = Server.MapPath("../common/images/watermark.gif");//待改
 
-            string fileName = Path.GetFileName(postedFile.FileName);                                            //文件名
+            string fileName = System.IO.Path.GetFileName(postedFile.FileName); //文件名
             fileName = fileName.Replace(" ", "");
             fileName = fileName.Replace("%", "");
             fileName = fileName.Replace("&", "");
@@ -335,10 +306,9 @@ namespace Loachs.Web
             fileName = fileName.Replace("+", "");
 
 
-            string fileExtension = Path.GetExtension(postedFile.FileName);                                      //文件后缀
+            string fileExtension = System.IO.Path.GetExtension(postedFile.FileName); //文件后缀
 
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);                       //没有后缀的文件名
-
+            string fileNameWithoutExtension = System.IO.Path.GetFileNameWithoutExtension(fileName); //没有后缀的文件名
 
 
             int type = StringHelper.StrToInt(rblistType.SelectedValue, 1);
@@ -351,15 +321,7 @@ namespace Loachs.Web
             }
 
             string[] fileExts = AllowFileExtension.Split(',');
-            bool allow = false;
-            foreach (string str in fileExts)
-            {
-                if (("." + str) == fileExtension)
-                {
-                    allow = true;
-                    break;
-                }
-            }
+            bool allow = fileExts.Any(str => ("." + str) == fileExtension);
             if (allow == false)
             {
                 ShowError("您上传的文件格式不被允许!");
@@ -380,40 +342,49 @@ namespace Loachs.Web
                 string fileSavePath2 = saveDirectory + "da563457-1c3c-4b28-bf73-92f87f930896" + fileName;
                 if (File.Exists(fileSavePath))
                 {
-                    if (type == 1)//跳过
+                    if (type == 1) //跳过
                     {
                         result = 1;
                         break;
                     }
-                    else if (type == 2)//重命名
+                    if (type == 2) //重命名
                     {
                         iCounter++;
                         fileName = fileNameWithoutExtension + "(" + iCounter + ")" + fileExtension;
-
                     }
-                    else if (type == 3)//覆盖 
+                    else if (type == 3) //覆盖 
                     {
                         File.Delete(fileSavePath);
                     }
                 }
                 else
                 {
-                    if ((fileExtension == ".gif" || fileExtension == ".jpg" || fileExtension == ".jpeg" || fileExtension == ".bmp" || fileExtension == ".png") && chkWatermark.Checked)
+                    if ((fileExtension == ".gif" || fileExtension == ".jpg" || fileExtension == ".jpeg" ||
+                         fileExtension == ".bmp" || fileExtension == ".png") && chkWatermark.Checked)
                     {
                         postedFile.SaveAs(fileSavePath2);
 
-                        string newFileName = Path.GetFileNameWithoutExtension(postedFile.FileName) + "w(" + iCounter + ")" + Path.GetExtension(postedFile.FileName);
+                        string newFileName = System.IO.Path.GetFileNameWithoutExtension(postedFile.FileName) + "w(" + iCounter +
+                                             ")" + System.IO.Path.GetExtension(postedFile.FileName);
                         string newImagePath = Server.MapPath(uploadPath + newFileName);
-                        string waterImagePath = Server.MapPath(ConfigHelper.SitePath + "common/images/watermark/" + SettingManager.GetSetting().WatermarkImage);
+                        string waterImagePath =
+                            Server.MapPath(ConfigHelper.SitePath + "common/images/watermark/" +
+                                           SettingManager.GetSetting().WatermarkImage);
 
                         if (SettingManager.GetSetting().WatermarkType == 2 && File.Exists(waterImagePath))
                         {
-                            Watermark.CreateWaterImage(fileSavePath2, fileSavePath, SettingManager.GetSetting().WatermarkPosition, waterImagePath, SettingManager.GetSetting().WatermarkTransparency, SettingManager.GetSetting().WatermarkQuality);
+                            Watermark.CreateWaterImage(fileSavePath2, fileSavePath,
+                                SettingManager.GetSetting().WatermarkPosition, waterImagePath,
+                                SettingManager.GetSetting().WatermarkTransparency,
+                                SettingManager.GetSetting().WatermarkQuality);
                         }
                         else
                         {
-                            Watermark.CreateWaterText(fileSavePath2, fileSavePath, SettingManager.GetSetting().WatermarkPosition, SettingManager.GetSetting().WatermarkText, SettingManager.GetSetting().WatermarkQuality, SettingManager.GetSetting().WatermarkFontName, SettingManager.GetSetting().WatermarkFontSize);
-
+                            Watermark.CreateWaterText(fileSavePath2, fileSavePath,
+                                SettingManager.GetSetting().WatermarkPosition, SettingManager.GetSetting().WatermarkText,
+                                SettingManager.GetSetting().WatermarkQuality,
+                                SettingManager.GetSetting().WatermarkFontName,
+                                SettingManager.GetSetting().WatermarkFontSize);
                         }
                         File.Delete(fileSavePath2);
                     }

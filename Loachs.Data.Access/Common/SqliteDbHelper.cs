@@ -1,25 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Loachs.Common;
-using Mono.Data.Sqlite;
 using System.Data;
 using System.Threading;
+using System.Web;
+using Loachs.Common;
+using Mono.Data.Sqlite;
 
 namespace Loachs.Data.Access
 {
     public class SqliteDbHelper
     {
-        public static string ConnectionString = string.Format("Data Source={0};Version=3", System.Web.HttpContext.Current.Server.MapPath(ConfigHelper.SitePath + ConfigHelper.DbConnection));
+        public static string ConnectionString = string.Format("Data Source={0};Version=3",
+            HttpContext.Current.Server.MapPath(ConfigHelper.SitePath + ConfigHelper.DbConnection));
 
         /// <summary>
-        /// 查询次数统计
+        ///     查询次数统计
         /// </summary>
-        private static int _querycount = 0;
-        private static object lockobject = new object();
+        private static int _querycount;
+
+        private static readonly object Lockobject = new object();
 
         /// <summary>
-        /// 查询次数统计
+        ///     查询次数统计
         /// </summary>
         public static int QueryCount
         {
@@ -27,9 +28,8 @@ namespace Loachs.Data.Access
             set { _querycount = value; }
         }
 
-
-
         #region MakeCommand
+
         ///// <summary>
         ///// 创建Command命令
         ///// </summary>
@@ -51,23 +51,26 @@ namespace Loachs.Data.Access
         //}
 
         /// <summary>
-        /// 创建Command命令
+        ///     创建Command命令
         /// </summary>
         /// <param name="conn">数据连接</param>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <param name="prams">参数级</param>
         /// <returns></returns>
-        private static SqliteCommand MakeCommand(SqliteConnection conn, CommandType cmdType, string cmdText, SqliteParameter[] prams)
+        private static SqliteCommand MakeCommand(SqliteConnection conn, CommandType cmdType, string cmdText,
+            SqliteParameter[] prams)
         {
             if (conn.State != ConnectionState.Open)
             {
                 conn.Open();
             }
-            SqliteCommand cmd = new SqliteCommand();
-            cmd.Connection = conn;
-            cmd.CommandText = cmdText;
-            cmd.CommandType = cmdType;
+            SqliteCommand cmd = new SqliteCommand
+            {
+                Connection = conn,
+                CommandText = cmdText,
+                CommandType = cmdType
+            };
             if (prams != null)
             {
                 foreach (SqliteParameter p in prams)
@@ -77,76 +80,125 @@ namespace Loachs.Data.Access
             }
             return cmd;
         }
+
         #endregion
 
-        #region MakeParam
         /// <summary>
-        /// 生成输入参数
+        ///     获取分页Sql
         /// </summary>
-        /// <param name="ParamName">Name of param.</param>
-        /// <param name="DbType">Param type.</param>
-        /// <param name="Size">Param size.</param>
-        /// <param name="Value">Param value.</param>
-        /// <returns>New parameter.</returns>
-        public static SqliteParameter MakeInParam(string ParamName, DbType dbType, int Size, object Value)
-        {
-            return MakeParam(ParamName, dbType, Size, ParameterDirection.Input, Value);
-        }
-
-        /// <summary>
-        /// 生成输出参数
-        /// </summary>
-        /// <param name="ParamName">Name of param.</param>
-        /// <param name="DbType">Param type.</param>
-        /// <param name="Size">Param size.</param>
-        /// <returns>New parameter.</returns>
-        public static SqliteParameter MakeOutParam(string ParamName, DbType dbType, int Size)
-        {
-            return MakeParam(ParamName, dbType, Size, ParameterDirection.Output, null);
-        }
-
-        /// <summary>
-        /// 生成返回参数,我添加
-        /// </summary>
-        /// <param name="ParamName"></param>
-        /// <param name="DbType"></param>
-        /// <param name="Size"></param>
+        /// <param name="tableName"></param>
+        /// <param name="colName"></param>
+        /// <param name="colList"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="pageIndex"></param>
+        /// <param name="orderBy"></param>
+        /// <param name="condition"></param>
         /// <returns></returns>
-        public static SqliteParameter MakeReturnParam(string ParamName, DbType dbType, int Size)
+        public static string GetPageSql(string tableName, string colName, string colList, int pageSize, int pageIndex,
+            int orderBy, string condition)
         {
-            return MakeParam(ParamName, dbType, Size, ParameterDirection.ReturnValue, null);
+            string temp = string.Empty;
+            string sql = string.Empty;
+            if (string.IsNullOrEmpty(condition))
+            {
+                condition = " 1=1 ";
+            }
+
+            //降序
+            if (orderBy == 1)
+            {
+                temp = "select  {1} from {2} where {5} and {3}   order by {3} desc limit {4} offset  {0} ";
+                sql = string.Format(temp, pageSize, colList, tableName, colName, pageSize*(pageIndex - 1), condition);
+            }
+            //降序
+            if (orderBy == 0)
+            {
+                temp = "select  {1} from {2} where {5} and {3}   order by {3} asc limit {4} offset  {0} ";
+                sql = string.Format(temp, pageSize, colList, tableName, colName, pageSize*(pageIndex - 1), condition);
+            }
+            //第一页
+            if (pageIndex == 1)
+            {
+                temp = "select  {1} from {2} where {3} order by {4} {5} limit {0}";
+                sql = string.Format(temp, pageSize, colList, tableName, condition, colName,
+                    orderBy == 1 ? "desc" : "asc");
+            }
+
+            return sql;
+        }
+
+        #region MakeParam
+
+        /// <summary>
+        ///     生成输入参数
+        /// </summary>
+        /// <param name="paramName">Name of param.</param>
+        /// <param name="dbType">Param type.</param>
+        /// <param name="size">Param size.</param>
+        /// <param name="value">Param value.</param>
+        /// <returns>New parameter.</returns>
+        public static SqliteParameter MakeInParam(string paramName, DbType dbType, int size, object value)
+        {
+            return MakeParam(paramName, dbType, size, ParameterDirection.Input, value);
         }
 
         /// <summary>
-        /// 生成各种参数
+        ///     生成输出参数
         /// </summary>
-        /// <param name="ParamName">Name of param.</param>
-        /// <param name="DbType">Param type.</param>
-        /// <param name="Size">Param size.</param>
-        /// <param name="Direction">Parm direction.</param>
-        /// <param name="Value">Param value.</param>
+        /// <param name="paramName">Name of param.</param>
+        /// <param name="dbType">Param type.</param>
+        /// <param name="size">Param size.</param>
         /// <returns>New parameter.</returns>
-        private static SqliteParameter MakeParam(string ParamName, DbType dbType, Int32 Size, ParameterDirection Direction, object Value)
+        public static SqliteParameter MakeOutParam(string paramName, DbType dbType, int size)
+        {
+            return MakeParam(paramName, dbType, size, ParameterDirection.Output, null);
+        }
+
+        /// <summary>
+        ///     生成返回参数,我添加
+        /// </summary>
+        /// <param name="paramName"></param>
+        /// <param name="dbType"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public static SqliteParameter MakeReturnParam(string paramName, DbType dbType, int size)
+        {
+            return MakeParam(paramName, dbType, size, ParameterDirection.ReturnValue, null);
+        }
+
+        /// <summary>
+        ///     生成各种参数
+        /// </summary>
+        /// <param name="paramName">Name of param.</param>
+        /// <param name="dbType">Param type.</param>
+        /// <param name="size">Param size.</param>
+        /// <param name="direction">Parm direction.</param>
+        /// <param name="value">Param value.</param>
+        /// <returns>New parameter.</returns>
+        private static SqliteParameter MakeParam(string paramName, DbType dbType, int size, ParameterDirection direction,
+            object value)
         {
             SqliteParameter param;
 
-            if (Size > 0)
-                param = new SqliteParameter(ParamName, dbType, Size);
+            if (size > 0)
+                param = new SqliteParameter(paramName, dbType, size);
             else
-                param = new SqliteParameter(ParamName, dbType);
+                param = new SqliteParameter(paramName, dbType);
 
-            param.Direction = Direction;
-            if (Direction == ParameterDirection.Input && Value != null)
+            param.Direction = direction;
+            if (direction == ParameterDirection.Input && value != null)
             {
-                param.Value = Value;
+                param.Value = value;
             }
             return param;
         }
+
         #endregion
 
         #region ExecuteScalar
+
         /// <summary>
-        /// 返回查询结果的第一行的第一列,忽略其他列或行
+        ///     返回查询结果的第一行的第一列,忽略其他列或行
         /// </summary>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <returns>object</returns>
@@ -156,19 +208,18 @@ namespace Loachs.Data.Access
         }
 
         /// <summary>
-        /// 返回查询结果的第一行的第一列,忽略其他列或行
+        ///     返回查询结果的第一行的第一列,忽略其他列或行
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <returns>object</returns>
         public static object ExecuteScalar(CommandType cmdType, string cmdText)
         {
-
             return ExecuteScalar(cmdType, cmdText, null);
         }
 
         /// <summary>
-        /// 返回查询结果的第一行的第一列,忽略其他列或行
+        ///     返回查询结果的第一行的第一列,忽略其他列或行
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
@@ -177,7 +228,7 @@ namespace Loachs.Data.Access
         public static object ExecuteScalar(CommandType cmdType, string cmdText, SqliteParameter[] prams)
         {
             _querycount++;
-            System.Web.HttpContext.Current.Application["total"] = Convert.ToInt32(System.Web.HttpContext.Current.Application["total"]) + 1;
+            HttpContext.Current.Application["total"] = Convert.ToInt32(HttpContext.Current.Application["total"]) + 1;
             using (SqliteConnection conn = new SqliteConnection(ConnectionString))
             {
                 SqliteCommand cmd = MakeCommand(conn, cmdType, cmdText, prams);
@@ -190,8 +241,9 @@ namespace Loachs.Data.Access
         #endregion
 
         #region ExecuteNonQuery
+
         /// <summary>
-        /// 返回受影响的行数,常用于Update和Delete 语句
+        ///     返回受影响的行数,常用于Update和Delete 语句
         /// </summary>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <returns>int</returns>
@@ -201,7 +253,7 @@ namespace Loachs.Data.Access
         }
 
         /// <summary>
-        /// 返回受影响的行数,常用于Update和Delete 语句
+        ///     返回受影响的行数,常用于Update和Delete 语句
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
@@ -212,7 +264,7 @@ namespace Loachs.Data.Access
         }
 
         /// <summary>
-        /// 返回受影响的行数,常用于Insert,Update和Delete 语句
+        ///     返回受影响的行数,常用于Insert,Update和Delete 语句
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
@@ -221,13 +273,13 @@ namespace Loachs.Data.Access
         public static int ExecuteNonQuery(CommandType cmdType, string cmdText, SqliteParameter[] prams)
         {
             _querycount++;
-            System.Web.HttpContext.Current.Application["total"] = Convert.ToInt32(System.Web.HttpContext.Current.Application["total"]) + 1;
-            Monitor.Enter(lockobject);
+            HttpContext.Current.Application["total"] = Convert.ToInt32(HttpContext.Current.Application["total"]) + 1;
+            Monitor.Enter(Lockobject);
             using (SqliteConnection conn = new SqliteConnection(ConnectionString))
             {
                 SqliteCommand cmd = MakeCommand(conn, cmdType, cmdText, prams);
                 int i = cmd.ExecuteNonQuery();
-                Monitor.Exit(lockobject);
+                Monitor.Exit(Lockobject);
                 cmd.Parameters.Clear();
                 return i;
             }
@@ -236,8 +288,9 @@ namespace Loachs.Data.Access
         #endregion
 
         #region ExecuteReader
+
         /// <summary>
-        /// 返回 SqliteDataReader
+        ///     返回 SqliteDataReader
         /// </summary>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <returns>SqliteDataReader</returns>
@@ -246,20 +299,20 @@ namespace Loachs.Data.Access
             return ExecuteReader(CommandType.Text, cmdText);
         }
 
-        [Obsolete]
         /// <summary>
         /// 返回 SqliteDataReader
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <returns>SqliteDataReader</returns>
+        [Obsolete]
         public static SqliteDataReader ExecuteReader(CommandType cmdType, string cmdText)
         {
             return ExecuteReader(cmdType, cmdText, null);
         }
 
         /// <summary>
-        /// 返回 SqliteDataReader
+        ///     返回 SqliteDataReader
         /// </summary>
         /// <param name="cmdText"></param>
         /// <param name="prams"></param>
@@ -270,7 +323,7 @@ namespace Loachs.Data.Access
         }
 
         /// <summary>
-        /// 返回 SqliteDataReader
+        ///     返回 SqliteDataReader
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
@@ -278,10 +331,9 @@ namespace Loachs.Data.Access
         /// <returns></returns>
         public static SqliteDataReader ExecuteReader(CommandType cmdType, string cmdText, SqliteParameter[] prams)
         {
-
             _querycount++;
 
-            System.Web.HttpContext.Current.Application["total"] = Convert.ToInt32(System.Web.HttpContext.Current.Application["total"]) + 1;
+            HttpContext.Current.Application["total"] = Convert.ToInt32(HttpContext.Current.Application["total"]) + 1;
 
             SqliteConnection conn = new SqliteConnection(ConnectionString);
             SqliteCommand cmd = MakeCommand(conn, cmdType, cmdText, prams);
@@ -293,8 +345,9 @@ namespace Loachs.Data.Access
         #endregion
 
         #region ExecuteDataSet
+
         /// <summary>
-        /// 返回 DataSet
+        ///     返回 DataSet
         /// </summary>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <returns>DataSet</returns>
@@ -302,8 +355,9 @@ namespace Loachs.Data.Access
         {
             return ExecuteDataSet(CommandType.Text, cmdText, null);
         }
+
         /// <summary>
-        /// 返回 DataSet
+        ///     返回 DataSet
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
@@ -323,7 +377,7 @@ namespace Loachs.Data.Access
         }
 
         /// <summary>
-        /// 返回 DataSet
+        ///     返回 DataSet
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
@@ -332,7 +386,7 @@ namespace Loachs.Data.Access
         public static DataSet ExecuteDataSet(CommandType cmdType, string cmdText, SqliteParameter[] prams)
         {
             _querycount++;
-            System.Web.HttpContext.Current.Application["total"] = Convert.ToInt32(System.Web.HttpContext.Current.Application["total"]) + 1;
+            HttpContext.Current.Application["total"] = Convert.ToInt32(HttpContext.Current.Application["total"]) + 1;
 
             using (SqliteConnection conn = new SqliteConnection(ConnectionString))
             {
@@ -346,48 +400,5 @@ namespace Loachs.Data.Access
         }
 
         #endregion
-
-        /// <summary>
-        /// 获取分页Sql
-        /// </summary>
-        /// <param name="tableName"></param>
-        /// <param name="colName"></param>
-        /// <param name="colList"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="pageIndex"></param>
-        /// <param name="orderBy"></param>
-        /// <param name="condition"></param>
-        /// <returns></returns>
-        public static string GetPageSql(string tableName, string colName, string colList, int pageSize, int pageIndex, int orderBy, string condition)
-        {
-            string temp = string.Empty;
-            string sql = string.Empty;
-            if (string.IsNullOrEmpty(condition))
-            {
-                condition = " 1=1 ";
-            }
-
-            //降序
-            if (orderBy == 1)
-            {
-                temp = "select  {1} from {2} where {5} and {3}   order by {3} desc limit {4} offset  {0} ";
-                sql = string.Format(temp, pageSize, colList, tableName, colName, pageSize * (pageIndex - 1), condition);
-            }
-            //降序
-            if (orderBy == 0)
-            {
-                temp = "select  {1} from {2} where {5} and {3}   order by {3} asc limit {4} offset  {0} ";
-                sql = string.Format(temp, pageSize, colList, tableName, colName, pageSize * (pageIndex - 1), condition);
-            }
-            //第一页
-            if (pageIndex == 1)
-            {
-                temp = "select  {1} from {2} where {3} order by {4} {5} limit {0}";
-                sql = string.Format(temp, pageSize, colList, tableName, condition, colName, orderBy == 1 ? "desc" : "asc");
-            }
-
-            return sql;
-
-        }
     }
 }

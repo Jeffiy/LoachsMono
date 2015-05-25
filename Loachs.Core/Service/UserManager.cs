@@ -1,28 +1,27 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Loachs.Data;
 using Loachs.Entity;
 
 namespace Loachs.Business
 {
     /// <summary>
-    /// 用户管理
+    ///     用户管理
     /// </summary>
     public class UserManager
     {
-
-        private static IUser dao = DataAccess.CreateUser();
-
+        private static readonly IUser Dao = DataAccess.CreateUser();
         //  private static readonly string CacheKey = "users";
 
         /// <summary>
-        /// 列表
+        ///     列表
         /// </summary>
         private static List<UserInfo> _users;
 
         /// <summary>
-        /// lock
+        ///     lock
         /// </summary>
-        private static readonly object lockHelper = new object();
+        private static readonly object LockHelper = new object();
 
         static UserManager()
         {
@@ -30,17 +29,17 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 初始化
+        ///     初始化
         /// </summary>
         public static void LoadUser()
         {
             if (_users == null)
             {
-                lock (lockHelper)
+                lock (LockHelper)
                 {
                     if (_users == null)
                     {
-                        _users = dao.GetUserList();
+                        _users = Dao.GetUserList();
 
                         //   BuildUser();
                     }
@@ -49,32 +48,32 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 添加用户
+        ///     添加用户
         /// </summary>
-        /// <param name="_userinfo"></param>
+        /// <param name="userinfo"></param>
         /// <returns></returns>
-        public static int InsertUser(UserInfo _userinfo)
+        public static int InsertUser(UserInfo userinfo)
         {
-            _userinfo.UserId = dao.InsertUser(_userinfo);
-            _users.Add(_userinfo);
+            userinfo.UserId = Dao.InsertUser(userinfo);
+            _users.Add(userinfo);
             _users.Sort();
 
-            return _userinfo.UserId;
+            return userinfo.UserId;
         }
 
         /// <summary>
-        /// 修改用户
+        ///     修改用户
         /// </summary>
-        /// <param name="_userinfo"></param>
+        /// <param name="userinfo"></param>
         /// <returns></returns>
-        public static int UpdateUser(UserInfo _userinfo)
+        public static int UpdateUser(UserInfo userinfo)
         {
             _users.Sort();
-            return dao.UpdateUser(_userinfo);
+            return Dao.UpdateUser(userinfo);
         }
 
         /// <summary>
-        /// 更新用户文章数
+        ///     更新用户文章数
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="addCount"></param>
@@ -91,7 +90,7 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 更新用户评论数
+        ///     更新用户评论数
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="addCount"></param>
@@ -109,7 +108,7 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 删除用户
+        ///     删除用户
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
@@ -121,12 +120,11 @@ namespace Loachs.Business
                 _users.Remove(user);
             }
 
-            return dao.DeleteUser(userId);
+            return Dao.DeleteUser(userId);
         }
 
-
         /// <summary>
-        /// 获取全部用户
+        ///     获取全部用户
         /// </summary>
         /// <returns></returns>
         public static List<UserInfo> GetUserList()
@@ -135,66 +133,44 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 是否存在
+        ///     是否存在
         /// </summary>
         /// <param name="userName"></param>
         /// <returns></returns>
         public static bool ExistsUserName(string userName)
         {
-            return dao.ExistsUserName(userName);
+            return Dao.ExistsUserName(userName);
         }
 
         /// <summary>
-        /// 获取用户
+        ///     获取用户
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
         public static UserInfo GetUser(int userId)
         {
-            foreach (UserInfo user in _users)
-            {
-                if (user.UserId == userId)
-                {
-                    return user;
-                }
-            }
-            return null;
+            return _users.FirstOrDefault(user => user.UserId == userId);
         }
 
         /// <summary>
-        /// 根据用户名获取用户 
+        ///     根据用户名获取用户
         /// </summary>
         /// <param name="userName"></param>
         /// <returns></returns>
         public static UserInfo GetUser(string userName)
         {
-
-            foreach (UserInfo user in _users)
-            {
-                if (user.UserName.ToLower() == userName.ToLower())
-                {
-                    return user;
-                }
-            }
-            return null;
+            return _users.FirstOrDefault(user => user.UserName.ToLower() == userName.ToLower());
         }
 
         /// <summary>
-        /// 根据用户名和密码获取用户
+        ///     根据用户名和密码获取用户
         /// </summary>
         /// <param name="userName"></param>
         /// <param name="password"></param>
         /// <returns></returns>
         public static UserInfo GetUser(string userName, string password)
         {
-            foreach (UserInfo user in _users)
-            {
-                if (  user.UserName.ToLower() == userName.ToLower() && user.Password.ToLower() == password.ToLower())
-                {
-                    return user;
-                }
-            }
-            return null;
+            return _users.FirstOrDefault(user => user.UserName.ToLower() == userName.ToLower() && user.Password.ToLower() == password.ToLower());
         }
     }
 }

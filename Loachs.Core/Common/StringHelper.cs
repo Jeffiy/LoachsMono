@@ -1,25 +1,25 @@
 ﻿using System;
-using System.Web;
-using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
+using System.Web.Security;
 
 namespace Loachs.Common
 {
-
     /// <summary>
-    /// 字符串处理类
+    ///     字符串处理类
     /// </summary>
     public class StringHelper
     {
         /// <summary>
-        /// Texts to HTML.
+        ///     Texts to HTML.
         /// </summary>
-        /// <param name="txtStr">The TXT STR.</param>
+        /// <param name="content">The content.</param>
         /// <returns>The formated str.</returns>
         public static string TextToHtml(string content)
         {
-            StringBuilder sb = new StringBuilder(content);
+            var sb = new StringBuilder(content);
             sb.Replace("&", "&amp;");
             sb.Replace("<", "&lt;");
             sb.Replace(">", "&gt;");
@@ -37,13 +37,13 @@ namespace Loachs.Common
         }
 
         /// <summary>
-        /// html to text
+        ///     html to text
         /// </summary>
         /// <param name="content"></param>
         /// <returns></returns>
         public static string HtmlToText(string content)
         {
-            StringBuilder sb = new StringBuilder(content);
+            var sb = new StringBuilder(content);
             sb.Replace("<br />", "\n");
             sb.Replace("<br/>", "\n");
             //  sb.Replace("\r", "");
@@ -60,7 +60,7 @@ namespace Loachs.Common
         }
 
         /// <summary>
-        /// HtmlEncode
+        ///     HtmlEncode
         /// </summary>
         /// <param name="content"></param>
         /// <returns></returns>
@@ -70,7 +70,7 @@ namespace Loachs.Common
         }
 
         /// <summary>
-        ///  HtmlDecode
+        ///     HtmlDecode
         /// </summary>
         /// <param name="content"></param>
         /// <returns></returns>
@@ -80,7 +80,7 @@ namespace Loachs.Common
         }
 
         /// <summary>
-        /// 返回 URL 字符串的编码结果
+        ///     返回 URL 字符串的编码结果
         /// </summary>
         /// <param name="str">字符串</param>
         /// <returns>编码结果</returns>
@@ -90,7 +90,7 @@ namespace Loachs.Common
         }
 
         /// <summary>
-        /// 返回 URL 字符串的编码结果
+        ///     返回 URL 字符串的编码结果
         /// </summary>
         /// <param name="str">字符串</param>
         /// <returns>解码结果</returns>
@@ -100,7 +100,7 @@ namespace Loachs.Common
         }
 
         /// <summary>
-        /// 是否为ip
+        ///     是否为ip
         /// </summary>
         /// <param name="ip"></param>
         /// <returns></returns>
@@ -108,10 +108,9 @@ namespace Loachs.Common
         {
             return Regex.IsMatch(ip, @"^((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)$");
         }
- 
 
         /// <summary>
-        /// 返回字符串真实长度, 1个汉字长度为2
+        ///     返回字符串真实长度, 1个汉字长度为2
         /// </summary>
         /// <returns></returns>
         public static int GetLength(string str)
@@ -124,11 +123,11 @@ namespace Loachs.Common
         }
 
         /// <summary>
-        /// 编码成 sql 文本可以接受的格式
+        ///     编码成 sql 文本可以接受的格式
         /// </summary>
         public static string SqlEncode(string s)
         {
-            if (null == s || 0 == s.Length)
+            if (string.IsNullOrEmpty(s))
             {
                 return string.Empty;
             }
@@ -137,20 +136,18 @@ namespace Loachs.Common
         }
 
         /// <summary>
-        /// 检测是否有Sql危险字符
-        /// 没有返回true
+        ///     检测是否有Sql危险字符
+        ///     没有返回true
         /// </summary>
         /// <param name="str">要判断字符串</param>
         /// <returns>判断结果</returns>
         public static bool IsSafeSqlString(string str)
         {
-
             return !Regex.IsMatch(str, @"[-|;|,|\/|\(|\)|\[|\]|\}|\{|%|@|\*|!|\']");
         }
- 
 
         /// <summary>
-        /// 从字符串的指定位置截取指定长度的子字符串(过时)
+        ///     从字符串的指定位置截取指定长度的子字符串(过时)
         /// </summary>
         /// <param name="str">原字符串</param>
         /// <param name="startIndex">子字符串的起始位置</param>
@@ -162,10 +159,10 @@ namespace Loachs.Common
         }
 
         /// <summary>
-        /// 从字符串的指定位置开始截取到字符串结尾的了符串
+        ///     从字符串开始位置截取指定长度的字符串
         /// </summary>
         /// <param name="str">原字符串</param>
-        /// <param name="startIndex">子字符串的起始位置</param>
+        /// <param name="length">长度</param>
         /// <returns>子字符串</returns>
         public static string CutString(string str, int length)
         {
@@ -173,7 +170,7 @@ namespace Loachs.Common
         }
 
         /// <summary>
-        /// 截取字符
+        ///     截取字符
         /// </summary>
         /// <param name="str"></param>
         /// <param name="length"></param>
@@ -190,7 +187,7 @@ namespace Loachs.Common
             {
                 if (length < 0)
                 {
-                    length = length * -1;
+                    length = length*-1;
                     if (startIndex - length < 0)
                     {
                         length = startIndex;
@@ -207,8 +204,6 @@ namespace Loachs.Common
                 {
                     return "";
                 }
-
-
             }
             else
             {
@@ -216,17 +211,14 @@ namespace Loachs.Common
                 {
                     return "";
                 }
+                if (length + startIndex > 0)
+                {
+                    length = length + startIndex;
+                    startIndex = 0;
+                }
                 else
                 {
-                    if (length + startIndex > 0)
-                    {
-                        length = length + startIndex;
-                        startIndex = 0;
-                    }
-                    else
-                    {
-                        return "";
-                    }
+                    return "";
                 }
             }
 
@@ -246,28 +238,27 @@ namespace Loachs.Common
             }
         }
 
-
         /// <summary>
-        /// 移除Html标记
+        ///     移除Html标记
         /// </summary>
-        /// <param name="Content"></param>
+        /// <param name="content"></param>
         /// <returns></returns>
-        public static string RemoveHtml(string Content)
+        public static string RemoveHtml(string content)
         {
-            string regexstr = @"<[^>]*>";
-            return Regex.Replace(Content, regexstr, string.Empty, RegexOptions.IgnoreCase).Trim();
+            var regexstr = @"<[^>]*>";
+            return Regex.Replace(content, regexstr, string.Empty, RegexOptions.IgnoreCase).Trim();
         }
 
         /// <summary>
-        ///  判断字符串是否合法的日期格式
+        ///     判断字符串是否合法的日期格式
         /// </summary>
-        /// <param name="val"></param>
+        /// <param name="value"></param>
         /// <returns></returns>
         public static bool IsData(string value)
         {
             try
             {
-                System.DateTime.Parse(value);
+                DateTime.Parse(value);
             }
             catch
             {
@@ -277,22 +268,22 @@ namespace Loachs.Common
         }
 
         /// <summary>
-        /// 判断给定的字符串(strInt)是否是数值型
+        ///     判断给定的字符串(strInt)是否是数值型
         /// </summary>
         /// <param name="strInt">要确认的字符串</param>
         /// <returns>是则返加true 不是则返回 false</returns>
         public static bool IsInt(string strInt)
         {
-            if (strInt == null || strInt == "")
+            if (string.IsNullOrEmpty(strInt))
             {
                 return false;
             }
             //return new Regex(@"^([0-9])[0-9]*(\.\w*)?$").IsMatch(strInt);	//整数和小数
-            return new Regex(@"^(0|[1-9]\d*)$").IsMatch(strInt);	//正整数
+            return new Regex(@"^(0|[1-9]\d*)$").IsMatch(strInt); //正整数
         }
 
         /// <summary>
-        /// 是否为httpUrl地址
+        ///     是否为httpUrl地址
         /// </summary>
         /// <param name="httpUrl"></param>
         /// <returns></returns>
@@ -303,18 +294,20 @@ namespace Loachs.Common
 
             return httpUrl.IndexOf("http://") != -1;
         }
+
         /// <summary>
-        /// 检测是否符合email格式
+        ///     检测是否符合email格式
         /// </summary>
         /// <param name="strEmail">要判断的email字符串</param>
         /// <returns>判断结果</returns>
         public static bool IsEmail(string strEmail)
         {
-            return Regex.IsMatch(strEmail, @"^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$");
+            return Regex.IsMatch(strEmail,
+                @"^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$");
         }
 
         /// <summary>
-        /// string型转换为int型,转换失败返回缺省值
+        ///     string型转换为int型,转换失败返回缺省值
         /// </summary>
         /// <param name="str">要转换的字符串</param>
         /// <param name="def">缺省值</param>
@@ -325,15 +318,11 @@ namespace Loachs.Common
             {
                 return int.Parse(str);
             }
-            else
-            {
-                return def;
-            }
+            return def;
         }
 
-
         /// <summary>
-        /// MD5加密
+        ///     MD5加密
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
@@ -343,12 +332,12 @@ namespace Loachs.Common
             {
                 str = string.Empty;
             }
-            return System.Web.Security.FormsAuthentication.HashPasswordForStoringInConfigFile(str, "MD5");
-
+            return FormsAuthentication.HashPasswordForStoringInConfigFile(str, "MD5");
         }
+
         /// <summary>
-        /// 返回URL中结尾的文件名
-        /// </summary>		
+        ///     返回URL中结尾的文件名
+        /// </summary>
         public static string GetFileName(string url)
         {
             //	HttpContext.Current.Response.Write( url.IndexOf("?"));
@@ -361,20 +350,17 @@ namespace Loachs.Common
             if (url.IndexOf("?") != -1)
             {
                 //去掉参数
-                string noquery = url.Substring(0, url.IndexOf("?"));
+                var noquery = url.Substring(0, url.IndexOf("?"));
 
                 //根据/分组
-                string[] filenames = noquery.Split(new char[] { '/' });
+                var filenames = noquery.Split('/');
 
                 //文件名
-                string filename = filenames[filenames.Length - 1];
+                var filename = filenames[filenames.Length - 1];
 
                 return filename;
             }
-            else
-            {
-                return System.IO.Path.GetFileName(url);
-            }
+            return Path.GetFileName(url);
 
             //以前的
             //			if (url == null)
@@ -384,7 +370,6 @@ namespace Loachs.Common
             //			string[] strs1 = url.Split(new char[]{'/'});
             //			return strs1[strs1.Length - 1].Split(new char[]{'?'})[0];
         }
-
 
         ///// <summary>
         ///// 生成随机码
@@ -416,56 +401,48 @@ namespace Loachs.Common
         //}
 
         /// <summary>
-        /// 将时间换成中文
+        ///     将时间换成中文
         /// </summary>
         /// <param name="datetime">时间</param>
         /// <returns></returns>
         public static string DateToChineseString(DateTime datetime)
         {
-            TimeSpan ts = DateTime.Now - datetime;
+            var ts = DateTime.Now - datetime;
             //    System.Web.HttpContext.Current.Response.Write(ts.TotalDays);
-            if ((int)ts.TotalDays >= 365)
+            if ((int) ts.TotalDays >= 365)
             {
-                return (int)ts.TotalDays / 365 + "年前";
+                return (int) ts.TotalDays/365 + "年前";
             }
-            if ((int)ts.TotalDays >= 30 && ts.TotalDays <= 365)
+            if ((int) ts.TotalDays >= 30 && ts.TotalDays <= 365)
             {
-                return (int)ts.TotalDays / 30 + "月前";
+                return (int) ts.TotalDays/30 + "月前";
             }
-            if ((int)ts.TotalDays == 1)
+            if ((int) ts.TotalDays == 1)
             {
                 return "昨天";
             }
-            if ((int)ts.TotalDays == 2)
+            if ((int) ts.TotalDays == 2)
             {
                 return "前天";
             }
-            if ((int)ts.TotalDays >= 3 && ts.TotalDays <= 30)
+            if ((int) ts.TotalDays >= 3 && ts.TotalDays <= 30)
             {
-                return (int)ts.TotalDays + "天前";
+                return (int) ts.TotalDays + "天前";
             }
-            if ((int)ts.TotalDays == 0)
+            if ((int) ts.TotalDays == 0)
             {
-                if ((int)ts.TotalHours != 0)
+                if ((int) ts.TotalHours != 0)
                 {
-                    return (int)ts.TotalHours + "小时前";
+                    return (int) ts.TotalHours + "小时前";
                 }
-                else
+                if ((int) ts.TotalMinutes == 0)
                 {
-                    if ((int)ts.TotalMinutes == 0)
-                    {
-                        return "1分钟前";
-                    }
-                    else
-                    {
-                        return (int)ts.TotalMinutes + "分钟前";
-                    }
+                    return "1分钟前";
                 }
+                return (int) ts.TotalMinutes + "分钟前";
             }
             return datetime.ToString("yyyy年MM月dd日 HH:mm");
         }
-
- 
 
         public static int ObjectToInt(object expression)
         {
@@ -473,7 +450,7 @@ namespace Loachs.Common
         }
 
         /// <summary>
-        /// 将对象转换为Int32类型
+        ///     将对象转换为Int32类型
         /// </summary>
         /// <param name="expression"></param>
         /// <param name="defValue"></param>

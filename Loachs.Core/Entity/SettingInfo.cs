@@ -1,93 +1,104 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Loachs.Entity
+﻿namespace Loachs.Entity
 {
     /// <summary>
-    /// 配置实体
-    /// 邮件设置,发邮件设置
+    ///     配置实体
+    ///     邮件设置,发邮件设置
     /// </summary>
     public class SettingInfo
     {
-        private string _sitename = "小泥鳅";
-        private string _sitedescription = "";
-        private string _metakeywords;
-        private string _metadescription;
-        private int _sitestatus = 1;
-        private int _sitetotaltype = 1;
-        private int _enableverifycode = 1;
-
-
-        private int _commentstatus = 1;
-        private int _commentorder = 0;
         private int _commentapproved = 1;
         private string _commentblackword = "";
-
-        private int _sidebarpostcount = 10;
-        private int _sidebarcommentcount = 10;
-        private int _sidebartagcount = 10;
-
-        private int _postshowtype = 2;
-        private int _postrelatedcount = 5;
-
-
-
-        private int _rssstatus = 1;
-        private int _rssrowcount = 20;
-        private int _rssshowtype = 2;
-
-        private int _pagesizepostcount = 10;
+        private int _commentstatus = 1;
+        private int _enableverifycode = 1;
+        private string _mobiletheme = "mobile";
         private int _pagesizecommentcount = 50;
+        private int _pagesizepostcount = 10;
+        private int _postrelatedcount = 5;
+        private int _postshowtype = 2;
         //     private int _pagesizetagcount = 10;
 
         //   private int _rewritestatus = 1;
         private string _rewriteextension = ".aspx";
-
-        private string _footerhtml;
-
-        private string _theme = "default";
-        private string _mobiletheme = "mobile";
-
-        private int _watermarktype = 1;
-        private int _watermarkposition = 4;
-        private int _watermarktransparency = 8;
-        private int _watermarkquality = 80;
-        private string _watermarktext = "小泥鳅";
-        private int _watermarkfontsize = 14;
-        private string _watermarkfontname = "Tahoma";
-        private string _watermarkimage = "watermark.gif";
-
+        private int _rssrowcount = 20;
+        private int _rssshowtype = 2;
+        private int _rssstatus = 1;
+        private int _sendmailnotifybycomment = 1;
+        private int _sidebarcommentcount = 10;
+        private int _sidebarpostcount = 10;
+        private int _sidebartagcount = 10;
+        private string _sitedescription = "";
+        private string _sitename = "小泥鳅";
+        private int _sitestatus = 1;
+        private int _sitetotaltype = 1;
         private string _smtpemail = "yourname@gmail.com";
+        private int _smtpenablessl = 1;
+        private string _smtppassword = "yourpassword";
         private string _smtpserver = "smtp.gmail.com";
         private int _smtpserverpost = 25;
         private string _smtpusername = "yourname";
-        private string _smtppassword = "yourpassword";
-        private int _smtpenablessl = 1;
+        private string _theme = "default";
+        private string _watermarkfontname = "Tahoma";
+        private int _watermarkfontsize = 14;
+        private string _watermarkimage = "watermark.gif";
+        private int _watermarkposition = 4;
+        private int _watermarkquality = 80;
+        private string _watermarktext = "小泥鳅";
+        private int _watermarktransparency = 8;
+        private int _watermarktype = 1;
 
-        private int _sendmailauthorbypost = 0;
-        private int _sendmailauthorbycomment = 0;
-        private int _sendmailnotifybycomment = 1;
+        public SettingInfo()
+        {
+            CommentOrder = 0;
+            SendMailAuthorByComment = 0;
+            SendMailAuthorByPost = 0;
+        }
+
+        #region 重写
+
+        ///// <summary>
+        ///// 重写状态
+        ///// </summary>
+        //public int RewriteStatus
+        //{
+        //    set { _rewritestatus = value; }
+        //    get { return _rewritestatus; }
+        //}
+
+
+        /// <summary>
+        ///     重写扩展名
+        /// </summary>
+        public string RewriteExtension
+        {
+            set { _rewriteextension = value; }
+            get { return _rewriteextension; }
+        }
+
+        #endregion
+
+        #region 页脚
+
+        /// <summary>
+        ///     页脚Html
+        /// </summary>
+        public string FooterHtml { set; get; }
+
+        #endregion
 
         #region 邮件发送设置
+
         /// <summary>
-        /// 发表新文章时给所有作者发一封邮件
+        ///     发表新文章时给所有作者发一封邮件
         /// </summary>
-        public int SendMailAuthorByPost
-        {
-            set { _sendmailauthorbypost = value; }
-            get { return _sendmailauthorbypost; }
-        }
+        public int SendMailAuthorByPost { set; get; }
+
         /// <summary>
-        /// 发布新评论时给文章作者发一封邮件
+        ///     发布新评论时给文章作者发一封邮件
         /// </summary>
-        public int SendMailAuthorByComment
-        {
-            set { _sendmailauthorbycomment = value; }
-            get { return _sendmailauthorbycomment; }
-        }
+        public int SendMailAuthorByComment { set; get; }
+
         /// <summary>
-        /// 发布新评论时给该文章评论订阅者发一封邮件
+        ///     发布新评论时给该文章评论订阅者发一封邮件
         /// </summary>
         public int SendMailNotifyByComment
         {
@@ -98,8 +109,9 @@ namespace Loachs.Entity
         #endregion
 
         #region 邮件设置
+
         /// <summary>
-        /// 邮箱
+        ///     邮箱
         /// </summary>
         public string SmtpEmail
         {
@@ -108,50 +120,56 @@ namespace Loachs.Entity
         }
 
         /// <summary>
-        /// 服务器
+        ///     服务器
         /// </summary>
         public string SmtpServer
         {
             set { _smtpserver = value; }
             get { return _smtpserver; }
         }
+
         /// <summary>
-        /// 端口
+        ///     端口
         /// </summary>
         public int SmtpServerPost
         {
             set { _smtpserverpost = value; }
             get { return _smtpserverpost; }
         }
+
         /// <summary>
-        /// 帐号
+        ///     帐号
         /// </summary>
         public string SmtpUserName
         {
             set { _smtpusername = value; }
             get { return _smtpusername; }
         }
+
         /// <summary>
-        /// 密码
+        ///     密码
         /// </summary>
         public string SmtpPassword
         {
             set { _smtppassword = value; }
             get { return _smtppassword; }
         }
+
         /// <summary>
-        /// 是否启用SSL
+        ///     是否启用SSL
         /// </summary>
         public int SmtpEnableSsl
         {
             set { _smtpenablessl = value; }
             get { return _smtpenablessl; }
         }
+
         #endregion
 
         #region 全局
+
         /// <summary>
-        /// 网站名称
+        ///     网站名称
         /// </summary>
         public string SiteName
         {
@@ -160,7 +178,7 @@ namespace Loachs.Entity
         }
 
         /// <summary>
-        /// 网站描述
+        ///     网站描述
         /// </summary>
         public string SiteDescription
         {
@@ -169,27 +187,18 @@ namespace Loachs.Entity
         }
 
 
-
         /// <summary>
-        /// Meta 关键字
+        ///     Meta 关键字
         /// </summary>
-        public string MetaKeywords
-        {
-            set { _metakeywords = value; }
-            get { return _metakeywords; }
-        }
+        public string MetaKeywords { set; get; }
 
         /// <summary>
-        /// Meta 描述
+        ///     Meta 描述
         /// </summary>
-        public string MetaDescription
-        {
-            set { _metadescription = value; }
-            get { return _metadescription; }
-        }
+        public string MetaDescription { set; get; }
 
         /// <summary>
-        /// 网站状态
+        ///     网站状态
         /// </summary>
         public int SiteStatus
         {
@@ -198,22 +207,19 @@ namespace Loachs.Entity
         }
 
         /// <summary>
-        /// 版本
+        ///     版本
         /// </summary>
         public string Version
         {
-
             get { return "1.3"; }
         }
+
         /// <summary>
-        /// 程序集版本
+        ///     程序集版本
         /// </summary>
-        //  public const string AssemblyVersion = "0.5.0";
-
-
         /// <summary>
-        /// 统计类型(包括文章浏览次数,网站访问次数)
-        /// 1:按刷新次数统计,2:按IP 24小时统计一次
+        ///     统计类型(包括文章浏览次数,网站访问次数)
+        ///     1:按刷新次数统计,2:按IP 24小时统计一次
         /// </summary>
         public int SiteTotalType
         {
@@ -222,7 +228,7 @@ namespace Loachs.Entity
         }
 
         /// <summary>
-        /// 启用验证码
+        ///     启用验证码
         /// </summary>
         public int EnableVerifyCode
         {
@@ -233,8 +239,9 @@ namespace Loachs.Entity
         #endregion
 
         #region 评论相关
+
         /// <summary>
-        /// 允许评论
+        ///     允许评论
         /// </summary>
         public int CommentStatus
         {
@@ -243,18 +250,14 @@ namespace Loachs.Entity
         }
 
         /// <summary>
-        /// 评论排序
-        /// 0:顺序,1:倒序
+        ///     评论排序
+        ///     0:顺序,1:倒序
         /// </summary>
-        public int CommentOrder
-        {
-            set { _commentorder = value; }
-            get { return _commentorder; }
-        }
+        public int CommentOrder { set; get; }
 
         /// <summary>
-        /// 评论审核 
-        /// 1:不审核,2:自动审核,3:人工审核
+        ///     评论审核
+        ///     1:不审核,2:自动审核,3:人工审核
         /// </summary>
         public int CommentApproved
         {
@@ -263,20 +266,21 @@ namespace Loachs.Entity
         }
 
         /// <summary>
-        /// 评论垃圾词汇
+        ///     评论垃圾词汇
         /// </summary>
         public string CommentSpamwords
         {
             set { _commentblackword = value; }
             get { return _commentblackword; }
         }
+
         #endregion
 
         #region Rss相关
 
         /// <summary>
-        /// Rss状态
-        /// 1:启用,0:停用
+        ///     Rss状态
+        ///     1:启用,0:停用
         /// </summary>
         public int RssStatus
         {
@@ -285,7 +289,7 @@ namespace Loachs.Entity
         }
 
         /// <summary>
-        /// Rss输入行数
+        ///     Rss输入行数
         /// </summary>
         public int RssRowCount
         {
@@ -294,8 +298,8 @@ namespace Loachs.Entity
         }
 
         /// <summary>
-        /// Rss输入类型
-        /// 1:仅标题,2:摘要,3,正文前200字,4:正文
+        ///     Rss输入类型
+        ///     1:仅标题,2:摘要,3,正文前200字,4:正文
         /// </summary>
         public int RssShowType
         {
@@ -308,7 +312,7 @@ namespace Loachs.Entity
         #region 侧栏
 
         /// <summary>
-        /// 侧栏文章数
+        ///     侧栏文章数
         /// </summary>
         public int SidebarPostCount
         {
@@ -317,7 +321,7 @@ namespace Loachs.Entity
         }
 
         /// <summary>
-        /// 评论数
+        ///     评论数
         /// </summary>
         public int SidebarCommentCount
         {
@@ -326,7 +330,7 @@ namespace Loachs.Entity
         }
 
         /// <summary>
-        /// 标签数
+        ///     标签数
         /// </summary>
         public int SidebarTagCount
         {
@@ -334,14 +338,12 @@ namespace Loachs.Entity
             get { return _sidebartagcount; }
         }
 
-
-
         #endregion
 
         #region 分页相关
 
         /// <summary>
-        /// 文章分页数量
+        ///     文章分页数量
         /// </summary>
         public int PageSizePostCount
         {
@@ -351,7 +353,7 @@ namespace Loachs.Entity
 
 
         /// <summary>
-        /// 评论分页数量
+        ///     评论分页数量
         /// </summary>
         public int PageSizeCommentCount
         {
@@ -371,46 +373,10 @@ namespace Loachs.Entity
 
         #endregion
 
-        #region 重写
-
-        ///// <summary>
-        ///// 重写状态
-        ///// </summary>
-        //public int RewriteStatus
-        //{
-        //    set { _rewritestatus = value; }
-        //    get { return _rewritestatus; }
-        //}
-
-
-        /// <summary>
-        /// 重写扩展名
-        /// </summary>
-        public string RewriteExtension
-        {
-            set { _rewriteextension = value; }
-            get { return _rewriteextension; }
-        }
-
-        #endregion
-
-        #region 页脚
-
-        /// <summary>
-        /// 页脚Html
-        /// </summary>
-        public string FooterHtml
-        {
-            set { _footerhtml = value; }
-            get { return _footerhtml; }
-        }
-
-        #endregion
-
         #region 主题
 
         /// <summary>
-        /// 主题
+        ///     主题
         /// </summary>
         public string Theme
         {
@@ -419,7 +385,7 @@ namespace Loachs.Entity
         }
 
         /// <summary>
-        /// 手机版主题
+        ///     手机版主题
         /// </summary>
         public string MobileTheme
         {
@@ -432,7 +398,7 @@ namespace Loachs.Entity
         #region 水印
 
         /// <summary>
-        /// 水印类型 1:文字,2:图片
+        ///     水印类型 1:文字,2:图片
         /// </summary>
         public int WatermarkType
         {
@@ -442,7 +408,7 @@ namespace Loachs.Entity
 
 
         /// <summary>
-        /// 水印定位 1:左上,2:左下,3:右上,4:右下,5:中心
+        ///     水印定位 1:左上,2:左下,3:右上,4:右下,5:中心
         /// </summary>
         public int WatermarkPosition
         {
@@ -452,7 +418,7 @@ namespace Loachs.Entity
 
 
         /// <summary>
-        /// 水印透明度 1-10,10为不透明
+        ///     水印透明度 1-10,10为不透明
         /// </summary>
         public int WatermarkTransparency
         {
@@ -462,7 +428,7 @@ namespace Loachs.Entity
 
 
         /// <summary>
-        /// 图片质量,0-100,100 为最高
+        ///     图片质量,0-100,100 为最高
         /// </summary>
         public int WatermarkQuality
         {
@@ -472,7 +438,7 @@ namespace Loachs.Entity
 
 
         /// <summary>
-        /// 水印文字
+        ///     水印文字
         /// </summary>
         public string WatermarkText
         {
@@ -482,7 +448,7 @@ namespace Loachs.Entity
 
 
         /// <summary>
-        /// 水印文字大小
+        ///     水印文字大小
         /// </summary>
         public int WatermarkFontSize
         {
@@ -492,7 +458,7 @@ namespace Loachs.Entity
 
 
         /// <summary>
-        /// 水印文字字体
+        ///     水印文字字体
         /// </summary>
         public string WatermarkFontName
         {
@@ -502,19 +468,20 @@ namespace Loachs.Entity
 
 
         /// <summary>
-        /// 水印图片名
+        ///     水印图片名
         /// </summary>
         public string WatermarkImage
         {
             set { _watermarkimage = value; }
             get { return _watermarkimage; }
         }
+
         #endregion
 
         #region 文章
 
         /// <summary>
-        /// 相关文章数
+        ///     相关文章数
         /// </summary>
         public int PostRelatedCount
         {
@@ -523,14 +490,15 @@ namespace Loachs.Entity
         }
 
         /// <summary>
-        /// 文章显示类型
-        /// 1:仅标题,2:摘要,3,正文前200字,4:正文
+        ///     文章显示类型
+        ///     1:仅标题,2:摘要,3,正文前200字,4:正文
         /// </summary>
         public int PostShowType
         {
             set { _postshowtype = value; }
             get { return _postshowtype; }
         }
+
         #endregion
     }
 }

@@ -1,6 +1,5 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" Inherits="Loachs.Web.admin_usercontrols_upfilemanager" Codebehind="upfilemanager.ascx.cs" %>
 <%@ Import Namespace="System.IO" %>
-<%@ Import Namespace="Loachs.Business" %>
 <%@ Import Namespace="Loachs.Common" %>
 <%@ Import Namespace="Loachs.Web" %>
 <h2>附件管理</h2>
@@ -25,13 +24,13 @@
     <h4>当前位置: <%=GetPathUrl()%></h4>
     <ul class="upfile">
     <%
-        foreach (FileSystemInfo d in currentDirectory.GetFileSystemInfos())
+        foreach (FileSystemInfo d in CurrentDirectory.GetFileSystemInfos())
             {
     %>
         <li>
         <%if (d is DirectoryInfo)
           {%>
-            <a href="<%=FileName %>?path=<%=path %><%=d.Name %>/" title="点击打开此文件夹"><img src="../common/images/file/folder.png"  alt="点击打开此文件夹" width="48" height="48"/></a>
+            <a href="<%=FileName %>?path=<%=Path %><%=d.Name %>/" title="点击打开此文件夹"><img src="../common/images/file/folder.png"  alt="点击打开此文件夹" width="48" height="48"/></a>
              <p class="small">
                 <span title="文件夹:<%=d.Name %>" ><%=d.Name %> </span>
                 <br />
@@ -40,10 +39,10 @@
         <%}
           else 
           { %>
-                <a href="<%=path+d.Name %>" target="_blank" onclick=" return returnValue('<%=path+d.Name %>','<%=d.Extension %>');">
+                <a href="<%=Path+d.Name %>" target="_blank" onclick=" return returnValue('<%=Path+d.Name %>','<%=d.Extension %>');">
              <%if (IsImage(d.Extension))
                { %>
-                <img src="<%=path+d.Name %>" width="48" height="48"/>
+                <img src="<%=Path+d.Name %>" width="48" height="48"/>
              <%}
                else
                { %>
@@ -56,10 +55,10 @@
                 <span class="gray"><%=PageUtils. ConvertUnit( ((FileInfo)d).Length )%></span>
                 </p>
         <%} %>
-        <a class="delete" href="<%=FileName %>?operate=delete&category=<%= d.Attributes%>&deletepath=<%=path %><%=d.Name %>"  title="删除" onclick=" return confirm('确定要删除 <%=d.Name %> 吗?');">X</a>
+        <a class="delete" href="<%=FileName %>?operate=delete&category=<%= d.Attributes%>&deletepath=<%=Path %><%=d.Name %>"  title="删除" onclick=" return confirm('确定要删除 <%=d.Name %> 吗?');">X</a>
         </li>
         
-    <%} if (currentDirectory.GetFileSystemInfos().Length == 0) { Response.Write("<p>还没有上传任何附件!</p>"); } %>
+    <%} if (CurrentDirectory.GetFileSystemInfos().Length == 0) { Response.Write("<p>还没有上传任何附件!</p>"); } %>
     </ul>
 </div>
 

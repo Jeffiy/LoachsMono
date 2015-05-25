@@ -1,40 +1,37 @@
-﻿ 
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 using System.Data;
 using System.Data.OleDb;
-
-using Loachs.Common; 
+using System.Web;
+using Loachs.Common;
 
 namespace Loachs.Data.Access
 {
-    /// <summary> 
-    /// 数据基类
-    /// 打开方式需要改进
+    /// <summary>
+    ///     数据基类
+    ///     打开方式需要改进
     /// </summary>
     public class OleDbHelper
     {
-        public static string ConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + System.Web.HttpContext.Current.Server.MapPath(ConfigHelper.SitePath + ConfigHelper.DbConnection);
+        public static string ConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" +
+                                                HttpContext.Current.Server.MapPath(ConfigHelper.SitePath +
+                                                                                   ConfigHelper.DbConnection);
 
-       /// <summary>
-       /// 查询次数统计
-       /// </summary>
-       private static int _querycount = 0;
-    
-        
         /// <summary>
-       /// 查询次数统计
-       /// </summary>
-       public static int QueryCount
-       {
-           get { return _querycount; }
-           set { _querycount = value; }
-       }
+        ///     查询次数统计
+        /// </summary>
+        private static int _querycount;
 
-   
+        /// <summary>
+        ///     查询次数统计
+        /// </summary>
+        public static int QueryCount
+        {
+            get { return _querycount; }
+            set { _querycount = value; }
+        }
 
         #region MakeCommand
+
         ///// <summary>
         ///// 创建Command命令
         ///// </summary>
@@ -56,14 +53,15 @@ namespace Loachs.Data.Access
         //}
 
         /// <summary>
-        /// 创建Command命令
+        ///     创建Command命令
         /// </summary>
         /// <param name="conn">数据连接</param>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <param name="prams">参数级</param>
         /// <returns></returns>
-        private static OleDbCommand MakeCommand(OleDbConnection conn, CommandType cmdType, string cmdText, OleDbParameter[] prams)
+        private static OleDbCommand MakeCommand(OleDbConnection conn, CommandType cmdType, string cmdText,
+            OleDbParameter[] prams)
         {
             if (conn.State != ConnectionState.Open)
             {
@@ -82,76 +80,127 @@ namespace Loachs.Data.Access
             }
             return cmd;
         }
+
         #endregion
 
-        #region MakeParam
         /// <summary>
-        /// 生成输入参数
+        ///     获取分页Sql
         /// </summary>
-        /// <param name="ParamName">Name of param.</param>
-        /// <param name="DbType">Param type.</param>
-        /// <param name="Size">Param size.</param>
-        /// <param name="Value">Param value.</param>
-        /// <returns>New parameter.</returns>
-        public static OleDbParameter MakeInParam(string ParamName, OleDbType DbType, int Size, object Value)
-        {
-            return MakeParam(ParamName, DbType, Size, ParameterDirection.Input, Value);
-        }
-
-        /// <summary>
-        /// 生成输出参数
-        /// </summary>
-        /// <param name="ParamName">Name of param.</param>
-        /// <param name="DbType">Param type.</param>
-        /// <param name="Size">Param size.</param>
-        /// <returns>New parameter.</returns>
-        public static OleDbParameter MakeOutParam(string ParamName, OleDbType DbType, int Size)
-        {
-            return MakeParam(ParamName, DbType, Size, ParameterDirection.Output, null);
-        }
-
-        /// <summary>
-        /// 生成返回参数,我添加
-        /// </summary>
-        /// <param name="ParamName"></param>
-        /// <param name="DbType"></param>
-        /// <param name="Size"></param>
+        /// <param name="tableName"></param>
+        /// <param name="colName"></param>
+        /// <param name="colList"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="pageIndex"></param>
+        /// <param name="orderBy"></param>
+        /// <param name="condition"></param>
         /// <returns></returns>
-        public static OleDbParameter MakeReturnParam(string ParamName, OleDbType DbType, int Size)
+        public static string GetPageSql(string tableName, string colName, string colList, int pageSize, int pageIndex,
+            int orderBy, string condition)
         {
-            return MakeParam(ParamName, DbType, Size, ParameterDirection.ReturnValue, null);
+            string temp = string.Empty;
+            string sql = string.Empty;
+            if (string.IsNullOrEmpty(condition))
+            {
+                condition = " 1=1 ";
+            }
+
+            //降序
+            if (orderBy == 1)
+            {
+                temp =
+                    "select top {0} {1} from {2} where {5} and {3} <(select min(pk) from ( select top {4} {3} as pk from {2} where {5} order by {3} desc) t) order by {3} desc";
+                sql = string.Format(temp, pageSize, colList, tableName, colName, pageSize*(pageIndex - 1), condition);
+            }
+            //降序
+            if (orderBy == 0)
+            {
+                temp =
+                    "select top {0} {1} from {2} where {5} and {3} >(select max(pk) from ( select top {4} {3} as pk from {2} where {5} order by {3} asc) t) order by {3} asc";
+                sql = string.Format(temp, pageSize, colList, tableName, colName, pageSize*(pageIndex - 1), condition);
+            }
+            //第一页
+            if (pageIndex == 1)
+            {
+                temp = "select top {0} {1} from {2} where {3} order by {4} {5}";
+                sql = string.Format(temp, pageSize, colList, tableName, condition, colName,
+                    orderBy == 1 ? "desc" : "asc");
+            }
+
+            return sql;
+        }
+
+        #region MakeParam
+
+        /// <summary>
+        ///     生成输入参数
+        /// </summary>
+        /// <param name="paramName">Name of param.</param>
+        /// <param name="dbType">Param type.</param>
+        /// <param name="size">Param size.</param>
+        /// <param name="value">Param value.</param>
+        /// <returns>New parameter.</returns>
+        public static OleDbParameter MakeInParam(string paramName, OleDbType dbType, int size, object value)
+        {
+            return MakeParam(paramName, dbType, size, ParameterDirection.Input, value);
         }
 
         /// <summary>
-        /// 生成各种参数
+        ///     生成输出参数
         /// </summary>
-        /// <param name="ParamName">Name of param.</param>
-        /// <param name="DbType">Param type.</param>
-        /// <param name="Size">Param size.</param>
-        /// <param name="Direction">Parm direction.</param>
-        /// <param name="Value">Param value.</param>
+        /// <param name="paramName">Name of param.</param>
+        /// <param name="dbType">Param type.</param>
+        /// <param name="size">Param size.</param>
         /// <returns>New parameter.</returns>
-        private static OleDbParameter MakeParam(string ParamName, OleDbType DbType, Int32 Size, ParameterDirection Direction, object Value)
+        public static OleDbParameter MakeOutParam(string paramName, OleDbType dbType, int size)
+        {
+            return MakeParam(paramName, dbType, size, ParameterDirection.Output, null);
+        }
+
+        /// <summary>
+        ///     生成返回参数,我添加
+        /// </summary>
+        /// <param name="paramName"></param>
+        /// <param name="dbType"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public static OleDbParameter MakeReturnParam(string paramName, OleDbType dbType, int size)
+        {
+            return MakeParam(paramName, dbType, size, ParameterDirection.ReturnValue, null);
+        }
+
+        /// <summary>
+        ///     生成各种参数
+        /// </summary>
+        /// <param name="paramName">Name of param.</param>
+        /// <param name="dbType">Param type.</param>
+        /// <param name="size">Param size.</param>
+        /// <param name="direction">Parm direction.</param>
+        /// <param name="value">Param value.</param>
+        /// <returns>New parameter.</returns>
+        private static OleDbParameter MakeParam(string paramName, OleDbType dbType, int size,
+            ParameterDirection direction, object value)
         {
             OleDbParameter param;
 
-            if (Size > 0)
-                param = new OleDbParameter(ParamName, DbType, Size);
+            if (size > 0)
+                param = new OleDbParameter(paramName, dbType, size);
             else
-                param = new OleDbParameter(ParamName, DbType);
+                param = new OleDbParameter(paramName, dbType);
 
-            param.Direction = Direction;
-            if (Direction == ParameterDirection.Input && Value != null)
+            param.Direction = direction;
+            if (direction == ParameterDirection.Input && value != null)
             {
-                param.Value = Value;
+                param.Value = value;
             }
             return param;
         }
+
         #endregion
 
         #region ExecuteScalar
+
         /// <summary>
-        /// 返回查询结果的第一行的第一列,忽略其他列或行
+        ///     返回查询结果的第一行的第一列,忽略其他列或行
         /// </summary>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <returns>object</returns>
@@ -161,19 +210,18 @@ namespace Loachs.Data.Access
         }
 
         /// <summary>
-        /// 返回查询结果的第一行的第一列,忽略其他列或行
+        ///     返回查询结果的第一行的第一列,忽略其他列或行
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <returns>object</returns>
         public static object ExecuteScalar(CommandType cmdType, string cmdText)
         {
- 
             return ExecuteScalar(cmdType, cmdText, null);
         }
 
         /// <summary>
-        /// 返回查询结果的第一行的第一列,忽略其他列或行
+        ///     返回查询结果的第一行的第一列,忽略其他列或行
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
@@ -182,7 +230,7 @@ namespace Loachs.Data.Access
         public static object ExecuteScalar(CommandType cmdType, string cmdText, OleDbParameter[] prams)
         {
             _querycount++;
-            System.Web.HttpContext.Current.Application["total"] = Convert.ToInt32(System.Web.HttpContext.Current.Application["total"]) + 1;
+            HttpContext.Current.Application["total"] = Convert.ToInt32(HttpContext.Current.Application["total"]) + 1;
             using (OleDbConnection conn = new OleDbConnection(ConnectionString))
             {
                 OleDbCommand cmd = MakeCommand(conn, cmdType, cmdText, prams);
@@ -195,8 +243,9 @@ namespace Loachs.Data.Access
         #endregion
 
         #region ExecuteNonQuery
+
         /// <summary>
-        /// 返回受影响的行数,常用于Update和Delete 语句
+        ///     返回受影响的行数,常用于Update和Delete 语句
         /// </summary>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <returns>int</returns>
@@ -206,7 +255,7 @@ namespace Loachs.Data.Access
         }
 
         /// <summary>
-        /// 返回受影响的行数,常用于Update和Delete 语句
+        ///     返回受影响的行数,常用于Update和Delete 语句
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
@@ -217,7 +266,7 @@ namespace Loachs.Data.Access
         }
 
         /// <summary>
-        /// 返回受影响的行数,常用于Insert,Update和Delete 语句
+        ///     返回受影响的行数,常用于Insert,Update和Delete 语句
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
@@ -226,7 +275,7 @@ namespace Loachs.Data.Access
         public static int ExecuteNonQuery(CommandType cmdType, string cmdText, OleDbParameter[] prams)
         {
             _querycount++;
-            System.Web.HttpContext.Current.Application["total"] = Convert.ToInt32(System.Web.HttpContext.Current.Application["total"]) + 1;
+            HttpContext.Current.Application["total"] = Convert.ToInt32(HttpContext.Current.Application["total"]) + 1;
 
             using (OleDbConnection conn = new OleDbConnection(ConnectionString))
             {
@@ -240,8 +289,9 @@ namespace Loachs.Data.Access
         #endregion
 
         #region ExecuteReader
+
         /// <summary>
-        /// 返回 OleDbDataReader
+        ///     返回 OleDbDataReader
         /// </summary>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <returns>OleDbDataReader</returns>
@@ -250,20 +300,20 @@ namespace Loachs.Data.Access
             return ExecuteReader(CommandType.Text, cmdText);
         }
 
-        [Obsolete]
         /// <summary>
         /// 返回 OleDbDataReader
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <returns>OleDbDataReader</returns>
-        public static OleDbDataReader  ExecuteReader(CommandType cmdType, string cmdText)
+        [Obsolete]
+        public static OleDbDataReader ExecuteReader(CommandType cmdType, string cmdText)
         {
             return ExecuteReader(cmdType, cmdText, null);
         }
 
         /// <summary>
-        /// 返回 OleDbDataReader
+        ///     返回 OleDbDataReader
         /// </summary>
         /// <param name="cmdText"></param>
         /// <param name="prams"></param>
@@ -274,7 +324,7 @@ namespace Loachs.Data.Access
         }
 
         /// <summary>
-        /// 返回 OleDbDataReader
+        ///     返回 OleDbDataReader
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
@@ -282,10 +332,9 @@ namespace Loachs.Data.Access
         /// <returns></returns>
         public static OleDbDataReader ExecuteReader(CommandType cmdType, string cmdText, OleDbParameter[] prams)
         {
-          
             _querycount++;
 
-            System.Web.HttpContext.Current.Application["total"] = Convert.ToInt32(System.Web.HttpContext.Current.Application["total"]) + 1;
+            HttpContext.Current.Application["total"] = Convert.ToInt32(HttpContext.Current.Application["total"]) + 1;
 
             OleDbConnection conn = new OleDbConnection(ConnectionString);
             OleDbCommand cmd = MakeCommand(conn, cmdType, cmdText, prams);
@@ -297,8 +346,9 @@ namespace Loachs.Data.Access
         #endregion
 
         #region ExecuteDataSet
+
         /// <summary>
-        /// 返回 DataSet
+        ///     返回 DataSet
         /// </summary>
         /// <param name="cmdText">SQL语句或存储过程名</param>
         /// <returns>DataSet</returns>
@@ -306,8 +356,9 @@ namespace Loachs.Data.Access
         {
             return ExecuteDataSet(CommandType.Text, cmdText, null);
         }
+
         /// <summary>
-        /// 返回 DataSet
+        ///     返回 DataSet
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
@@ -327,7 +378,7 @@ namespace Loachs.Data.Access
         }
 
         /// <summary>
-        /// 返回 DataSet
+        ///     返回 DataSet
         /// </summary>
         /// <param name="cmdType">命令类型</param>
         /// <param name="cmdText">SQL语句或存储过程名</param>
@@ -336,7 +387,7 @@ namespace Loachs.Data.Access
         public static DataSet ExecuteDataSet(CommandType cmdType, string cmdText, OleDbParameter[] prams)
         {
             _querycount++;
-            System.Web.HttpContext.Current.Application["total"] = Convert.ToInt32(System.Web.HttpContext.Current.Application["total"]) + 1;
+            HttpContext.Current.Application["total"] = Convert.ToInt32(HttpContext.Current.Application["total"]) + 1;
 
             using (OleDbConnection conn = new OleDbConnection(ConnectionString))
             {
@@ -350,47 +401,5 @@ namespace Loachs.Data.Access
         }
 
         #endregion
-
-        /// <summary>
-        /// 获取分页Sql
-        /// </summary>
-        /// <param name="tableName"></param>
-        /// <param name="colName"></param>
-        /// <param name="colList"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="pageIndex"></param>
-        /// <param name="orderBy"></param>
-        /// <param name="condition"></param>
-        /// <returns></returns>
-        public static string GetPageSql(string tableName, string colName, string colList, int pageSize, int pageIndex, int orderBy, string condition)
-        {
-            string temp = string.Empty;
-            string sql = string.Empty;
-            if (string.IsNullOrEmpty(condition))
-            {
-                condition = " 1=1 ";
-            }
-
-            //降序
-            if (orderBy == 1)
-            {
-                temp = "select top {0} {1} from {2} where {5} and {3} <(select min(pk) from ( select top {4} {3} as pk from {2} where {5} order by {3} desc) t) order by {3} desc";
-                sql = string.Format(temp, pageSize, colList, tableName, colName, pageSize * (pageIndex - 1), condition);
-            }
-            //降序
-            if (orderBy == 0)
-            {
-                temp = "select top {0} {1} from {2} where {5} and {3} >(select max(pk) from ( select top {4} {3} as pk from {2} where {5} order by {3} asc) t) order by {3} asc";
-                sql = string.Format(temp, pageSize, colList, tableName, colName, pageSize * (pageIndex - 1), condition);
-            }
-            //第一页
-            if (pageIndex == 1)
-            {
-                temp = "select top {0} {1} from {2} where {3} order by {4} {5}";
-                sql = string.Format(temp, pageSize, colList, tableName, condition, colName, orderBy == 1 ? "desc" : "asc");
-            }
-
-            return sql;
-        }
     }
 }

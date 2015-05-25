@@ -1,33 +1,20 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Web;
 using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-
+using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
-using Loachs.Business;
+
 namespace Loachs.Web
 {
     public partial class admin_login : PageBase
     {
-
         protected void Page_Load(object sender, EventArgs e)
         {
-
             if (PageUtils.IsLogin)
             {
                 Response.Redirect("default.aspx");
             }
             Title = "登录 - Powered by Loachs";
-
-
         }
 
         protected void btnLogin_Click(object sender, EventArgs e)
@@ -60,7 +47,6 @@ namespace Loachs.Web
             {
                 lblMessage.Text = "用户名或密码错误!";
             }
-
         }
     }
 }

@@ -2,32 +2,29 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Web;
-using System.Web.Security;
-
 using Loachs.Business;
-using Loachs.Entity;
-//using Loachs.Core;
 using Loachs.Common;
+using Loachs.Entity;
 using Loachs.Web;
+//using Loachs.Core;
 
 namespace Loachs.MetaWeblog
 {
     /// <summary>
-    /// HTTP Handler for MetaWeblog API
-    /// 
-    /// from BlogEngine Source
+    ///     HTTP Handler for MetaWeblog API
+    ///     from BlogEngine Source
     /// </summary>
     public class MetaWeblogHelper
     {
         #region IHttpHandler Members
 
-
         /// <summary>
-        /// Process the HTTP Request.  Create XMLRPC request, find method call, process it and create response object and sent it back.
-        /// This is the heart of the MetaWeblog API
+        ///     Process the HTTP Request.  Create XMLRPC request, find method call, process it and create response object and sent
+        ///     it back.
+        ///     This is the heart of the MetaWeblog API
         /// </summary>
         /// <param name="context"></param>
-        public   void ProcessRequest(HttpContext context)
+        public void ProcessRequest(HttpContext context)
         {
             try
             {
@@ -41,13 +38,15 @@ namespace Loachs.MetaWeblog
                         output.PostID = NewPost(input.BlogID, input.UserName, input.Password, input.Post, input.Publish);
                         break;
                     case "metaWeblog.editPost":
-                        output.Completed = EditPost(input.PostID, input.UserName, input.Password, input.Post, input.Publish);
+                        output.Completed = EditPost(input.PostID, input.UserName, input.Password, input.Post,
+                            input.Publish);
                         break;
                     case "metaWeblog.getPost":
                         output.Post = GetPost(input.PostID, input.UserName, input.Password);
                         break;
                     case "metaWeblog.newMediaObject":
-                        output.MediaInfo = NewMediaObject(input.BlogID, input.UserName, input.Password, input.MediaObject, context);
+                        output.MediaInfo = NewMediaObject(input.BlogID, input.UserName, input.Password,
+                            input.MediaObject, context);
                         break;
                     case "metaWeblog.getCategories":
                         output.Categories = GetCategories(input.BlogID, input.UserName, input.Password, rootUrl);
@@ -60,7 +59,8 @@ namespace Loachs.MetaWeblog
                         output.Blogs = GetUserBlogs(input.AppKey, input.UserName, input.Password, rootUrl);
                         break;
                     case "blogger.deletePost":
-                        output.Completed = DeletePost(input.AppKey, input.PostID, input.UserName, input.Password, input.Publish);
+                        output.Completed = DeletePost(input.AppKey, input.PostID, input.UserName, input.Password,
+                            input.Publish);
                         break;
                     case "blogger.getUserInfo":
                         throw new MetaWeblogException("10", "获取用户方法未实现.");
@@ -94,8 +94,8 @@ namespace Loachs.MetaWeblog
             {
                 XMLRPCResponse output = new XMLRPCResponse("fault");
                 MWAFault fault = new MWAFault();
-                fault.faultCode = mex.Code;
-                fault.faultString = mex.Message;
+                fault.FaultCode = mex.Code;
+                fault.FaultString = mex.Message;
                 output.Fault = fault;
                 output.Response(context);
             }
@@ -103,8 +103,8 @@ namespace Loachs.MetaWeblog
             {
                 XMLRPCResponse output = new XMLRPCResponse("fault");
                 MWAFault fault = new MWAFault();
-                fault.faultCode = "0";
-                fault.faultString = ex.Message;
+                fault.FaultCode = "0";
+                fault.FaultString = ex.Message;
                 output.Fault = fault;
                 output.Response(context);
             }
@@ -115,10 +115,10 @@ namespace Loachs.MetaWeblog
         #region API Methods
 
         /// <summary>
-        /// 由标签名称列表返回标签ID列表,带{},新标签自动添加
-        /// 拷贝自添加文章页面
+        ///     由标签名称列表返回标签ID列表,带{},新标签自动添加
+        ///     拷贝自添加文章页面
         /// </summary>
-        /// <param name="tagNameList"></param>
+        /// <param name="names"></param>
         /// <returns></returns>
         private string GetTagIdList(List<string> names)
         {
@@ -139,16 +139,16 @@ namespace Loachs.MetaWeblog
 
                     if (t == null)
                     {
-                        t = new TagInfo();
-
-                        t.Count = 0;
-                        t.CreateDate = DateTime.Now;
-                        t.Description = StringHelper.HtmlEncode(n);
-                        t.Displayorder = 1000;
-                        t.Name = StringHelper.HtmlEncode(n);
-                        t.Slug = PageUtils.FilterSlug(n, "tag", false);
-
-                        t.TagId = TagManager.InsertTag(t);
+                        t = new TagInfo
+                        {
+                            Count = 0,
+                            CreateDate = DateTime.Now,
+                            Description = StringHelper.HtmlEncode(n),
+                            Displayorder = 1000,
+                            Name = StringHelper.HtmlEncode(n),
+                            Slug = PageUtils.FilterSlug(n, "tag", false),
+                            TagId = TagManager.InsertTag(t)
+                        };
                     }
                     tagIds += "{" + t.TagId + "}";
                 }
@@ -158,7 +158,7 @@ namespace Loachs.MetaWeblog
 
 
         /// <summary>
-        /// 添加或修改文章
+        ///     添加或修改文章
         /// </summary>
         /// <param name="blogID"></param>
         /// <param name="postID"></param>
@@ -168,7 +168,8 @@ namespace Loachs.MetaWeblog
         /// <param name="publish"></param>
         /// <param name="operate"></param>
         /// <returns></returns>
-        private int NewOrUpdatePost(string blogID, string postID, string userName, string password, MWAPost sentPost, bool publish, OperateType operate)
+        private int NewOrUpdatePost(string blogID, string postID, string userName, string password, MWAPost sentPost,
+            bool publish, OperateType operate)
         {
             ValidateRequest(userName, password);
 
@@ -177,7 +178,6 @@ namespace Loachs.MetaWeblog
             if (operate == OperateType.Update)
             {
                 post = PostManager.GetPost(StringHelper.StrToInt(postID, 0));
-
             }
             else
             {
@@ -192,29 +192,29 @@ namespace Loachs.MetaWeblog
                 }
             }
 
-            post.Title = StringHelper.HtmlEncode(sentPost.title);
-            post.Content = sentPost.description;
-            post.Status = publish == true ? 1 : 0;
-            post.Slug = PageUtils.FilterSlug(sentPost.slug, "post", true);
-            post.Summary = sentPost.excerpt;
+            post.Title = StringHelper.HtmlEncode(sentPost.Title);
+            post.Content = sentPost.Description;
+            post.Status = publish ? 1 : 0;
+            post.Slug = PageUtils.FilterSlug(sentPost.Slug, "post", true);
+            post.Summary = sentPost.Excerpt;
 
-            post.UrlFormat = (int)PostUrlFormat.Default;
+            post.UrlFormat = (int) PostUrlFormat.Default;
             post.Template = string.Empty;
             post.Recommend = 0;
             post.TopStatus = 0;
             post.HideStatus = 0;
             post.UpdateDate = DateTime.Now;
 
-            if (sentPost.commentPolicy != "")
+            if (sentPost.CommentPolicy != "")
             {
-                if (sentPost.commentPolicy == "1")
+                if (sentPost.CommentPolicy == "1")
                     post.CommentStatus = 1;
                 else
                     post.CommentStatus = 0;
             }
 
 
-            foreach (string item in sentPost.categories)
+            foreach (string item in sentPost.Categories)
             {
                 CategoryInfo cat;
                 if (LookupCategoryGuidByName(item, out cat))
@@ -235,7 +235,7 @@ namespace Loachs.MetaWeblog
                     post.CategoryId = newcat.CategoryId;
                 }
             }
-            post.Tag = GetTagIdList(sentPost.tags);
+            post.Tag = GetTagIdList(sentPost.Tags);
 
             if (operate == OperateType.Update)
             {
@@ -252,7 +252,7 @@ namespace Loachs.MetaWeblog
         }
 
         /// <summary>
-        /// metaWeblog.newPost
+        ///     metaWeblog.newPost
         /// </summary>
         /// <param name="blogID">always 1000 in BlogEngine since it is a singlar blog instance</param>
         /// <param name="userName">login username</param>
@@ -268,7 +268,7 @@ namespace Loachs.MetaWeblog
         }
 
         /// <summary>
-        /// metaWeblog.editPost
+        ///     metaWeblog.editPost
         /// </summary>
         /// <param name="postID">post guid in string format</param>
         /// <param name="userName">login username</param>
@@ -286,7 +286,7 @@ namespace Loachs.MetaWeblog
         }
 
         /// <summary>
-        /// metaWeblog.getPost
+        ///     metaWeblog.getPost
         /// </summary>
         /// <param name="postID">post guid in string format</param>
         /// <param name="userName">login username</param>
@@ -300,40 +300,40 @@ namespace Loachs.MetaWeblog
 
             PostInfo post = PostManager.GetPost(StringHelper.StrToInt(postID, 0));
 
-            sendPost.postID = post.PostId.ToString();
-            sendPost.postDate = post.CreateDate;
-            sendPost.title = StringHelper.HtmlDecode(post.Title);
-            sendPost.description = post.Content;
-            sendPost.link = post.Url;
-            sendPost.slug = StringHelper.HtmlDecode(post.Slug); 
-            sendPost.excerpt = post.Summary;
+            sendPost.PostId = post.PostId.ToString();
+            sendPost.PostDate = post.CreateDate;
+            sendPost.Title = StringHelper.HtmlDecode(post.Title);
+            sendPost.Description = post.Content;
+            sendPost.Link = post.Url;
+            sendPost.Slug = StringHelper.HtmlDecode(post.Slug);
+            sendPost.Excerpt = post.Summary;
             if (post.CommentStatus == 1)
             {
-                sendPost.commentPolicy = "1";
+                sendPost.CommentPolicy = "1";
             }
             else
             {
-                sendPost.commentPolicy = "0";
+                sendPost.CommentPolicy = "0";
             }
 
-            sendPost.publish = post.Status == 1 ? true : false;
+            sendPost.Publish = post.Status == 1 ? true : false;
 
             List<string> cats = new List<string>();
             cats.Add(StringHelper.HtmlDecode(post.Category.Name));
-            sendPost.categories = cats;
+            sendPost.Categories = cats;
 
             List<string> tags = new List<string>();
             for (int i = 0; i < post.Tags.Count; i++)
             {
                 tags.Add(StringHelper.HtmlDecode(post.Tags[i].Name));
             }
-            sendPost.tags = tags;
+            sendPost.Tags = tags;
 
             return sendPost;
         }
 
         /// <summary>
-        /// metaWeblog.newMediaObject
+        ///     metaWeblog.newMediaObject
         /// </summary>
         /// <param name="blogID">always 1000 in BlogEngine since it is a singlar blog instance</param>
         /// <param name="userName">login username</param>
@@ -341,7 +341,8 @@ namespace Loachs.MetaWeblog
         /// <param name="mediaObject">struct with media details</param>
         /// <param name="request">The HTTP request.</param>
         /// <returns>struct with url to media</returns>
-        internal MWAMediaInfo NewMediaObject(string blogID, string userName, string password, MWAMediaObject mediaObject, HttpContext request)
+        internal MWAMediaInfo NewMediaObject(string blogID, string userName, string password, MWAMediaObject mediaObject,
+            HttpContext request)
         {
             ValidateRequest(userName, password);
 
@@ -349,13 +350,12 @@ namespace Loachs.MetaWeblog
 
             string newPath = "upfiles/" + DateTime.Now.ToString("yyyyMM") + "/";
             string saveFolder = HttpContext.Current.Server.MapPath(ConfigHelper.SitePath + newPath);
-            string fileName = mediaObject.name;
+            string fileName = mediaObject.Name;
 
             // Check/Create Folders & Fix fileName
-            if (mediaObject.name.LastIndexOf('/') > -1)
+            if (mediaObject.Name.LastIndexOf('/') > -1)
             {
-
-                fileName = mediaObject.name.Substring(mediaObject.name.LastIndexOf('/') + 1);
+                fileName = mediaObject.Name.Substring(mediaObject.Name.LastIndexOf('/') + 1);
             }
 
             if (!Directory.Exists(saveFolder))
@@ -381,15 +381,15 @@ namespace Loachs.MetaWeblog
             // Save File
             FileStream fs = new FileStream(saveFolder + fileName, FileMode.Create);
             BinaryWriter bw = new BinaryWriter(fs);
-            bw.Write(mediaObject.bits);
+            bw.Write(mediaObject.Bits);
             bw.Close();
 
-            mediaInfo.url = ConfigHelper.SiteUrl + newPath + fileName;
+            mediaInfo.Url = ConfigHelper.SiteUrl + newPath + fileName;
             return mediaInfo;
         }
 
         /// <summary>
-        /// metaWeblog.getCategories
+        ///     metaWeblog.getCategories
         /// </summary>
         /// <param name="blogID">always 1000 in BlogEngine since it is a singlar blog instance</param>
         /// <param name="userName">login username</param>
@@ -405,10 +405,10 @@ namespace Loachs.MetaWeblog
             foreach (CategoryInfo cat in CategoryManager.GetCategoryList())
             {
                 MWACategory temp = new MWACategory();
-                temp.title = StringHelper.HtmlDecode(cat.Name);
-                temp.description = StringHelper.HtmlDecode(cat.Description);
-                temp.htmlUrl = cat.Url;
-                temp.rssUrl = cat.FeedUrl;
+                temp.Title = StringHelper.HtmlDecode(cat.Name);
+                temp.Description = StringHelper.HtmlDecode(cat.Description);
+                temp.HtmlUrl = cat.Url;
+                temp.RssUrl = cat.FeedUrl;
                 categories.Add(temp);
             }
 
@@ -416,7 +416,7 @@ namespace Loachs.MetaWeblog
         }
 
         /// <summary>
-        /// wp.getTags
+        ///     wp.getTags
         /// </summary>
         /// <param name="blogID"></param>
         /// <param name="userName"></param>
@@ -437,7 +437,7 @@ namespace Loachs.MetaWeblog
         }
 
         /// <summary>
-        /// metaWeblog.getRecentPosts
+        ///     metaWeblog.getRecentPosts
         /// </summary>
         /// <param name="blogID">always 1000 in BlogEngine since it is a singlar blog instance</param>
         /// <param name="userName">login username</param>
@@ -465,27 +465,27 @@ namespace Loachs.MetaWeblog
                 List<string> tempCats = new List<string>();
                 List<string> tempTags = new List<string>();
 
-                tempPost.postID = post.PostId.ToString();
-                tempPost.postDate = post.CreateDate;
-                tempPost.title = StringHelper.HtmlDecode(post.Title);
-                tempPost.description = post.Content;
-                tempPost.link = post.Url;
-                tempPost.slug = StringHelper.HtmlDecode(post.Slug);
-                tempPost.excerpt = post.Summary;
+                tempPost.PostId = post.PostId.ToString();
+                tempPost.PostDate = post.CreateDate;
+                tempPost.Title = StringHelper.HtmlDecode(post.Title);
+                tempPost.Description = post.Content;
+                tempPost.Link = post.Url;
+                tempPost.Slug = StringHelper.HtmlDecode(post.Slug);
+                tempPost.Excerpt = post.Summary;
                 if (post.CommentStatus == 1)
-                    tempPost.commentPolicy = "";
+                    tempPost.CommentPolicy = "";
                 else
-                    tempPost.commentPolicy = "0";
-                tempPost.publish = post.Status == 1 ? true : false;
+                    tempPost.CommentPolicy = "0";
+                tempPost.Publish = post.Status == 1;
 
                 tempCats.Add(StringHelper.HtmlDecode(post.Category.Name));
-                tempPost.categories = tempCats;
+                tempPost.Categories = tempCats;
 
                 for (int i = 0; i < post.Tags.Count; i++)
                 {
                     tempTags.Add(StringHelper.HtmlDecode(post.Tags[i].Name));
                 }
-                tempPost.tags = tempTags;
+                tempPost.Tags = tempTags;
 
                 sendPosts.Add(tempPost);
             }
@@ -493,7 +493,7 @@ namespace Loachs.MetaWeblog
         }
 
         /// <summary>
-        /// blogger.getUsersBlogs
+        ///     blogger.getUsersBlogs
         /// </summary>
         /// <param name="appKey">Key from application.  Outdated methodology that has no use here.</param>
         /// <param name="userName">login username</param>
@@ -507,16 +507,16 @@ namespace Loachs.MetaWeblog
             List<MWABlogInfo> blogs = new List<MWABlogInfo>();
 
             MWABlogInfo temp = new MWABlogInfo();
-            temp.url = rootUrl;
-            temp.blogID = "1000";
-            temp.blogName = SettingManager.GetSetting().SiteName;
+            temp.Url = rootUrl;
+            temp.BlogId = "1000";
+            temp.BlogName = SettingManager.GetSetting().SiteName;
             blogs.Add(temp);
 
             return blogs;
         }
 
         /// <summary>
-        /// blogger.deletePost
+        ///     blogger.deletePost
         /// </summary>
         /// <param name="appKey">Key from application.  Outdated methodology that has no use here.</param>
         /// <param name="postID">post guid in string format</param>
@@ -541,11 +541,11 @@ namespace Loachs.MetaWeblog
             UserInfo user = UserManager.GetUser(userName);
             if (user != null)
             {
-                temp.user_id = user.UserId.ToString();
-                temp.user_login = user.UserName;
-                temp.display_name = user.Name;
-                temp.user_email = user.Email;
-                temp.meta_value = user.Description;
+                temp.UserId = user.UserId.ToString();
+                temp.UserLogin = user.UserName;
+                temp.DisplayName = user.Name;
+                temp.UserEmail = user.Email;
+                temp.MetaValue = user.Description;
                 authors.Add(temp);
             }
             return authors;
@@ -556,8 +556,8 @@ namespace Loachs.MetaWeblog
         #region Private Methods
 
         /// <summary>
-        /// 验证用户
-        /// Checks username and password.  Throws error if validation fails.
+        ///     验证用户
+        ///     Checks username and password.  Throws error if validation fails.
         /// </summary>
         /// <param name="userName"></param>
         /// <param name="password"></param>
@@ -571,21 +571,21 @@ namespace Loachs.MetaWeblog
         }
 
         /// <summary>
-        /// 查找分类，存在返回TRUE和分类,不存在返回FALSE
-        /// Returns Category Guid from Category name.
+        ///     查找分类，存在返回TRUE和分类,不存在返回FALSE
+        ///     Returns Category Guid from Category name.
         /// </summary>
         /// <remarks>
-        /// Reverse dictionary lookups are ugly.
+        ///     Reverse dictionary lookups are ugly.
         /// </remarks>
         /// <param name="name"></param>
         /// <param name="cat"></param>
         /// <returns></returns>
-        private bool LookupCategoryGuidByName(string name, out  CategoryInfo cat)
+        private bool LookupCategoryGuidByName(string name, out CategoryInfo cat)
         {
             name = StringHelper.HtmlEncode(name);
 
             cat = new CategoryInfo();
-            foreach (CategoryInfo item in Loachs.Business.CategoryManager.GetCategoryList())
+            foreach (CategoryInfo item in CategoryManager.GetCategoryList())
             {
                 if (item.Name == name)
                 {
@@ -600,256 +600,281 @@ namespace Loachs.MetaWeblog
     }
 
     /// <summary>
-    /// Exception specifically for MetaWeblog API.  Error (or fault) responses 
-    /// request a code value.  This is our chance to add one to the exceptions
-    /// which can be used to produce a proper fault.
+    ///     Exception specifically for MetaWeblog API.  Error (or fault) responses
+    ///     request a code value.  This is our chance to add one to the exceptions
+    ///     which can be used to produce a proper fault.
     /// </summary>
-    [Serializable()]
+    [Serializable]
     public class MetaWeblogException : Exception
     {
         /// <summary>
-        /// Constructor to load properties
+        ///     Constructor to load properties
         /// </summary>
         /// <param name="code">Fault code to be returned in Fault Response</param>
         /// <param name="message">Message to be returned in Fault Response</param>
         public MetaWeblogException(string code, string message)
             : base(message)
         {
-            _code = code;
+            Code = code;
         }
 
-        private string _code;
         /// <summary>
-        /// Code is actually for Fault Code.  It will be passed back in the 
-        /// response along with the error message.
+        ///     Code is actually for Fault Code.  It will be passed back in the
+        ///     response along with the error message.
         /// </summary>
-        public string Code
-        {
-            get { return _code; }
-        }
+        public string Code { get; private set; }
     }
-
 
     # region struct
 
     /// <summary>
-    /// MetaWeblog Category struct
-    /// returned as an array from GetCategories
+    ///     MetaWeblog Category struct
+    ///     returned as an array from GetCategories
     /// </summary>
     internal struct MWACategory
     {
         /// <summary>
-        /// Category title
+        ///     Category title
         /// </summary>
-        public string description;
+        public string Description;
+
         /// <summary>
-        /// Url to thml display of category
+        ///     Url to thml display of category
         /// </summary>
-        public string htmlUrl;
+        public string HtmlUrl;
+
         /// <summary>
-        /// Url to RSS for category
+        ///     The guid of the category
         /// </summary>
-        public string rssUrl;
+        public string Id;
+
         /// <summary>
-        /// The guid of the category
+        ///     Url to RSS for category
         /// </summary>
-        public string id;
+        public string RssUrl;
+
         /// <summary>
-        /// The title/name of the category
+        ///     The title/name of the category
         /// </summary>
-        public string title;
+        public string Title;
     }
 
     /// <summary>
-    /// MetaWeblog BlogInfo struct
-    /// returned as an array from getUserBlogs
+    ///     MetaWeblog BlogInfo struct
+    ///     returned as an array from getUserBlogs
     /// </summary>
     internal struct MWABlogInfo
     {
         /// <summary>
-        /// Blog Url
+        ///     Blog ID (Since BlogEngine.NET is single instance this number is always 10.
         /// </summary>
-        public string url;
+        public string BlogId;
+
         /// <summary>
-        /// Blog ID (Since BlogEngine.NET is single instance this number is always 10.
+        ///     Blog Title
         /// </summary>
-        public string blogID;
+        public string BlogName;
+
         /// <summary>
-        /// Blog Title
+        ///     Blog Url
         /// </summary>
-        public string blogName;
+        public string Url;
     }
 
     /// <summary>
-    /// MetaWeblog Fault struct
-    /// returned when error occurs
+    ///     MetaWeblog Fault struct
+    ///     returned when error occurs
     /// </summary>
     internal struct MWAFault
     {
         /// <summary>
-        /// Error code of Fault Response
+        ///     Error code of Fault Response
         /// </summary>
-        public string faultCode;
+        public string FaultCode;
+
         /// <summary>
-        /// Message of Fault Response
+        ///     Message of Fault Response
         /// </summary>
-        public string faultString;
+        public string FaultString;
     }
 
     /// <summary>
-    /// MetaWeblog MediaObject struct
-    /// passed in the newMediaObject call
+    ///     MetaWeblog MediaObject struct
+    ///     passed in the newMediaObject call
     /// </summary>
     internal struct MWAMediaObject
     {
         /// <summary>
-        /// Name of media object (filename)
+        ///     Media
         /// </summary>
-        public string name;
+        public byte[] Bits;
+
         /// <summary>
-        /// Type of file
+        ///     Name of media object (filename)
         /// </summary>
-        public string type;
+        public string Name;
+
         /// <summary>
-        /// Media
+        ///     Type of file
         /// </summary>
-        public byte[] bits;
+        public string Type;
     }
 
     /// <summary>
-    /// MetaWeblog MediaInfo struct
-    /// returned from NewMediaObject call
+    ///     MetaWeblog MediaInfo struct
+    ///     returned from NewMediaObject call
     /// </summary>
     internal struct MWAMediaInfo
     {
         /// <summary>
-        /// Url that points to Saved MediaObejct
+        ///     Url that points to Saved MediaObejct
         /// </summary>
-        public string url;
+        public string Url;
     }
 
     /// <summary>
-    /// MetaWeblog Post struct
-    /// used in newPost, editPost, getPost, recentPosts
-    /// not all properties are used everytime.
+    ///     MetaWeblog Post struct
+    ///     used in newPost, editPost, getPost, recentPosts
+    ///     not all properties are used everytime.
     /// </summary>
     internal struct MWAPost
     {
         /// <summary>
-        /// PostID Guid in string format
+        ///     wp_author_id
         /// </summary>
-        public string postID;
-        /// <summary>
-        /// Title of Blog Post
-        /// </summary>
-        public string title;
-        /// <summary>
-        /// Link to Blog Post
-        /// </summary>
-        public string link;
-        /// <summary>
-        /// Content of Blog Post
-        /// </summary>
-        public string description;
-        /// <summary>
-        /// List of Categories assigned for Blog Post
-        /// </summary>
-        public List<string> categories;
-        /// <summary>
-        /// List of Tags assinged for Blog Post
-        /// </summary>
-        public List<string> tags;
-        /// <summary>
-        /// Display date of Blog Post (DateCreated)
-        /// </summary>
-        public DateTime postDate;
-        /// <summary>
-        /// Whether the Post is published or not.
-        /// </summary>
-        public bool publish;
-        /// <summary>
-        /// Slug of post
-        /// </summary>
-        public string slug;
-        /// <summary>
-        /// CommentPolicy (Allow/Deny)
-        /// </summary>
-        public string commentPolicy;
-        /// <summary>
-        /// Excerpt
-        /// </summary>
-        public string excerpt;
-        /// <summary>
-        /// wp_author_id
-        /// </summary>
-        public string author;
+        public string Author;
 
+        /// <summary>
+        ///     List of Categories assigned for Blog Post
+        /// </summary>
+        public List<string> Categories;
+
+        /// <summary>
+        ///     CommentPolicy (Allow/Deny)
+        /// </summary>
+        public string CommentPolicy;
+
+        /// <summary>
+        ///     Content of Blog Post
+        /// </summary>
+        public string Description;
+
+        /// <summary>
+        ///     Excerpt
+        /// </summary>
+        public string Excerpt;
+
+        /// <summary>
+        ///     Link to Blog Post
+        /// </summary>
+        public string Link;
+
+        /// <summary>
+        ///     Display date of Blog Post (DateCreated)
+        /// </summary>
+        public DateTime PostDate;
+
+        /// <summary>
+        ///     PostID Guid in string format
+        /// </summary>
+        public string PostId;
+
+        /// <summary>
+        ///     Whether the Post is published or not.
+        /// </summary>
+        public bool Publish;
+
+        /// <summary>
+        ///     Slug of post
+        /// </summary>
+        public string Slug;
+
+        /// <summary>
+        ///     List of Tags assinged for Blog Post
+        /// </summary>
+        public List<string> Tags;
+
+        /// <summary>
+        ///     Title of Blog Post
+        /// </summary>
+        public string Title;
     }
 
     /// <summary>
-    /// wp Page Struct
+    ///     wp Page Struct
     /// </summary>
     internal struct MWAPage
     {
         /// <summary>
-        /// PostID Guid in string format
+        ///     Content of Blog Post
         /// </summary>
-        public string pageID;
+        public string Description;
+
         /// <summary>
-        /// Title of Blog Post
+        ///     Link to Blog Post
         /// </summary>
-        public string title;
+        public string Link;
+
         /// <summary>
-        /// Link to Blog Post
+        ///     Convert Breaks
         /// </summary>
-        public string link;
+        public string MtConvertBreaks;
+
         /// <summary>
-        /// Content of Blog Post
+        ///     Page keywords
         /// </summary>
-        public string description;
+        public string MtKeywords;
+
         /// <summary>
-        /// Display date of Blog Post (DateCreated)
+        ///     Display date of Blog Post (DateCreated)
         /// </summary>
-        public DateTime pageDate;
+        public DateTime PageDate;
+
         /// <summary>
-        /// Convert Breaks
+        ///     PostID Guid in string format
         /// </summary>
-        public string mt_convert_breaks;
+        public string PageId;
+
         /// <summary>
-        /// Page Parent ID
+        ///     Page Parent ID
         /// </summary>
-        public string pageParentID;
+        public string PageParentId;
+
         /// <summary>
-        /// Page keywords
+        ///     Title of Blog Post
         /// </summary>
-        public string mt_keywords;
+        public string Title;
     }
 
     /// <summary>
-    /// wp Author struct
+    ///     wp Author struct
     /// </summary>
     internal struct MWAAuthor
     {
         /// <summary>
-        /// userID - Specs call for a int, but our ID is a string.
+        ///     display name
         /// </summary>
-        public string user_id;
+        public string DisplayName;
+
         /// <summary>
-        /// user login name
+        ///     nothing to see here.
         /// </summary>
-        public string user_login;
+        public string MetaValue;
+
         /// <summary>
-        /// display name
+        ///     user email
         /// </summary>
-        public string display_name;
+        public string UserEmail;
+
         /// <summary>
-        /// user email
+        ///     userID - Specs call for a int, but our ID is a string.
         /// </summary>
-        public string user_email;
+        public string UserId;
+
         /// <summary>
-        /// nothing to see here.
+        ///     user login name
         /// </summary>
-        public string meta_value;
+        public string UserLogin;
     }
 
     #endregion

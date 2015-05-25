@@ -1,87 +1,19 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
+using System.Diagnostics;
 using System.IO;
-
+using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
-using Loachs.Business;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
-
 
 namespace Loachs.Web
 {
-
     public partial class admin_default : AdminPage
     {
-
-        #region 变量
         /// <summary>
-        /// 数据库大小
+        ///     文件夹大小
         /// </summary>
-        protected string DbSize;
-
-        /// <summary>
-        /// 数据库路径
-        /// </summary>
-        protected string DbPath;
-
-        /// <summary>
-        /// 附件大小
-        /// </summary>
-        protected string UpfileSize;
-
-        /// <summary>
-        /// 附件路径
-        /// </summary>
-        protected string UpfilePath;
-
-        /// <summary>
-        /// 附件个数
-        /// </summary>
-        protected int UpfileCount = 0;
-
-        /// <summary>
-        /// 操作系统版本
-        /// </summary>
-        protected string OSVersion;
-
-        /// <summary>
-        /// IIS 版本
-        /// </summary>
-        protected string IISVersion;
-
-        /// <summary>
-        /// .net 版本
-        /// </summary>
-        protected string NETVersion;
-
-        /// <summary>
-        /// CPU信息
-        /// </summary>
-        protected string CPUInfo;
-
-        /// <summary>
-        /// 使用内存大小
-        /// </summary>
-        protected string MemoryInfo;
-
-        //  protected MemoryInfo memoryInfo;  
-
-        //   private string CommentMessage = "";
-
-        protected List<CommentInfo> commentlist;
-
-        #endregion
+        public long DirSize;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -91,7 +23,8 @@ namespace Loachs.Web
             {
                 CheckStatistics();
 
-                commentlist = CommentManager.GetCommentList(15, 1, -1, -1, -1, (int)ApprovedStatus.Wait, -1, string.Empty);
+                commentlist = CommentManager.GetCommentList(15, 1, -1, -1, -1, (int) ApprovedStatus.Wait, -1,
+                    string.Empty);
                 //rptComment.DataSource = list;
                 //rptComment.DataBind();
                 //if (list.Count == 0)
@@ -101,14 +34,14 @@ namespace Loachs.Web
 
 
                 DbPath = ConfigHelper.SitePath + ConfigHelper.DbConnection;
-                System.IO.FileInfo file = new System.IO.FileInfo(Server.MapPath(ConfigHelper.SitePath + ConfigHelper.DbConnection));
+                FileInfo file = new FileInfo(Server.MapPath(ConfigHelper.SitePath + ConfigHelper.DbConnection));
                 DbSize = GetFileSize(file.Length);
 
                 UpfilePath = ConfigHelper.SitePath + "upfiles";
 
                 GetDirectorySize(Server.MapPath(UpfilePath));
 
-                UpfileSize = GetFileSize(dirSize);
+                UpfileSize = GetFileSize(DirSize);
 
                 GetDirectoryCount(Server.MapPath(UpfilePath));
 
@@ -122,13 +55,14 @@ namespace Loachs.Web
             {
                 if (PageUtils.IsIE6 || PageUtils.IsIE7)
                 {
-                    ShowError("小提示: 系统发现您正在使用老旧的浏览器(IE内核版本过低或启用了兼容模式) , 建议您升级或更换更标准更好体验的 <a href=\"http://www.microsoft.com/windows/internet-explorer/\" title=\"Microsoft Internet Explorer\" target=\"_blank\">IE8 +</a> , <a href=\"http://www.google.com/chrome?hl=zh-CN\" title=\"Google Chrome\" target=\"_blank\">Chrome</a> , <a href=\"http://www.mozillaonline.com/\" title=\"Mozilla Firefox\" target=\"_blank\">Firefox</a> , <a href=\"http://www.apple.com.cn/safari/\" title=\"Apple Safari\" target=\"_blank\">Safari</a>");
+                    ShowError(
+                        "小提示: 系统发现您正在使用老旧的浏览器(IE内核版本过低或启用了兼容模式) , 建议您升级或更换更标准更好体验的 <a href=\"http://www.microsoft.com/windows/internet-explorer/\" title=\"Microsoft Internet Explorer\" target=\"_blank\">IE8 +</a> , <a href=\"http://www.google.com/chrome?hl=zh-CN\" title=\"Google Chrome\" target=\"_blank\">Chrome</a> , <a href=\"http://www.mozillaonline.com/\" title=\"Mozilla Firefox\" target=\"_blank\">Firefox</a> , <a href=\"http://www.apple.com.cn/safari/\" title=\"Apple Safari\" target=\"_blank\">Safari</a>");
                 }
             }
         }
 
         /// <summary>
-        /// 显示结果
+        ///     显示结果
         /// </summary>
         protected void ShowResult()
         {
@@ -154,7 +88,7 @@ namespace Loachs.Web
             StatisticsInfo s = StatisticsManager.GetStatistics();
             bool update = false;
 
-            int totalPosts = PostManager.GetPostCount(-1, -1, -1, (int)PostStatus.Published, 0);
+            int totalPosts = PostManager.GetPostCount(-1, -1, -1, (int) PostStatus.Published, 0);
             if (totalPosts != s.PostCount)
             {
                 s.PostCount = totalPosts;
@@ -173,41 +107,35 @@ namespace Loachs.Web
                 s.TagCount = totalTags;
                 update = true;
             }
-            if (update == true)
+            if (update)
             {
                 StatisticsManager.UpdateStatistics();
             }
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="size">byte</param>
         /// <returns></returns>
         protected string GetFileSize(long size)
         {
-            string FileSize = string.Empty;
-            if (size > (1024 * 1024 * 1024))
-                FileSize = ((double)size / (1024 * 1024 * 1024)).ToString(".##") + " GB";
-            else if (size > (1024 * 1024))
-                FileSize = ((double)size / (1024 * 1024)).ToString(".##") + " MB";
+            string fileSize = string.Empty;
+            if (size > (1024*1024*1024))
+                fileSize = ((double) size/(1024*1024*1024)).ToString(".##") + " GB";
+            else if (size > (1024*1024))
+                fileSize = ((double) size/(1024*1024)).ToString(".##") + " MB";
             else if (size > 1024)
-                FileSize = ((double)size / 1024).ToString(".##") + " KB";
+                fileSize = ((double) size/1024).ToString(".##") + " KB";
             else if (size == 0)
-                FileSize = "0 Byte";
+                fileSize = "0 Byte";
             else
-                FileSize = ((double)size / 1).ToString(".##") + " Byte";
+                fileSize = ((double) size/1).ToString(".##") + " Byte";
 
-            return FileSize;
+            return fileSize;
         }
 
         /// <summary>
-        /// 文件夹大小
-        /// </summary>
-        public long dirSize = 0;
-
-        /// <summary>
-        /// 递归文件夹大小
+        ///     递归文件夹大小
         /// </summary>
         /// <param name="dirp"></param>
         /// <returns></returns>
@@ -218,23 +146,21 @@ namespace Loachs.Web
             {
                 if (fsi is FileInfo)
                 {
-                    FileInfo fi = (FileInfo)fsi;
-                    dirSize += fi.Length;
+                    FileInfo fi = (FileInfo) fsi;
+                    DirSize += fi.Length;
                 }
                 else
                 {
-                    DirectoryInfo di = (DirectoryInfo)fsi;
-                    string new_dir = di.FullName;
-                    GetDirectorySize(new_dir);
+                    DirectoryInfo di = (DirectoryInfo) fsi;
+                    string newDir = di.FullName;
+                    GetDirectorySize(newDir);
                 }
             }
-            return dirSize;
+            return DirSize;
         }
 
-
-
         /// <summary>
-        /// 递归文件数量
+        ///     递归文件数量
         /// </summary>
         /// <param name="dirp"></param>
         /// <returns></returns>
@@ -250,9 +176,9 @@ namespace Loachs.Web
                 }
                 else
                 {
-                    DirectoryInfo di = (DirectoryInfo)fsi;
-                    string new_dir = di.FullName;
-                    GetDirectoryCount(new_dir);
+                    DirectoryInfo di = (DirectoryInfo) fsi;
+                    string newDir = di.FullName;
+                    GetDirectoryCount(newDir);
                 }
             }
             return UpfileCount;
@@ -263,7 +189,7 @@ namespace Loachs.Web
             List<CategoryInfo> list = CategoryManager.GetCategoryList();
             for (int i = 0; i < list.Count; i++)
             {
-                list[i].Count = PostManager.GetPostCount(list[i].CategoryId, -1, -1, (int)PostStatus.Published, 0);
+                list[i].Count = PostManager.GetPostCount(list[i].CategoryId, -1, -1, (int) PostStatus.Published, 0);
                 CategoryManager.UpdateCategory(list[i]);
             }
             Response.Redirect("default.aspx?result=11");
@@ -274,7 +200,7 @@ namespace Loachs.Web
             List<TagInfo> list = TagManager.GetTagList();
             for (int i = 0; i < list.Count; i++)
             {
-                list[i].Count = PostManager.GetPostCount(-1, list[i].TagId, -1, (int)PostStatus.Published, 0);
+                list[i].Count = PostManager.GetPostCount(-1, list[i].TagId, -1, (int) PostStatus.Published, 0);
                 TagManager.UpdateTag(list[i]);
             }
             Response.Redirect("default.aspx?result=12");
@@ -282,11 +208,10 @@ namespace Loachs.Web
 
         protected void btnUser_Click(object sender, EventArgs e)
         {
-
             List<UserInfo> list = UserManager.GetUserList();
             for (int i = 0; i < list.Count; i++)
             {
-                list[i].PostCount = PostManager.GetPostCount(-1, -1, list[i].UserId, (int)PostStatus.Published, 0);
+                list[i].PostCount = PostManager.GetPostCount(-1, -1, list[i].UserId, (int) PostStatus.Published, 0);
                 list[i].CommentCount = CommentManager.GetCommentCount(list[i].UserId, -1, false);
                 UserManager.UpdateUser(list[i]);
             }
@@ -294,7 +219,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 获取系统内存大小
+        ///     获取系统内存大小
         /// </summary>
         /// <returns>内存大小（单位GB）</returns>
         private static int GetPhisicalMemory()
@@ -331,8 +256,6 @@ namespace Loachs.Web
             return 0;
         }
 
-
-
         ////定义内存的信息结构   
         //[StructLayout(LayoutKind.Sequential)]
         //public struct MEMORY_INFO
@@ -348,13 +271,12 @@ namespace Loachs.Web
         //}
 
         /// <summary>
-        /// 获取系统信息
+        ///     获取系统信息
         /// </summary>
         protected void GetSystemInfo()
         {
             try
             {
-
                 OSVersion = Environment.OSVersion.ToString();
 
                 IISVersion = Request.ServerVariables["SERVER_SOFTWARE"];
@@ -387,7 +309,8 @@ namespace Loachs.Web
 
                 NETVersion = Environment.Version.ToString();
 
-                CPUInfo = Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER") + " (" + Environment.ProcessorCount + " 核)";
+                CPUInfo = Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER") + " (" + Environment.ProcessorCount +
+                          " 核)";
 
 
                 //MEMORY_INFO MemInfo;
@@ -396,16 +319,73 @@ namespace Loachs.Web
                 if (Environment.OSVersion.Platform == PlatformID.Unix)
                 {
                     PerformanceCounter p = new PerformanceCounter("Mono Memory", "Total Physical Memory");
-                    MemoryInfo = "物理内存:" + (p.RawValue / 1024 / 1024) + " MB / 当前程序已占用物理内存:" + (Environment.WorkingSet / 1024 / 1024).ToString() + " MB";
-
+                    MemoryInfo = "物理内存:" + (p.RawValue/1024/1024) + " MB / 当前程序已占用物理内存:" +
+                                 (Environment.WorkingSet/1024/1024) + " MB";
                 }
             }
-            catch(Exception  ex)
+            catch (Exception  ex)
             {
-
             }
-
-
         }
+
+        #region 变量
+
+        /// <summary>
+        ///     数据库大小
+        /// </summary>
+        protected string DbSize;
+
+        /// <summary>
+        ///     数据库路径
+        /// </summary>
+        protected string DbPath;
+
+        /// <summary>
+        ///     附件大小
+        /// </summary>
+        protected string UpfileSize;
+
+        /// <summary>
+        ///     附件路径
+        /// </summary>
+        protected string UpfilePath;
+
+        /// <summary>
+        ///     附件个数
+        /// </summary>
+        protected int UpfileCount;
+
+        /// <summary>
+        ///     操作系统版本
+        /// </summary>
+        protected string OSVersion;
+
+        /// <summary>
+        ///     IIS 版本
+        /// </summary>
+        protected string IISVersion;
+
+        /// <summary>
+        ///     .net 版本
+        /// </summary>
+        protected string NETVersion;
+
+        /// <summary>
+        ///     CPU信息
+        /// </summary>
+        protected string CPUInfo;
+
+        /// <summary>
+        ///     使用内存大小
+        /// </summary>
+        protected string MemoryInfo;
+
+        //  protected MemoryInfo memoryInfo;  
+
+        //   private string CommentMessage = "";
+
+        protected List<CommentInfo> commentlist;
+
+        #endregion
     }
 }

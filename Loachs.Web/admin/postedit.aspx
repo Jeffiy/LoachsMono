@@ -22,7 +22,7 @@
     </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
-<h2><%=headerTitle%></h2>
+<h2><%=HeaderTitle%></h2>
 <%=ResponseMessage %>
     <p>
         <label class="label" for="<%=txtTitle.ClientID %>">标题:</label>
@@ -139,7 +139,7 @@ function createSummary(type) {
          <asp:DropDownList ID="ddlUrlType" runat="server" Width="50%" CssClass="text"></asp:DropDownList>  
     </p>
     <p>
-         <label  class="label" for="<%=ddlTemplate.ClientID %>">文章模板:<span  class="gray small"> (位于<%=ConfigHelper.SitePath %>themes/<%=setting.Theme %>/template/下,当然,您也可以自己制作,文件名必须以"post"开头)</span></label>
+         <label  class="label" for="<%=ddlTemplate.ClientID %>">文章模板:<span  class="gray small"> (位于<%=ConfigHelper.SitePath %>themes/<%=Setting.Theme %>/template/下,当然,您也可以自己制作,文件名必须以"post"开头)</span></label>
          <asp:DropDownList ID="ddlTemplate" runat="server" Width="50%"></asp:DropDownList>  
           
     </p>

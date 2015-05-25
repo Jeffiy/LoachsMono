@@ -1,24 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Net;
 using System.Net.Mail;
+using System.Text;
 using System.Threading;
-
 using Loachs.Business;
 
 namespace Loachs.Common
 {
     /// <summary>
-    /// 发邮件
-    /// 说明:
-    /// FromMail:同域的任何邮箱
-    /// UserName:可能不需要@gmail.com
+    ///     发邮件
+    ///     说明:
+    ///     FromMail:同域的任何邮箱
+    ///     UserName:可能不需要@gmail.com
     /// </summary>
     public class EmailHelper
     {
-
         /// <summary>
-        ///  发邮件
+        ///     发邮件
         /// </summary>
         /// <param name="recipients"></param>
         /// <param name="subject"></param>
@@ -27,12 +25,13 @@ namespace Loachs.Common
         {
             try
             {
-                MailAddress from = new MailAddress(SettingManager.GetSetting().SmtpEmail, SettingManager.GetSetting().SiteName);
+                MailAddress from = new MailAddress(SettingManager.GetSetting().SmtpEmail,
+                    SettingManager.GetSetting().SiteName);
                 MailMessage m = new MailMessage();
                 m.From = from;
                 //   m.ReplyTo = new MailAddress(recipients);
 
-                m.To.Add(recipients);   //收件人处会显示所有人的邮箱
+                m.To.Add(recipients); //收件人处会显示所有人的邮箱
 
                 //if (recipients.IndexOf(',') == -1)
                 //{
@@ -53,17 +52,20 @@ namespace Loachs.Common
 
                 SmtpClient smtp = new SmtpClient();
                 smtp.Host = SettingManager.GetSetting().SmtpServer;
-                smtp.Credentials = new System.Net.NetworkCredential(SettingManager.GetSetting().SmtpUserName, SettingManager.GetSetting().SmtpPassword);
+                smtp.Credentials = new NetworkCredential(SettingManager.GetSetting().SmtpUserName,
+                    SettingManager.GetSetting().SmtpPassword);
                 smtp.EnableSsl = Convert.ToBoolean(SettingManager.GetSetting().SmtpEnableSsl);
                 smtp.Port = SettingManager.GetSetting().SmtpServerPost;
                 smtp.Send(m);
             }
             catch
-            { }
+            {
+                // ignored
+            }
         }
 
         /// <summary>
-        /// 异步发邮件,如果超过一百封,仅发前一百封
+        ///     异步发邮件,如果超过一百封,仅发前一百封
         /// </summary>
         /// <param name="recipients"></param>
         /// <param name="subject"></param>

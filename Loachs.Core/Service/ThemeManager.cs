@@ -1,34 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.IO;
 using System.Xml;
-
-using Loachs.Common;
-using Loachs.Data;
 using Loachs.Entity;
 
 namespace Loachs.Business
 {
     /// <summary>
-    /// 主题管理
+    ///     主题管理
     /// </summary>
     public class ThemeManager
     {
         public static ThemeInfo GetTemplate(string xmlPath)
         {
-            ThemeInfo theme = new ThemeInfo();
-            theme.Name = "";
-            theme.Author = "";
-            theme.PubDate = "";
-            theme.Version = "";
-            theme.Email = "";
-            theme.SiteUrl = "";
+            ThemeInfo theme = new ThemeInfo
+            {
+                Name = "",
+                Author = "",
+                PubDate = "",
+                Version = "",
+                Email = "",
+                SiteUrl = ""
+            };
 
 
-            if (!System.IO.File.Exists(xmlPath + @"/theme.xml"))
+            if (!File.Exists(xmlPath + @"/theme.xml"))
             {
                 return theme;
-
             }
             try
             {
@@ -47,9 +43,7 @@ namespace Loachs.Business
             catch
             {
                 return theme;
-
             }
-
         }
     }
 }

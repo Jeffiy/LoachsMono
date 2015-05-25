@@ -1,57 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Web.Security;
-
-using Loachs.Common;
+﻿using System.Collections.Generic;
 using Loachs.Data;
 using Loachs.Entity;
 
 namespace Loachs.Business
 {
     /// <summary>
-    /// 评论管理
+    ///     评论管理
     /// </summary>
     public class CommentManager
     {
-        private static IComment dao = DataAccess.CreateComment();
+        private static readonly IComment Dao = DataAccess.CreateComment();
 
         /// <summary>
-        /// 最近评论列表
+        ///     最近评论列表
         /// </summary>
         private static List<CommentInfo> _recentcomments;
 
         /// <summary>
-        /// lock
+        ///     lock
         /// </summary>
-        private static object lockHelper = new object();
+        private static readonly object LockHelper = new object();
 
         static CommentManager()
         {
             //   LoadRecentComment(); 
         }
 
-
         /// <summary>
-        /// 加载最近评论
+        ///     加载最近评论
         /// </summary>
         private static void LoadRecentComment(int rowCount)
         {
-            lock (lockHelper)
+            lock (LockHelper)
             {
-                _recentcomments = GetCommentList(rowCount, 1, -1, -1, 0, (int)ApprovedStatus.Success, -1, string.Empty);
+                _recentcomments = GetCommentList(rowCount, 1, -1, -1, 0, (int) ApprovedStatus.Success, -1, string.Empty);
             }
         }
 
-
         /// <summary>
-        /// 添加
+        ///     添加
         /// </summary>
         /// <param name="comment"></param>
         /// <returns></returns>
         public static int InsertComment(CommentInfo comment)
         {
-            int result = dao.InsertComment(comment);
+            int result = Dao.InsertComment(comment);
 
             //统计
             StatisticsManager.UpdateStatisticsCommentCount(1);
@@ -69,7 +62,7 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 更新
+        ///     更新
         /// </summary>
         /// <param name="comment"></param>
         /// <returns></returns>
@@ -77,12 +70,11 @@ namespace Loachs.Business
         {
             _recentcomments = null;
 
-            return dao.UpdateComment(comment);
-
+            return Dao.UpdateComment(comment);
         }
 
         /// <summary>
-        /// 删除
+        ///     删除
         /// </summary>
         /// <param name="commentId"></param>
         /// <returns></returns>
@@ -90,7 +82,7 @@ namespace Loachs.Business
         {
             CommentInfo comment = GetComment(commentId);
 
-            int result = dao.DeleteComment(commentId);
+            int result = Dao.DeleteComment(commentId);
 
             //统计
             StatisticsManager.UpdateStatisticsCommentCount(-1);
@@ -109,21 +101,21 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 获取
+        ///     获取
         /// </summary>
         /// <param name="commentId"></param>
         /// <returns></returns>
         public static CommentInfo GetComment(int commentId)
         {
-            CommentInfo comment = dao.GetComment(commentId);
+            CommentInfo comment = Dao.GetComment(commentId);
             return comment;
         }
 
-
         /// <summary>
-        /// 获取评论
+        ///     获取评论
         /// </summary>
         /// <param name="rowCount"></param>
+        /// <param name="order"></param>
         /// <param name="userId"></param>
         /// <param name="postId"></param>
         /// <param name="parentId"></param>
@@ -131,14 +123,16 @@ namespace Loachs.Business
         /// <param name="emailNotify"></param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public static List<CommentInfo> GetCommentList(int rowCount, int order, int userId, int postId, int parentId, int approved, int emailNotify, string keyword)
+        public static List<CommentInfo> GetCommentList(int rowCount, int order, int userId, int postId, int parentId,
+            int approved, int emailNotify, string keyword)
         {
             int totalRecord = 0;
-            return GetCommentList(rowCount, 1, out totalRecord, order, userId, postId, parentId, approved, emailNotify, keyword);
+            return GetCommentList(rowCount, 1, out totalRecord, order, userId, postId, parentId, approved, emailNotify,
+                keyword);
         }
 
         /// <summary>
-        /// 最近评论
+        ///     最近评论
         /// </summary>
         /// <param name="rowCount"></param>
         /// <returns></returns>
@@ -164,7 +158,7 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 获取评论
+        ///     获取评论
         /// </summary>
         /// <param name="pageSize"></param>
         /// <param name="pageIndex"></param>
@@ -173,31 +167,32 @@ namespace Loachs.Business
         /// <param name="postId"></param>
         /// <param name="parentId"></param>
         /// <param name="approved"></param>
-        /// <param name="emailStatus"></param>
+        /// <param name="emailNotify"></param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public static List<CommentInfo> GetCommentList(int pageSize, int pageIndex, out int totalRecord, int order, int userId, int postId, int parentId, int approved, int emailNotify, string keyword)
+        public static List<CommentInfo> GetCommentList(int pageSize, int pageIndex, out int totalRecord, int order,
+            int userId, int postId, int parentId, int approved, int emailNotify, string keyword)
         {
-            List<CommentInfo> list = dao.GetCommentList(pageSize, pageIndex, out totalRecord, order, userId, postId, parentId, approved, emailNotify, keyword);
+            List<CommentInfo> list = Dao.GetCommentList(pageSize, pageIndex, out totalRecord, order, userId, postId,
+                parentId, approved, emailNotify, keyword);
 
             int floor = 1;
             foreach (CommentInfo comment in list)
             {
-
-                comment.Floor = pageSize * (pageIndex - 1) + floor;
+                comment.Floor = pageSize*(pageIndex - 1) + floor;
                 floor++;
             }
             return list;
         }
 
         /// <summary>
-        /// 根据日志ID删除评论
+        ///     根据日志ID删除评论
         /// </summary>
         /// <param name="postId">日志ID</param>
         /// <returns></returns>
         public static int DeleteCommentByPost(int postId)
         {
-            int result = dao.DeleteCommentByPost(postId);
+            int result = Dao.DeleteCommentByPost(postId);
 
             StatisticsManager.UpdateStatisticsCommentCount(-result);
 
@@ -207,7 +202,7 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 统计评论数
+        ///     统计评论数
         /// </summary>
         /// <param name="incChild"></param>
         /// <returns></returns>
@@ -217,9 +212,10 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 统计评论数
+        ///     统计评论数
         /// </summary>
         /// <param name="postId"></param>
+        /// <param name="incChild"></param>
         /// <returns></returns>
         public static int GetCommentCount(int postId, bool incChild)
         {
@@ -227,7 +223,6 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="postId"></param>
@@ -235,9 +230,7 @@ namespace Loachs.Business
         /// <returns></returns>
         public static int GetCommentCount(int userId, int postId, bool incChild)
         {
-
-            return dao.GetCommentCount(userId, postId, incChild);
+            return Dao.GetCommentCount(userId, postId, incChild);
         }
-
     }
 }

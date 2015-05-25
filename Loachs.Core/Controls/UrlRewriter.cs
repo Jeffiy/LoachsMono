@@ -1,30 +1,30 @@
 ﻿using System;
+using System.Collections;
 using System.Text.RegularExpressions;
 using System.Web;
+using System.Web.Caching;
 using System.Xml;
-using System.Collections;
-using System.Configuration;
-
 using Loachs.Common;
 
 namespace Loachs.Controls
 {
     /// <summary>
-    /// 重写URL
+    ///     重写URL
     /// </summary>
-    public class UrlRewriter : System.Web.IHttpModule
+    public class UrlRewriter : IHttpModule
     {
         public void Init(HttpApplication app)
         {
-            app.BeginRequest += new EventHandler(this.Application_BeginRequest);
-
+            app.BeginRequest += Application_BeginRequest;
         }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+        }
 
         protected void Application_BeginRequest(object sender, EventArgs e)
         {
-            HttpApplication app = (HttpApplication)sender;
+            HttpApplication app = (HttpApplication) sender;
             //foreach (RewriterRule rule in GetRuleList())
             //{
             //    string lookFor = "^" + ResolveUrl(app.Request.ApplicationPath, rule.LookFor) + "$";
@@ -48,7 +48,8 @@ namespace Loachs.Controls
                 {
                     if (re.IsMatch(app.Request.Url.AbsoluteUri))
                     {
-                        string sendTo = ResolveUrl(app.Context.Request.ApplicationPath, re.Replace(app.Request.Url.AbsoluteUri, rule.SendTo));
+                        string sendTo = ResolveUrl(app.Context.Request.ApplicationPath,
+                            re.Replace(app.Request.Url.AbsoluteUri, rule.SendTo));
                         RewritePath(app.Context, sendTo);
                         break;
                     }
@@ -58,15 +59,17 @@ namespace Loachs.Controls
                 {
                     if (re.IsMatch(app.Request.Path))
                     {
-                        string sendTo = ResolveUrl(app.Context.Request.ApplicationPath, re.Replace(app.Request.Path, rule.SendTo));
+                        string sendTo = ResolveUrl(app.Context.Request.ApplicationPath,
+                            re.Replace(app.Request.Path, rule.SendTo));
                         RewritePath(app.Context, sendTo);
                         break;
                     }
                 }
             }
         }
+
         /// <summary>
-        /// 是否为URL地址
+        ///     是否为URL地址
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
@@ -76,7 +79,7 @@ namespace Loachs.Controls
         }
 
         /// <summary>
-        /// 重写路径,主要处理参数
+        ///     重写路径,主要处理参数
         /// </summary>
         /// <param name="context"></param>
         /// <param name="sendToUrl"></param>
@@ -86,14 +89,14 @@ namespace Loachs.Controls
             {
                 if (sendToUrl.IndexOf('?') != -1)
                 {
-                    sendToUrl += "&" + context.Request.QueryString.ToString();
+                    sendToUrl += "&" + context.Request.QueryString;
                 }
                 else
                 {
-                    sendToUrl += "?" + context.Request.QueryString.ToString();
+                    sendToUrl += "?" + context.Request.QueryString;
                 }
             }
-            string queryString = String.Empty;
+            string queryString = string.Empty;
             string sendToUrlLessQString = sendToUrl;
             if (sendToUrl.IndexOf('?') > 0)
             {
@@ -101,23 +104,25 @@ namespace Loachs.Controls
                 queryString = sendToUrl.Substring(sendToUrl.IndexOf('?') + 1);
             }
             //    context.RewritePath(sendToUrlLessQString +"?"+ queryString);
-            context.RewritePath(sendToUrlLessQString, String.Empty, queryString);
+            context.RewritePath(sendToUrlLessQString, string.Empty, queryString);
         }
 
         /// <summary>
-        /// 读取并缓存规则列表
+        ///     读取并缓存规则列表
         /// </summary>
         /// <returns></returns>
         protected ArrayList GetRuleList()
         {
             string cacheKey = ConfigHelper.SitePrefix + "rewriterulelist";
 
-            ArrayList ruleList = (ArrayList)HttpContext.Current.Cache.Get(cacheKey);
+            ArrayList ruleList = (ArrayList) HttpContext.Current.Cache.Get(cacheKey);
             if (ruleList == null)
             {
                 ruleList = new ArrayList();
-                string urlFilePath = HttpContext.Current.Server.MapPath(string.Format("{0}common/config/rewrite.config", ConfigHelper.SitePath));
-                System.Xml.XmlDocument xml = new System.Xml.XmlDocument();
+                string urlFilePath =
+                    HttpContext.Current.Server.MapPath(string.Format("{0}common/config/rewrite.config",
+                        ConfigHelper.SitePath));
+                XmlDocument xml = new XmlDocument();
 
                 xml.Load(urlFilePath);
 
@@ -132,13 +137,13 @@ namespace Loachs.Controls
                         ruleList.Add(rule);
                     }
                 }
-                HttpContext.Current.Cache.Insert(cacheKey, ruleList, new System.Web.Caching.CacheDependency(urlFilePath));
+                HttpContext.Current.Cache.Insert(cacheKey, ruleList, new CacheDependency(urlFilePath));
             }
             return ruleList;
         }
 
         /// <summary>
-        /// 处理各种路径
+        ///     处理各种路径
         /// </summary>
         /// <param name="appPath"></param>
         /// <param name="url"></param>
@@ -147,53 +152,36 @@ namespace Loachs.Controls
         {
             //   return url;
             if (url.Length == 0 || url[0] != '~')
-                return url;		// there is no ~ in the first character position, just return the url
-            else
+                return url; // there is no ~ in the first character position, just return the url
+            if (url.Length == 1)
+                return appPath; // there is just the ~ in the URL, return the appPath
+            if (url[1] == '/' || url[1] == '\\')
             {
-                if (url.Length == 1)
-                    return appPath;  // there is just the ~ in the URL, return the appPath
-                if (url[1] == '/' || url[1] == '\\')
-                {
-                    // url looks like ~/ or ~\
-                    if (appPath.Length > 1)
-                        return appPath + "/" + url.Substring(2);
-                    else
-                        return "/" + url.Substring(2);
-                }
-                else
-                {
-                    // url looks like ~something
-                    if (appPath.Length > 1)
-                        return appPath + "/" + url.Substring(1);
-                    else
-                        return appPath + url.Substring(1);
-                }
+                // url looks like ~/ or ~\
+                if (appPath.Length > 1)
+                    return appPath + "/" + url.Substring(2);
+                return "/" + url.Substring(2);
             }
+            // url looks like ~something
+            if (appPath.Length > 1)
+                return appPath + "/" + url.Substring(1);
+            return appPath + url.Substring(1);
         }
     }
 
     /// <summary>
-    /// 规则实体
+    ///     规则实体
     /// </summary>
     public class RewriterRule
     {
-        private string _lookfor;
-        private string _sendto;
         /// <summary>
-        /// 正则地址
+        ///     正则地址
         /// </summary>
-        public string LookFor
-        {
-            get { return _lookfor; }
-            set { _lookfor = value; }
-        }
+        public string LookFor { get; set; }
+
         /// <summary>
-        /// 实际地址
+        ///     实际地址
         /// </summary>
-        public string SendTo
-        {
-            get { return _sendto; }
-            set { _sendto = value; }
-        }
+        public string SendTo { get; set; }
     }
 }

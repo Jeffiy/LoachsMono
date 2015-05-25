@@ -1,33 +1,21 @@
 ﻿using System;
-using System.Collections;
-using System.Configuration;
-using System.Data;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
 using System.IO;
 using System.Text;
-using System.Xml;
-
 using Loachs.Common;
-using Loachs.Entity;
-using Loachs.Business;
+
 namespace Loachs.Web
 {
     public partial class admin_themeedit : AdminPage
     {
         /// <summary>
-        /// 主题名
+        ///     文件路径
         /// </summary>
-        protected string themeName = RequestHelper.QueryString("themename");
+        protected string FilePath = RequestHelper.QueryString("filepath");
 
         /// <summary>
-        /// 文件路径
+        ///     主题名
         /// </summary>
-        protected string filePath = RequestHelper.QueryString("filepath");
+        protected string ThemeName = RequestHelper.QueryString("themename");
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -40,13 +28,17 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 绑定文件
+        ///     绑定文件
         /// </summary>
         protected void BindFile()
         {
-            if (!string.IsNullOrEmpty(filePath))
+            if (!string.IsNullOrEmpty(FilePath))
             {
-                using (StreamReader objReader = new StreamReader(Server.MapPath(ConfigHelper.SitePath + "themes/" + themeName + "/" + filePath), Encoding.UTF8))
+                using (
+                    StreamReader objReader =
+                        new StreamReader(
+                            Server.MapPath(ConfigHelper.SitePath + "themes/" + ThemeName + "/" + FilePath),
+                            Encoding.UTF8))
                 {
                     txtContent.Text = objReader.ReadToEnd();
                     objReader.Close();
@@ -54,21 +46,21 @@ namespace Loachs.Web
             }
             else
             {
-                Response.Redirect("themeedit.aspx?themename=" + themeName + "&filepath=template/default.html");
+                Response.Redirect("themeedit.aspx?themename=" + ThemeName + "&filepath=template/default.html");
             }
         }
 
         /// <summary>
-        /// 修改
+        ///     修改
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         protected void btnSave_Click(object sender, EventArgs e)
         {
-            string filepath = Server.MapPath(ConfigHelper.SitePath + "themes/" + themeName + "/" + filePath);
+            string filepath = Server.MapPath(ConfigHelper.SitePath + "themes/" + ThemeName + "/" + FilePath);
             using (FileStream fs = new FileStream(filepath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
-                Byte[] info = Encoding.UTF8.GetBytes(txtContent.Text);
+                byte[] info = Encoding.UTF8.GetBytes(txtContent.Text);
                 fs.Write(info, 0, info.Length);
                 fs.Close();
             }

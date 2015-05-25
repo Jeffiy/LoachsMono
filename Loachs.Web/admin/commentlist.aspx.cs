@@ -1,29 +1,20 @@
-﻿
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
+using System.Linq;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-
+using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
-using Loachs.Business;
+
 namespace Loachs.Web
 {
     public partial class admin_commentlist : AdminPage
     {
-
-
         /// <summary>
-        /// 审核
+        ///     审核
         /// </summary>
-        int approved = RequestHelper.QueryInt("approved", -1);
+        private readonly int _approved = RequestHelper.QueryInt("approved", -1);
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -37,11 +28,10 @@ namespace Loachs.Web
             {
                 BindCommentList();
             }
-
         }
 
         /// <summary>
-        /// 审核,删除单条记录
+        ///     审核,删除单条记录
         /// </summary>
         private void OperateComment()
         {
@@ -57,7 +47,7 @@ namespace Loachs.Web
                 CommentInfo comment = CommentManager.GetComment(commentId);
                 if (comment != null)
                 {
-                    comment.Approved = (int)ApprovedStatus.Success;
+                    comment.Approved = (int) ApprovedStatus.Success;
                     CommentManager.UpdateComment(comment);
 
                     Response.Redirect("commentlist.aspx?result=4&page=" + Pager1.PageIndex);
@@ -66,14 +56,13 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 显示结果
+        ///     显示结果
         /// </summary>
         protected void ShowResult()
         {
             int result = RequestHelper.QueryInt("result");
             switch (result)
             {
-
                 case 3:
                     ShowMessage("删除成功!");
                     break;
@@ -85,28 +74,27 @@ namespace Loachs.Web
             }
         }
 
-
         /// <summary>
-        /// 绑定
+        ///     绑定
         /// </summary>
         protected void BindCommentList()
         {
             int totalRecord = 0;
 
-            List<CommentInfo> list = CommentManager.GetCommentList(Pager1.PageSize, Pager1.PageIndex, out totalRecord, 1, -1, -1, -1, approved, -1, string.Empty);
+            List<CommentInfo> list = CommentManager.GetCommentList(Pager1.PageSize, Pager1.PageIndex, out totalRecord, 1,
+                -1, -1, -1, _approved, -1, string.Empty);
             rptComment.DataSource = list;
             rptComment.DataBind();
             Pager1.RecordCount = totalRecord;
         }
 
         /// <summary>
-        /// 文章连接
+        ///     文章连接
         /// </summary>
         /// <param name="postId"></param>
         /// <returns></returns>
         protected string GetPostLink(int postId)
         {
-
             PostInfo post = PostManager.GetPost(postId);
             if (post != null)
             {
@@ -115,10 +103,8 @@ namespace Loachs.Web
             return string.Empty;
         }
 
-
-
         /// <summary>
-        /// 删除
+        ///     删除
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -127,47 +113,35 @@ namespace Loachs.Web
             int i = 0;
             foreach (RepeaterItem item in rptComment.Items)
             {
-                HtmlInputCheckBox box = ((HtmlInputCheckBox)item.FindControl("chkRow"));
+                HtmlInputCheckBox box = ((HtmlInputCheckBox) item.FindControl("chkRow"));
                 if (box.Checked)
                 {
                     int commentId = Convert.ToInt32(box.Value);
                     CommentManager.DeleteComment(commentId);
                     i++;
-
                 }
             }
-
-
-            Response.Redirect("commentlist.aspx?result=3&page=" + Pager1.PageIndex + "&approved=" + approved);
-
+            
+            Response.Redirect("commentlist.aspx?result=3&page=" + Pager1.PageIndex + "&approved=" + _approved);
         }
 
         /// <summary>
-        /// 审核
+        ///     审核
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         protected void btnApproved_Click(object sender, EventArgs e)
         {
             int i = 0;
-            foreach (RepeaterItem item in rptComment.Items)
+            foreach (CommentInfo c in from RepeaterItem item in rptComment.Items select ((HtmlInputCheckBox) item.FindControl("chkRow")) into box where box.Checked select Convert.ToInt32(box.Value) into commentID select CommentManager.GetComment(commentID) into c where c != null select c)
             {
-                HtmlInputCheckBox box = ((HtmlInputCheckBox)item.FindControl("chkRow"));
-                if (box.Checked)
+                c.Approved = (int) ApprovedStatus.Success;
+                if (CommentManager.UpdateComment(c) > 0)
                 {
-                    int commentID = Convert.ToInt32(box.Value);
-                    CommentInfo c = CommentManager.GetComment(commentID);
-                    if (c != null)
-                    {
-                        c.Approved = (int)ApprovedStatus.Success;
-                        if (CommentManager.UpdateComment(c) > 0)
-                        {
-                            i++;
-                        }
-                    }
+                    i++;
                 }
             }
-            Response.Redirect("commentlist.aspx?result=4&page=" + Pager1.PageIndex + "&approved=" + approved);
+            Response.Redirect("commentlist.aspx?result=4&page=" + Pager1.PageIndex + "&approved=" + _approved);
         }
     }
 }

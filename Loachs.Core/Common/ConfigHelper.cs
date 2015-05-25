@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Configuration;
+using System.Web;
 
 namespace Loachs.Common
 {
     /// <summary>
-    /// web.config 配置类
+    ///     web.config 配置类
     /// </summary>
     public class ConfigHelper
     {
-
         private static string _siteprefix;
+        private static string _sitepath;
+        private static string _dbconnection;
 
         /// <summary>
-        /// Cache、Session、Cookies 等应用程序变量名前缀
+        ///     Cache、Session、Cookies 等应用程序变量名前缀
         /// </summary>
         public static string SitePrefix
         {
@@ -27,10 +27,8 @@ namespace Loachs.Common
             }
         }
 
-        private static string _sitepath;
-
         /// <summary>
-        /// 程序相对根路径
+        ///     程序相对根路径
         /// </summary>
         public static string SitePath
         {
@@ -49,32 +47,29 @@ namespace Loachs.Common
                 return _sitepath;
             }
         }
- 
 
         /// <summary>
-        /// 程序Url
-        /// 未考虑https://;存在多个域名指向时，有BUG，因为静态变量已存在，如www.loachs.com,loachs.com
-        /// 已解决
+        ///     程序Url
+        ///     未考虑https://;存在多个域名指向时，有BUG，因为静态变量已存在，如www.loachs.com,loachs.com
+        ///     已解决
         /// </summary>
         public static string SiteUrl
         {
             get
             {
-
-                string _siteurl = "http://" + System.Web.HttpContext.Current.Request.Url.Host + SitePath;
-                if (System.Web.HttpContext.Current.Request.Url.Port != 80)
+                string siteurl = "http://" + HttpContext.Current.Request.Url.Host + SitePath;
+                if (HttpContext.Current.Request.Url.Port != 80)
                 {
-                    _siteurl = "http://" + System.Web.HttpContext.Current.Request.Url.Host + ":" + System.Web.HttpContext.Current.Request.Url.Port + SitePath;
+                    siteurl = "http://" + HttpContext.Current.Request.Url.Host + ":" +
+                               HttpContext.Current.Request.Url.Port + SitePath;
                 }
 
-                return _siteurl;
+                return siteurl;
             }
         }
 
-        private static  string _dbconnection;
-
         /// <summary>
-        /// 数据库路径
+        ///     数据库路径
         /// </summary>
         public static string DbConnection
         {
@@ -97,14 +92,13 @@ namespace Loachs.Common
         //}
 
         /// <summary>
-        /// 读取值
+        ///     读取值
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
         private static string GetValue(string key)
         {
-            return System.Configuration.ConfigurationManager.AppSettings[key];
-
+            return ConfigurationManager.AppSettings[key];
         }
     }
 }

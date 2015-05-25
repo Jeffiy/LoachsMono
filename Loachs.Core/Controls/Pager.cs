@@ -1,34 +1,21 @@
 ﻿//http://topic.csdn.net/t/20050825/17/4231529.html
 
 using System;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
+using System.Web.UI;
 
 namespace Loachs.Controls
 {
     /// <summary>
-    /// 分页控件
+    ///     分页控件
     /// </summary>
     [DefaultProperty("Text"),
-    ToolboxData("<{0}:Pager runat=server></{0}:Pager>")]
+     ToolboxData("<{0}:Pager runat=server></{0}:Pager>")]
     public class Pager : Control
     {
-        public int _pageindex = 1;
-        public int intPageSize = 10;	//每页显示的记录数
-        //public int intPageCount;	//计算总共有多少页
-        public int intRecordCount = 0;	//一共有多少记录
-        public int intPageIndex = 1;	//当时页
-        public int intShowNum = 5;		//控件UI显示数字的个数
-        //public int intStartRecord;	//起始记录
-        private string _currenturl = string.Empty;		//当前页面路径
-        private string _rewriteurl = string.Empty;  //重写地址
-
-        private string _cssclass = "pager";
-        private int _totalrecord = 0;
-
         //以下脚本用于从文本框输入页码
-        private const string strScript =
+        private const string StrScript =
             "<script language='javascript'>\n" +
             " function ChoosePage(ctrl,max)" +
             " { " +
@@ -48,8 +35,24 @@ namespace Loachs.Controls
             " }" +
             "</script>";
 
+        private string _cssclass = "pager";
+        //public int intStartRecord;	//起始记录
+        private string _currenturl = string.Empty; //当前页面路径
+        public int Pageindex = 1;
+        private string _rewriteurl = string.Empty; //重写地址
+        private int _totalrecord = 0;
+        public int IntPageIndex = 1; //当时页
+        public int IntPageSize = 10; //每页显示的记录数
+        //public int intPageCount;	//计算总共有多少页
+        public int IntRecordCount = 0; //一共有多少记录
+        public int IntShowNum = 5; //控件UI显示数字的个数
+
+        public Pager()
+        {
+        }
+
         /// <summary>
-        /// 样式类名
+        ///     样式类名
         /// </summary>
         public string CssClass
         {
@@ -58,7 +61,7 @@ namespace Loachs.Controls
         }
 
         /// <summary>
-        /// 每页显示的记录数
+        ///     每页显示的记录数
         /// </summary>
         [DefaultValue(10), Category("Customer")]
         public int PageSize
@@ -66,99 +69,73 @@ namespace Loachs.Controls
             set
             {
                 if (value <= 0)
-                    intPageSize = 1;
+                    IntPageSize = 1;
                 else
-                    intPageSize = value;
+                    IntPageSize = value;
             }
-            get
-            {
-                return intPageSize;
-            }
+            get { return IntPageSize; }
         }
+
         /// <summary>
-        /// 当前页
+        ///     当前页
         /// </summary>
         public int PageIndex
         {
-            get
-            {
-                return _pageindex;
-            }
-            set
-            {
-                _pageindex = value > 0 ? value : 1;
-            }
-
-
+            get { return Pageindex; }
+            set { Pageindex = value > 0 ? value : 1; }
         }
 
-
         /// <summary>
-        /// 记录总数
+        ///     记录总数
         /// </summary>
         public int RecordCount
         {
-
-            get
-            {
-                return Convert.ToInt32(ViewState["_totalrecord"]);
-            }
+            get { return Convert.ToInt32(ViewState["_totalrecord"]); }
             set
             {
                 if (value < 0)
                 {
                     throw new Exception("记录总条数不能为负数");
                 }
-                else
-                {
-                    ViewState["_totalrecord"] = value;
-                }
+                ViewState["_totalrecord"] = value;
             }
         }
 
-
         /// <summary>
-        /// 总页数
+        ///     总页数
         /// </summary>
         [DefaultValue(1), Category("Customer")]
         public int PageSum
         {
             get
             {
-                if (this.RecordCount % this.intPageSize > 0)
+                if (RecordCount%IntPageSize > 0)
                 {
-                    return ((int)this.RecordCount / this.intPageSize) + 1;
+                    return (RecordCount/IntPageSize) + 1;
                 }
-                else
-                {
-                    return ((int)this.RecordCount / this.intPageSize);
-                }
+                return (RecordCount/IntPageSize);
             }
         }
 
         /// <summary>
-        /// 显示数字的个数
-        ///	ShowNum>=4
+        ///     显示数字的个数
+        ///     ShowNum>=4
         /// </summary>
         public int ShowNum
         {
-            set
-            {
-                intShowNum = value;
-            }
+            set { IntShowNum = value; }
             get
             {
-                if (intShowNum < 5)
+                if (IntShowNum < 5)
                 {
-                    intShowNum = 5;
+                    IntShowNum = 5;
                 }
-                return intShowNum;
+                return IntShowNum;
             }
         }
 
-
         /// <summary>
-        /// 重写地址
+        ///     重写地址
         /// </summary>
         public string RewriteUrl
         {
@@ -172,15 +149,14 @@ namespace Loachs.Controls
 
             //获取当前页数
 
-            if (this.Context.Request.QueryString["Page"] == null || this.Context.Request.QueryString["Page"] == "")
+            if (Context.Request.QueryString["Page"] == null || Context.Request.QueryString["Page"] == "")
             {
-                this.PageIndex = 1;
+                PageIndex = 1;
             }
             else
             {
-                this.PageIndex = int.Parse(this.Context.Request.QueryString["Page"]);
+                PageIndex = int.Parse(Context.Request.QueryString["Page"]);
             }
-
         }
 
         //protected override void OnPreRender(EventArgs e)
@@ -193,16 +169,15 @@ namespace Loachs.Controls
         //}
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="output"></param>
         protected override void Render(HtmlTextWriter output)
         {
             base.Render(output);
-            string strTotal = null;
+            string strTotal;
             string strLeft = null;
             string strRight = null;
-            string strCenterNum = null;	//循环生成数字序列部分
+            string strCenterNum = null; //循环生成数字序列部分
 
             //string first = "<font face=webdings title=首页>9</font>";
             //string prev = "<font face=webdings title=上页>7</font>";
@@ -216,168 +191,173 @@ namespace Loachs.Controls
 
             if (RewriteUrl == string.Empty || RewriteUrl == null)
             {
+                Regex rx = new Regex(@"&Page=\d*|Page=\d*", RegexOptions.IgnoreCase);
 
-
-                System.Text.RegularExpressions.Regex RX = new System.Text.RegularExpressions.Regex(@"&Page=\d*|Page=\d*", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-
-                string strFileUrl = Context.Request.Url.LocalPath;	//文件相对路径,不包括参数和域名
+                string strFileUrl = Context.Request.Url.LocalPath; //文件相对路径,不包括参数和域名
 
                 //string strUrlQuery=System.Web.HttpUtility.UrlDecode(Context.Request.Url.Query.Replace("?",string.Empty),System.Text.Encoding.GetEncoding("UTF-8"));		//去年问号的参数 同时解码中文参数
-                string strUrlQuery = Context.Request.Url.Query.Replace("?", string.Empty);		//去年问号的参数
+                string strUrlQuery = Context.Request.Url.Query.Replace("?", string.Empty); //去年问号的参数
 
-                string strRXUrl = RX.Replace(strUrlQuery, string.Empty);	//去年问号,page=n,&page=n的参数
-                string strNewUrl = strFileUrl + "?" + strRXUrl;			//新路径(不含&page=n)
+                string strRxUrl = rx.Replace(strUrlQuery, string.Empty); //去年问号,page=n,&page=n的参数
+                string strNewUrl = strFileUrl + "?" + strRxUrl; //新路径(不含&page=n)
 
                 //显示统计信息
                 //strTotal = "页:" + this.PageIndex.ToString() + "/" + this.PageSum.ToString() + "&nbsp;&nbsp;" + "每页" + this.PageSize.ToString() + "条" + "&nbsp;&nbsp;共" + this.RecordCount.ToString() + "条&nbsp;&nbsp;";     
-                strTotal = "共" + this.RecordCount.ToString() + "条&nbsp;&nbsp;";
+                strTotal = "共" + RecordCount + "条&nbsp;&nbsp;";
 
                 //显示首页 上一页
-                if (this.PageIndex != 1)
+                if (PageIndex != 1)
                 {
-                    if (strRXUrl.Length > 0)	//判断是否有其它参数
-                    { strLeft = "<a href=" + strNewUrl + "&Page=1>" + first + "</a>"; }
+                    if (strRxUrl.Length > 0) //判断是否有其它参数
+                    {
+                        strLeft = "<a href=" + strNewUrl + "&Page=1>" + first + "</a>";
+                    }
                     else
-                    { strLeft = "<a href=" + strNewUrl + "Page=1>" + first + "</a>"; }
+                    {
+                        strLeft = "<a href=" + strNewUrl + "Page=1>" + first + "</a>";
+                    }
 
-                    if (strRXUrl.Length > 0)	//判断是否有其它参数
-                    { strLeft += "<a href=" + strNewUrl + "&Page=" + (this.PageIndex - 1) + ">" + prev + "</a>"; }
+                    if (strRxUrl.Length > 0) //判断是否有其它参数
+                    {
+                        strLeft += "<a href=" + strNewUrl + "&Page=" + (PageIndex - 1) + ">" + prev + "</a>";
+                    }
                     else
-                    { strLeft += "<a href=" + strNewUrl + "Page=" + (this.PageIndex - 1) + ">" + prev + "</a>"; }
-                }
-                else
-                {
-                    //		strLeft = "|<" + "&nbsp;";
-                    //		strLeft += "<<" + "&nbsp;&nbsp;";
+                    {
+                        strLeft += "<a href=" + strNewUrl + "Page=" + (PageIndex - 1) + ">" + prev + "</a>";
+                    }
                 }
 
                 //显示尾页 下一页
-                if (this.PageIndex < this.PageSum && this.PageSum > 1)
+                if (PageIndex < PageSum && PageSum > 1)
                 {
-                    if (strRXUrl.Length > 0)
-                    { strRight = "<a href=" + strNewUrl + "&Page=" + (this.PageIndex + 1) + ">" + next + "</a>"; }
+                    if (strRxUrl.Length > 0)
+                    {
+                        strRight = "<a href=" + strNewUrl + "&Page=" + (PageIndex + 1) + ">" + next + "</a>";
+                    }
                     else
-                    { strRight = "<a href=" + strNewUrl + "Page=" + (this.PageIndex + 1) + ">" + next + "</a>"; }
+                    {
+                        strRight = "<a href=" + strNewUrl + "Page=" + (PageIndex + 1) + ">" + next + "</a>";
+                    }
 
-                    if (strRXUrl.Length > 0)
-                    { strRight += "<a href=" + strNewUrl + "&Page=" + this.PageSum + ">" + last + "</a>"; }
+                    if (strRxUrl.Length > 0)
+                    {
+                        strRight += "<a href=" + strNewUrl + "&Page=" + PageSum + ">" + last + "</a>";
+                    }
                     else
-                    { strRight += "<a href=" + strNewUrl + "Page=" + this.PageSum + ">" + last + "</a>"; }
-                }
-                else
-                {
-                    //		strRight = ">>" + "&nbsp;";
-                    //		strRight += ">|" + "&nbsp;&nbsp;";
+                    {
+                        strRight += "<a href=" + strNewUrl + "Page=" + PageSum + ">" + last + "</a>";
+                    }
                 }
 
-                int min = 1;	//要显示的页面数最小值
-                int max = this.ShowNum;	//要显示的页面数最大值
+                int min = 1; //要显示的页面数最小值
+                int max = ShowNum; //要显示的页面数最大值
 
-                if (this.PageIndex > this.PageSum)
+                if (PageIndex > PageSum)
                 {
-                    this.PageIndex = this.PageSum;
+                    PageIndex = PageSum;
                 }
 
                 //获取循环数字的最小值和最大值
-                if (this.PageIndex <= 3 && this.PageIndex > 0)  //0<当前页<=3, 
+                if (PageIndex <= 3 && PageIndex > 0) //0<当前页<=3, 
                 {
-                    if (this.PageSum < this.ShowNum)
+                    if (PageSum < ShowNum)
                     {
                         min = 1;
-                        max = this.PageSum;
+                        max = PageSum;
                     }
                     else
                     {
                         min = 1;
-                        max = this.ShowNum;
+                        max = ShowNum;
                     }
                 }
-                else if (this.PageIndex > 3 && this.PageIndex < this.PageSum - (this.ShowNum - 4))	//当前页>3,当前页比最大页<6
+                else if (PageIndex > 3 && PageIndex < PageSum - (ShowNum - 4)) //当前页>3,当前页比最大页<6
                 {
-                    min = this.PageIndex - 2;
-                    max = this.PageIndex + (this.ShowNum - 3);
+                    min = PageIndex - 2;
+                    max = PageIndex + (ShowNum - 3);
                 }
-                else if (this.PageIndex >= this.PageSum - (this.ShowNum - 4))// && this.PageSum>(this.ShowNum-4))	//当前页比最大页>=6,当前页>6   this.PageSum-(this.ShowNum-4):可能为负
+                else if (PageIndex >= PageSum - (ShowNum - 4))
+                    // && this.PageSum>(this.ShowNum-4))	//当前页比最大页>=6,当前页>6   this.PageSum-(this.ShowNum-4):可能为负
                 {
-                    min = (this.PageSum - this.ShowNum + 1) < 1 ? 1 : (this.PageSum - this.ShowNum + 1);
-                    max = this.PageSum;
+                    min = (PageSum - ShowNum + 1) < 1 ? 1 : (PageSum - ShowNum + 1);
+                    max = PageSum;
                 }
 
                 //循环显示数字
                 for (int i = min; i <= max; i++)
                 {
-                    if (this.PageIndex == i)	//如果是当前页，用粗体和红色显示
+                    if (PageIndex == i) //如果是当前页，用粗体和红色显示
                     {
                         //strCenterNum += "<B style='color:red'>" + i + "</B>&nbsp;" + "\n";
                         strCenterNum += "<span class=\"current\">" + i + "</span>";
                     }
                     else
                     {
-                        if (strRXUrl.Length > 0)	//判断是否有其它参数
+                        if (strRxUrl.Length > 0) //判断是否有其它参数
                         {
-                            strCenterNum += "<a href=" + strNewUrl + "&Page=" + i.ToString() + ">" + i + "</a>";// + "\n";
+                            strCenterNum += "<a href=" + strNewUrl + "&Page=" + i + ">" + i + "</a>"; // + "\n";
                         }
                         else
                         {
-                            strCenterNum += "<a href=" + strNewUrl + "Page=" + i.ToString() + ">" + i + "</a>";
+                            strCenterNum += "<a href=" + strNewUrl + "Page=" + i + ">" + i + "</a>";
                         }
                     }
                 }
             }
             else
             {
-
                 //显示首页 上一页
-                if (this.PageIndex != 1)
+                if (PageIndex != 1)
                 {
                     strLeft += "<a href='" + string.Format(RewriteUrl, 1) + "'>" + first + "</a>";
                     strLeft += "<a href='" + string.Format(RewriteUrl, PageIndex - 1) + "'>" + prev + "</a>";
                 }
 
                 //显示尾页 下一页
-                if (this.PageIndex < this.PageSum && this.PageSum > 1)
+                if (PageIndex < PageSum && PageSum > 1)
                 {
                     strRight += "<a href='" + string.Format(RewriteUrl, PageIndex + 1) + "'>" + next + "</a>";
                     strRight += "<a href='" + string.Format(RewriteUrl, PageSum) + "'>" + last + "</a>";
                 }
 
-                int min = 1;	//要显示的页面数最小值
-                int max = this.ShowNum;	//要显示的页面数最大值
+                int min = 1; //要显示的页面数最小值
+                int max = ShowNum; //要显示的页面数最大值
 
-                if (this.PageIndex > this.PageSum)
+                if (PageIndex > PageSum)
                 {
-                    this.PageIndex = this.PageSum;
+                    PageIndex = PageSum;
                 }
 
                 //获取循环数字的最小值和最大值
-                if (this.PageIndex <= 3 && this.PageIndex > 0)  //0<当前页<=3, 
+                if (PageIndex <= 3 && PageIndex > 0) //0<当前页<=3, 
                 {
-                    if (this.PageSum < this.ShowNum)
+                    if (PageSum < ShowNum)
                     {
                         min = 1;
-                        max = this.PageSum;
+                        max = PageSum;
                     }
                     else
                     {
                         min = 1;
-                        max = this.ShowNum;
+                        max = ShowNum;
                     }
                 }
-                else if (this.PageIndex > 3 && this.PageIndex < this.PageSum - (this.ShowNum - 4))	//当前页>3,当前页比最大页<6
+                else if (PageIndex > 3 && PageIndex < PageSum - (ShowNum - 4)) //当前页>3,当前页比最大页<6
                 {
-                    min = this.PageIndex - 2;
-                    max = this.PageIndex + (this.ShowNum - 3);
+                    min = PageIndex - 2;
+                    max = PageIndex + (ShowNum - 3);
                 }
-                else if (this.PageIndex >= this.PageSum - (this.ShowNum - 4))// && this.PageSum>(this.ShowNum-4))	//当前页比最大页>=6,当前页>6   this.PageSum-(this.ShowNum-4):可能为负
+                else if (PageIndex >= PageSum - (ShowNum - 4))
+                    // && this.PageSum>(this.ShowNum-4))	//当前页比最大页>=6,当前页>6   this.PageSum-(this.ShowNum-4):可能为负
                 {
-                    min = (this.PageSum - this.ShowNum + 1) < 1 ? 1 : (this.PageSum - this.ShowNum + 1);
-                    max = this.PageSum;
+                    min = (PageSum - ShowNum + 1) < 1 ? 1 : (PageSum - ShowNum + 1);
+                    max = PageSum;
                 }
 
                 //循环显示数字
                 for (int i = min; i <= max; i++)
                 {
-                    if (this.PageIndex == i)	//如果是当前页，用粗体和红色显示
+                    if (PageIndex == i) //如果是当前页，用粗体和红色显示
                     {
                         strCenterNum += "<span class=\"current\">" + i + "</span>";
                     }
@@ -386,11 +366,10 @@ namespace Loachs.Controls
                         strCenterNum += "<a href=\"" + string.Format(RewriteUrl, i) + "\">" + i + "</a>";
                     }
                 }
-
             }
             //	strTotal = "共<span class=\"totalnum\">" + this.RecordCount.ToString() + "</span>条&nbsp;&nbsp;";     
-            strTotal = string.Format("<span class=\"total\">共有<strong>{0}</strong>条</span>", this.RecordCount.ToString());
-            output.Write("<div id=\"" + this.UniqueID + "\" class= \"" + this.CssClass + "\">");
+            strTotal = string.Format("<span class=\"total\">共有<strong>{0}</strong>条</span>", RecordCount);
+            output.Write("<div id=\"" + UniqueID + "\" class= \"" + CssClass + "\">");
             output.Write("<div>");
             output.Write(strTotal + strLeft + strCenterNum + strRight);
             output.Write("</div>");

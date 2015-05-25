@@ -1,29 +1,17 @@
 ﻿using System;
-using System.Data;
-using System.Configuration;
-using System.Collections;
 using System.Collections.Generic;
-using System.Net.Mail;
-using System.Globalization;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-using System.Web.UI.HtmlControls;
-
+using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
-using Loachs.Business;
 
 namespace Loachs.Web
 {
     public partial class admin_taglist : AdminPage
     {
         /// <summary>
-        /// 分类ID
+        ///     分类ID
         /// </summary>
-        protected int tagId = RequestHelper.QueryInt("tagid");
+        protected int TagId = RequestHelper.QueryInt("tagid");
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -47,7 +35,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 显示结果
+        ///     显示结果
         /// </summary>
         protected void ShowResult()
         {
@@ -72,15 +60,16 @@ namespace Loachs.Web
 
         protected void Delete()
         {
-            TagManager.DeleteTag(tagId);
+            TagManager.DeleteTag(TagId);
             Response.Redirect("taglist.aspx?result=3&page=" + Pager1.PageIndex);
         }
+
         /// <summary>
-        /// 绑定分类
+        ///     绑定分类
         /// </summary>
         protected void BindCategory()
         {
-            TagInfo tag = TagManager.GetTag(tagId);
+            TagInfo tag = TagManager.GetTag(TagId);
             if (tag != null)
             {
                 txtName.Text = StringHelper.HtmlDecode(tag.Name);
@@ -91,7 +80,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 绑定列表
+        ///     绑定列表
         /// </summary>
         protected void BindCategoryList()
         {
@@ -105,7 +94,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 编辑
+        ///     编辑
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -114,7 +103,7 @@ namespace Loachs.Web
             TagInfo tag = new TagInfo();
             if (Operate == OperateType.Update)
             {
-                tag = TagManager.GetTag(tagId);
+                tag = TagManager.GetTag(TagId);
             }
             else
             {

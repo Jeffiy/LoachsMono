@@ -1,63 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Loachs.Common;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Loachs.Data;
 using Loachs.Entity;
 
 namespace Loachs.Business
 {
     /// <summary>
-    /// 连接管理
+    ///     连接管理
     /// </summary>
     public class LinkManager
     {
-        static ILink dao = DataAccess.CreateLink();
+        private static readonly ILink Dao = DataAccess.CreateLink();
 
         /// <summary>
-        /// 列表
+        ///     列表
         /// </summary>
         private static List<LinkInfo> _links;
 
         /// <summary>
-        /// lock
+        ///     lock
         /// </summary>
-        private static object lockHelper = new object();
+        private static readonly object LockHelper = new object();
 
         static LinkManager()
         {
             LoadLink();
         }
 
-
         /// <summary>
-        /// 初始化
+        ///     初始化
         /// </summary>
         public static void LoadLink()
         {
             if (_links == null)
             {
-                lock (lockHelper)
+                lock (LockHelper)
                 {
                     if (_links == null)
                     {
-                        _links = dao.GetLinkList();
-
+                        _links = Dao.GetLinkList();
                     }
                 }
             }
         }
 
-
         /// <summary>
-        /// 添加
+        ///     添加
         /// </summary>
         /// <param name="link"></param>
         /// <returns></returns>
         public static int InsertLink(LinkInfo link)
         {
-            link.LinkId = dao.InsertLink(link);
+            link.LinkId = Dao.InsertLink(link);
             _links.Add(link);
             _links.Sort();
 
@@ -65,52 +59,43 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 修改
+        ///     修改
         /// </summary>
         /// <param name="link"></param>
         /// <returns></returns>
         public static int UpdateLink(LinkInfo link)
         {
             _links.Sort();
-            return dao.UpdateLink(link);
+            return Dao.UpdateLink(link);
         }
 
         /// <summary>
-        /// 删除
+        ///     删除
         /// </summary>
         /// <param name="termid"></param>
         /// <returns></returns>
         public static int DeleteLink(int linkId)
         {
-
             LinkInfo link = GetLink(linkId);
             if (link != null)
             {
                 _links.Remove(link);
             }
-            return dao.DeleteLink(linkId);
+            return Dao.DeleteLink(linkId);
         }
 
         /// <summary>
-        /// 获取
+        ///     获取
         /// </summary>
         /// <param name="linkId"></param>
         /// <returns></returns>
         public static LinkInfo GetLink(int linkId)
         {
-
-            foreach (LinkInfo l in _links)
-            {
-                if (l.LinkId == linkId)
-                {
-                    return l;
-                }
-            }
-            return null;
+            return _links.FirstOrDefault(l => l.LinkId == linkId);
         }
 
         /// <summary>
-        /// 获取连接列表
+        ///     获取连接列表
         /// </summary>
         /// <param name="position"></param>
         /// <param name="status"></param>
@@ -121,7 +106,7 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 获取连接列表
+        ///     获取连接列表
         /// </summary>
         /// <param name="type"></param>
         /// <param name="position"></param>
@@ -150,7 +135,7 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 获取连接列表
+        ///     获取连接列表
         /// </summary>
         /// <returns></returns>
         public static List<LinkInfo> GetLinkList()

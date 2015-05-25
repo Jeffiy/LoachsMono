@@ -2,7 +2,7 @@
 <%@ Import Namespace="Loachs.Common" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
 <style type="text/css">
-.navs{line-height:22px; border:0px solid #ccc;color:#666; padding:3px  ;}
+.navs{line-height:22px; border:0 solid #ccc;color:#666; padding:3px  ;}
 .navs a { padding-right:8px; font-size:14px;}
 </style>
 </asp:Content>

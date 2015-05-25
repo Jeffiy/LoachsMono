@@ -1,40 +1,22 @@
 ﻿using System;
-using System.Collections;
-using System.Configuration;
-using System.Data;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
 using System.IO;
-using System.Text;
-using System.Xml;
-
+using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
-using Loachs.Business;
+
 namespace Loachs.Web
 {
     public partial class admin_themelist : AdminPage
     {
         /// <summary>
-        /// 主题名(文件夹名)
+        ///     主题名(文件夹名)
         /// </summary>
-        protected string themename = RequestHelper.QueryString("themename", true);
+        protected string Themename = RequestHelper.QueryString("themename", true);
 
         protected void Page_Load(object sender, EventArgs e)
         {
             SetPageTitle("主题管理");
-
-            string[] filelist = Directory.GetFileSystemEntries(Server.MapPath("../themes/default"));
-            foreach (string str in filelist)
-            {
-                //   Response.Write(str+"<br>");
-            }
-            //   System.IO.Directory.Delete(Server.MapPath("../themes/test"),true);
-
+            
             string type = RequestHelper.QueryString("type", true);
 
             if (Operate == OperateType.Update)
@@ -44,11 +26,11 @@ namespace Loachs.Web
                 switch (type)
                 {
                     case "mobile":
-                        s.MobileTheme = themename;
+                        s.MobileTheme = Themename;
                         break;
                     case "pc":
                     default:
-                        s.Theme = themename;
+                        s.Theme = Themename;
                         break;
                 }
                 SettingManager.UpdateSetting();
@@ -57,17 +39,17 @@ namespace Loachs.Web
             }
             else if (Operate == OperateType.Insert)
             {
-                string srcPath = Server.MapPath("../themes/" + themename);
+                string srcPath = Server.MapPath("../themes/" + Themename);
 
-                if (!string.IsNullOrEmpty(themename) && System.IO.Directory.Exists(srcPath))
+                if (!string.IsNullOrEmpty(Themename) && Directory.Exists(srcPath))
                 {
                     string aimPath = string.Empty;
                     int count = 1;
                     while (true)
                     {
                         count++;
-                        aimPath = Server.MapPath("../themes/" + themename + "-" + count);
-                        if (!System.IO.Directory.Exists(aimPath))
+                        aimPath = Server.MapPath("../themes/" + Themename + "-" + count);
+                        if (!Directory.Exists(aimPath))
                         {
                             break;
                         }
@@ -78,16 +60,16 @@ namespace Loachs.Web
             }
             else if (Operate == OperateType.Delete)
             {
-                if (themename == "default")
+                if (Themename == "default")
                 {
                     Response.Redirect("themelist.aspx?result=5");
                 }
                 else
                 {
-                    string path = Server.MapPath("../themes/" + themename);
-                    if (System.IO.Directory.Exists(path))
+                    string path = Server.MapPath("../themes/" + Themename);
+                    if (Directory.Exists(path))
                     {
-                        System.IO.Directory.Delete(path, true);
+                        Directory.Delete(path, true);
                         Response.Redirect("themelist.aspx?result=3");
                     }
                 }
@@ -97,7 +79,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 显示结果
+        ///     显示结果
         /// </summary>
         protected void ShowResult()
         {
@@ -124,10 +106,8 @@ namespace Loachs.Web
             }
         }
 
-
-
         /// <summary>
-        /// 将整个文件夹复制到目标文件夹中。
+        ///     将整个文件夹复制到目标文件夹中。
         /// </summary>
         /// <param name="srcPath">源文件夹</param>
         /// <param name="aimPath">目标文件夹</param>

@@ -1,29 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Web;
 using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
+
 namespace Loachs.Web
 {
     /// <summary>
-    /// 数据调用管理
+    ///     数据调用管理
     /// </summary>
     public class LoachsDataManager
     {
         /// <summary>
-        /// 调用文章列表
+        ///     调用文章列表
         /// </summary>
         /// <remarks>
-        /// 参数说明：
-        /// categoryid=7&userid=2&pagesize=10&page=2
-        /// categoryid=8&userid=2&count=10&order=desc&keyword=
+        ///     参数说明：
+        ///     categoryid=7&userid=2&pagesize=10&page=2
+        ///     categoryid=8&userid=2&count=10&order=desc&keyword=
         /// </remarks>
         /// <param name="condition"></param>
         /// <returns></returns>
         public List<PostInfo> GetPosts(string condition)
         {
-
             return PostManager.GetPostList();
         }
 
@@ -48,7 +47,7 @@ namespace Loachs.Web
         //}
 
         /// <summary>
-        /// 调用用户
+        ///     调用用户
         /// </summary>
         /// <param name="key">userid or username</param>
         /// <returns></returns>
@@ -62,10 +61,10 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 调用评论
+        ///     调用评论
         /// </summary>
         /// <remarks>
-        /// postid=7&userid=3&pagesize=20&page=2&order=desc
+        ///     postid=7&userid=3&pagesize=20&page=2&order=desc
         /// </remarks>
         /// <param name="condition"></param>
         /// <returns></returns>
@@ -78,13 +77,14 @@ namespace Loachs.Web
             int userid = -1;
             int postid = -1;
             int parentid = -1;
-            int approved = (int)ApprovedStatus.Success;
+            int approved = (int) ApprovedStatus.Success;
             int emailNotify = -1;
             string keyword = string.Empty;
 
             // int pageSize, int pageIndex, out int totalRecord, int order, int userId, int postId, int parentId, int approved, int emailNotify, string keyword)
 
-            return CommentManager.GetCommentList(pageSize, pageIndex, out recordCount, order, userid, postid, parentid, approved, emailNotify, keyword);
+            return CommentManager.GetCommentList(pageSize, pageIndex, out recordCount, order, userid, postid, parentid,
+                approved, emailNotify, keyword);
         }
 
         public List<TagInfo> GetTags(string filter)

@@ -18,53 +18,44 @@
  * cache,tag:  key<10时:tag 与cache 差距极大， key=10时:tag 快20倍以上，key=20时:tag 快10倍以上，key=50时:tag 快5倍以上，key=100时:tag 快4倍左右， key=200时:tag 快3倍左右，  key=500时:tag快一倍左右， key=1000时: tag 略快， key=5000:当有其它缓存时，tag 明显要快， key=10000 接近 ，key>20000 cache 略快
  * 单台用cache,多台用tag
  */
+
 using System;
-using System.Data;
-using System.Configuration;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-using System.Web.UI.HtmlControls;
-using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using System.Web.Caching;
- 
+using System.Xml;
+
 namespace Loachs.Common
 {
     /// <summary>
-    ///缓存管理
+    ///     缓存管理
     /// </summary>
     public class CacheByXml
     {
         /// <summary>
-        /// XML 元素
+        ///     XML 元素
         /// </summary>
-        public static XmlElement objectXmlMap;
+        public static XmlElement ObjectXmlMap;
 
         /// <summary>
-        /// 缓存键XML文档
+        ///     缓存键XML文档
         /// </summary>
-        public static XmlDocument rootXml = new XmlDocument();
+        public static XmlDocument RootXml = new XmlDocument();
 
-        protected static volatile System.Web.Caching.Cache webCache = System.Web.HttpRuntime.Cache;
-
-        private static object lockHelper = new object();
+        protected static volatile Cache WebCache = HttpRuntime.Cache;
+        private static readonly object LockHelper = new object();
 
         static CacheByXml()
         {
-            objectXmlMap = rootXml.CreateElement("Cache");
+            ObjectXmlMap = RootXml.CreateElement("Cache");
             //build the internal xml document.
-            rootXml.AppendChild(objectXmlMap);
+            RootXml.AppendChild(ObjectXmlMap);
         }
 
-
         /// <summary>
-        /// Add the object to the underlying storage and Xml mapping document
+        ///     Add the object to the underlying storage and Xml mapping document
         /// </summary>
         /// <param name="xpath">the hierarchical location of the object in Xml document </param>
         /// <param name="o">the object to be cached</param>
@@ -78,11 +69,11 @@ namespace Loachs.Common
             //find the item name
             string element = newXpath.Substring(separator + 1);
 
-            XmlNode groupNode = objectXmlMap.SelectSingleNode(group);
+            XmlNode groupNode = ObjectXmlMap.SelectSingleNode(group);
 
             string objectId = "";
 
-            XmlNode node = objectXmlMap.SelectSingleNode(PrepareXpath(xpath));
+            XmlNode node = ObjectXmlMap.SelectSingleNode(PrepareXpath(xpath));
             if (node != null)
             {
                 objectId = node.Attributes["objectId"].Value;
@@ -92,33 +83,33 @@ namespace Loachs.Common
             {
                 groupNode = CreateNode(group);
                 objectId = Guid.NewGuid().ToString();
-                XmlElement objectElement = objectXmlMap.OwnerDocument.CreateElement(element);
-                XmlAttribute objectAttribute = objectXmlMap.OwnerDocument.CreateAttribute("objectId");
+                XmlElement objectElement = ObjectXmlMap.OwnerDocument.CreateElement(element);
+                XmlAttribute objectAttribute = ObjectXmlMap.OwnerDocument.CreateAttribute("objectId");
                 objectAttribute.Value = objectId;
                 objectElement.Attributes.Append(objectAttribute);
                 groupNode.AppendChild(objectElement);
             }
             else
             {
-                XmlElement objectElement = objectXmlMap.OwnerDocument.CreateElement(element);
-                XmlAttribute objectAttribute = objectXmlMap.OwnerDocument.CreateAttribute("objectId");
+                XmlElement objectElement = ObjectXmlMap.OwnerDocument.CreateElement(element);
+                XmlAttribute objectAttribute = ObjectXmlMap.OwnerDocument.CreateAttribute("objectId");
                 objectAttribute.Value = objectId;
                 objectElement.Attributes.Append(objectAttribute);
                 groupNode.ReplaceChild(objectElement, node);
             }
 
-            webCache.Insert(objectId, o);
+            WebCache.Insert(objectId, o);
         }
 
         /// <summary>
-        /// Retrieve the cached object using its hierarchical location
+        ///     Retrieve the cached object using its hierarchical location
         /// </summary>
         /// <param name="xpath">hierarchical location of the object in xml document</param>
         /// <returns>cached object </returns>
         public static object Get(string xpath)
         {
             object o = null;
-            XmlNode node = objectXmlMap.SelectSingleNode(PrepareXpath(xpath));
+            XmlNode node = ObjectXmlMap.SelectSingleNode(PrepareXpath(xpath));
             //if the hierarchical location existed in the xml, retrieve the object
             //otherwise, return the object as null
             if (node != null)
@@ -126,22 +117,19 @@ namespace Loachs.Common
                 string objectId = node.Attributes["objectId"].Value;
                 //retrieve the object through cache strategy
                 //  o = cs.RetrieveObject(objectId);
-                o = webCache.Get(objectId);
+                o = WebCache.Get(objectId);
             }
             return o;
-
         }
 
-
-
         /// <summary>
-        /// Retrive a list of object under a hierarchical location
+        ///     Retrive a list of object under a hierarchical location
         /// </summary>
         /// <param name="xpath">hierarchical location</param>
         /// <returns>an array of objects</returns>
         public static object[] GetList(string xpath)
         {
-            XmlNode group = objectXmlMap.SelectSingleNode(PrepareXpath(xpath));
+            XmlNode group = ObjectXmlMap.SelectSingleNode(PrepareXpath(xpath));
             XmlNodeList results = group.SelectNodes(PrepareXpath(xpath) + "/*[@objectId]");
             ArrayList objects = new ArrayList();
             string objectId = null;
@@ -151,22 +139,22 @@ namespace Loachs.Common
             {
                 objectId = result.Attributes["objectId"].Value;
                 //   objects.Add(cs.RetrieveObject(objectId));
-                objects.Add(webCache.Get(objectId));
+                objects.Add(WebCache.Get(objectId));
             }
             //convert the ArrayList to object[]
-            return (object[])objects.ToArray(typeof(System.Object));
+            return (object[]) objects.ToArray(typeof (object));
         }
 
         /// <summary>
-        /// Remove the object from the storage and clear the Xml assocated with
-        /// the object
+        ///     Remove the object from the storage and clear the Xml assocated with
+        ///     the object
         /// </summary>
         /// <param name="xpath">hierarchical locatioin of the object</param>
         public static void Remove(string xpath)
         {
-            lock (lockHelper)
+            lock (LockHelper)
             {
-                XmlNode result = objectXmlMap.SelectSingleNode(PrepareXpath(xpath));
+                XmlNode result = ObjectXmlMap.SelectSingleNode(PrepareXpath(xpath));
                 //check if the xpath refers to a group(container) or
                 //actual element for cached object
                 if (result.HasChildNodes)
@@ -182,7 +170,7 @@ namespace Loachs.Common
                         //use cache strategy to remove the objects from the 
                         //underlying storage
                         //     cs.RemoveObject(objectId);
-                        webCache.Remove(objectId);
+                        WebCache.Remove(objectId);
                     }
                 }
                 else
@@ -192,52 +180,51 @@ namespace Loachs.Common
                     result.ParentNode.RemoveChild(result);
                     //    cs.RemoveObject(objectId);
 
-                    webCache.Remove(objectId);
+                    WebCache.Remove(objectId);
                 }
             }
         }
 
         /// <summary>
-        /// CreateNode is responsible for creating the xml tree that is
-        /// specificed in the hierarchical location of the object.
+        ///     CreateNode is responsible for creating the xml tree that is
+        ///     specificed in the hierarchical location of the object.
         /// </summary>
         /// <param name="xpath">hierarchical location</param>
         /// <returns></returns>
         private static XmlNode CreateNode(string xpath)
         {
-            lock (lockHelper)
+            lock (LockHelper)
             {
                 string[] xpathArray = xpath.Split('/');
                 string root = "";
-                XmlNode parentNode = (XmlNode)objectXmlMap;
+                XmlNode parentNode = ObjectXmlMap;
                 //loop through the array of levels and create the corresponding node for each level
                 //skip the root node.
                 for (int i = 1; i < xpathArray.Length; i++)
                 {
-                    XmlNode node = objectXmlMap.SelectSingleNode(root + "/" + xpathArray[i]);
+                    XmlNode node = ObjectXmlMap.SelectSingleNode(root + "/" + xpathArray[i]);
                     // if the current location doesn't exist, build one
                     //otherwise set the current locaiton to the it child location
                     if (node == null)
                     {
-                        XmlElement newElement = objectXmlMap.OwnerDocument.CreateElement(xpathArray[i]);
+                        XmlElement newElement = ObjectXmlMap.OwnerDocument.CreateElement(xpathArray[i]);
                         parentNode.AppendChild(newElement);
                     }
                     //set the new location to one level lower
                     root = root + "/" + xpathArray[i];
-                    parentNode = objectXmlMap.SelectSingleNode(root);
+                    parentNode = ObjectXmlMap.SelectSingleNode(root);
                 }
                 return parentNode;
             }
         }
 
         /// <summary>
-        /// clean up the xpath so that extra '/' is removed
+        ///     clean up the xpath so that extra '/' is removed
         /// </summary>
         /// <param name="xpath">hierarchical location</param>
         /// <returns></returns>
         private static string PrepareXpath(string xpath)
         {
-
             string[] xpathArray = xpath.Split('/');
             xpath = "/Cache";
             foreach (string s in xpathArray)
@@ -248,60 +235,45 @@ namespace Loachs.Common
                 }
             }
             return xpath;
-
         }
     }
 
 
-
     public class CacheByTag
     {
-        private static readonly Cache _cache = HttpContext.Current.Cache;
+        private static readonly Cache Cache = HttpContext.Current.Cache;
+
         private static string GenerateKey(string key)
         {
             return "project_name/" + key;
         }
 
-        /// 
         /// 取缓存
-        /// 
-        /// 
-        /// 
         public static object Get(string key)
         {
             key = GenerateKey(key);
 
-            object obj = _cache.Get(key);
+            object obj = Cache.Get(key);
 
             if (obj != null)
             {
-
-              //  Logs.Debug("Cache hit " + key);
+                //  Logs.Debug("Cache hit " + key);
             }
 
             return obj;
         }
 
-        /// 
         /// 存缓存
-        /// 
-        /// 
-        /// 
         public static void Set(string key, object value)
         {
             key = GenerateKey(key);
 
-            _cache.Insert(key, value);
+            Cache.Insert(key, value);
 
-          //  Logs.Debug("Cache set " + key);
+            //  Logs.Debug("Cache set " + key);
         }
 
-        /// 
         /// 存缓存，带Tag，用于做类似命名空间的管理
-        /// 
-        /// 
-        /// 
-        /// 
         public static void Set(string key, object value, string[] tags)
         {
             if (tags.Length == 0)
@@ -320,7 +292,7 @@ namespace Loachs.Common
                 object tagObj = Get(tag);
                 if (tagObj != null)
                 {
-                    tagList = (List<string>)tagObj;
+                    tagList = (List<string>) tagObj;
                 }
 
                 tagList.Add(key);
@@ -330,24 +302,17 @@ namespace Loachs.Common
             Set(key, value);
         }
 
-
-        /// 
         /// 删缓存
-        /// 
-        /// 
         public static void Remove(string key)
         {
             key = GenerateKey(key);
 
-            _cache.Remove(key);
+            Cache.Remove(key);
 
-         //   Logs.Debug("Cache remove " + key);
+            //   Logs.Debug("Cache remove " + key);
         }
 
-        /// 
         /// 根据 Tag 删除缓存
-        /// 
-        /// 
         public static void RemoveByTags(string[] tags)
         {
             for (int i = 0; i < tags.Length; i++)
@@ -361,7 +326,7 @@ namespace Loachs.Common
                 object tagsObj = Get(tag);
                 if (tagsObj != null)
                 {
-                    tagList = (List<string>)tagsObj;
+                    tagList = (List<string>) tagsObj;
                     foreach (string key in tagList)
                     {
                         Remove(key);
@@ -376,35 +341,30 @@ namespace Loachs.Common
 
     public class CacheByRegex
     {
-        private static readonly Cache _cache = HttpContext.Current.Cache;
-        /// 
+        private static readonly Cache Cache = HttpContext.Current.Cache;
+
         /// 用于存放所有cache keys，以便于用正则的方式删除缓存
         /// 如： place/home/page/1 ，以后用 place/home/page/* 来删除 place/home/page/1,place/home/page/2 ... place/home/page/n
-        /// 
-        private static List<string> cacheKeys = new List<string>();
-        /// 
+        private static readonly List<string> CacheKeys = new List<string>();
+
         /// 将 Key 存入 cacheKeyStore
-        /// 
-        /// 
-        private static void saveKeyToCacheKeys(string key)
+        private static void SaveKeyToCacheKeys(string key)
         {
-            if (!cacheKeys.Exists(c => c == key))
+            if (!CacheKeys.Exists(c => c == key))
             {
-                cacheKeys.Add(key);
+                CacheKeys.Add(key);
             }
         }
 
         public static void Set(string key, object value)
         {
+            SaveKeyToCacheKeys(key);
 
-            saveKeyToCacheKeys(key);
-
-            _cache.Insert(key, value);
+            Cache.Insert(key, value);
 
             //  Logs.Debug("Cache set " + key);
         }
 
-        /// 
         /// 删缓存
         /// 
         /// 
@@ -414,22 +374,20 @@ namespace Loachs.Common
             if (!match)
             {
                 // Memcached 虚构的自已实现一个
-                _cache.Remove(key);
+                Cache.Remove(key);
                 // 写 Cached 操作日志
-              //  Debug.Log("Cache remove " + key);
+                //  Debug.Log("Cache remove " + key);
             }
             else
             {
                 Regex reg = new Regex(key, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
-                List<string> matchedKeys = cacheKeys.FindAll(c => reg.IsMatch(c));
+                List<string> matchedKeys = CacheKeys.FindAll(c => reg.IsMatch(c));
                 foreach (var k in matchedKeys)
                 {
-                    _cache.Remove(k);
-                 //   Debug.Log("Cache remove " + key);
+                    Cache.Remove(k);
+                    //   Debug.Log("Cache remove " + key);
                 }
-
             }
         }
     }
-
 }

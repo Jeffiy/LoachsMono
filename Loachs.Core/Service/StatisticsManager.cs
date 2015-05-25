@@ -1,28 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-
-using Loachs.Data;
+﻿using Loachs.Data;
 using Loachs.Entity;
-using Loachs.Common;
 
 namespace Loachs.Business
 {
     /// <summary>
-    /// 统计管理
+    ///     统计管理
     /// </summary>
     public static class StatisticsManager
     {
-        private static IStatistics dao = DataAccess.CreateStatistics();
+        private static readonly IStatistics Dao = DataAccess.CreateStatistics();
 
         /// <summary>
-        /// 缓存统计
+        ///     缓存统计
         /// </summary>
         private static StatisticsInfo _statistics;
 
         /// <summary>
-        /// lock
+        ///     lock
         /// </summary>
-        private static object lockHelper = new object();
+        private static readonly object LockHelper = new object();
 
         static StatisticsManager()
         {
@@ -30,24 +26,24 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 初始化
+        ///     初始化
         /// </summary>
         private static void LoadStatistics()
         {
             if (_statistics == null)
             {
-                lock (lockHelper)
+                lock (LockHelper)
                 {
                     if (_statistics == null)
                     {
-                        _statistics = dao.GetStatistics();
+                        _statistics = Dao.GetStatistics();
                     }
                 }
             }
         }
 
         /// <summary>
-        /// 获取
+        ///     获取
         /// </summary>
         /// <returns></returns>
         public static StatisticsInfo GetStatistics()
@@ -56,16 +52,16 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 修改
+        ///     修改
         /// </summary>
         /// <returns></returns>
         public static bool UpdateStatistics()
         {
-            return dao.UpdateStatistics(_statistics);
+            return Dao.UpdateStatistics(_statistics);
         }
 
         /// <summary>
-        /// 更新文章数
+        ///     更新文章数
         /// </summary>
         /// <param name="addCount">增加数，可为负数</param>
         /// <returns></returns>
@@ -76,7 +72,7 @@ namespace Loachs.Business
         }
 
         /// <summary>
-        /// 更新评论数
+        ///     更新评论数
         /// </summary>
         /// <param name="addCount">增加数，可为负数</param>
         /// <returns></returns>

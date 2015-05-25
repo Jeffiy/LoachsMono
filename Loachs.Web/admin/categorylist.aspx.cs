@@ -1,29 +1,17 @@
 ﻿using System;
-using System.Data;
-using System.Configuration;
-using System.Collections;
 using System.Collections.Generic;
-using System.Net.Mail;
-using System.Globalization;
-using System.Web;
-using System.Web.Security;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Web.UI.WebControls.WebParts;
-using System.Web.UI.HtmlControls;
-
+using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
-using Loachs.Business;
 
 namespace Loachs.Web
 {
-    public partial class admin_categorylist : Loachs.Web.AdminPage
+    public partial class admin_categorylist : AdminPage
     {
         /// <summary>
-        /// 分类ID
+        ///     分类ID
         /// </summary>
-        protected int categoryId = RequestHelper.QueryInt("categoryid");
+        protected int CategoryId = RequestHelper.QueryInt("categoryid");
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -32,8 +20,7 @@ namespace Loachs.Web
             if (!IsPostBack)
             {
                 BindCategoryList();
-
-
+                
                 if (Operate == OperateType.Update)
                 {
                     BindCategory();
@@ -48,7 +35,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 显示结果
+        ///     显示结果
         /// </summary>
         protected void ShowResult()
         {
@@ -71,15 +58,16 @@ namespace Loachs.Web
 
         protected void Delete()
         {
-            CategoryManager.DeleteCategory(categoryId);
+            CategoryManager.DeleteCategory(CategoryId);
             Response.Redirect("categorylist.aspx?result=3");
         }
+
         /// <summary>
-        /// 绑定分类
+        ///     绑定分类
         /// </summary>
         protected void BindCategory()
         {
-            CategoryInfo term = CategoryManager.GetCategory(categoryId);
+            CategoryInfo term = CategoryManager.GetCategory(CategoryId);
             if (term != null)
             {
                 txtName.Text = StringHelper.HtmlDecode(term.Name);
@@ -90,7 +78,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 绑定列表
+        ///     绑定列表
         /// </summary>
         protected void BindCategoryList()
         {
@@ -100,7 +88,7 @@ namespace Loachs.Web
         }
 
         /// <summary>
-        /// 编辑
+        ///     编辑
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -109,7 +97,7 @@ namespace Loachs.Web
             CategoryInfo term = new CategoryInfo();
             if (Operate == OperateType.Update)
             {
-                term = CategoryManager.GetCategory(categoryId);
+                term = CategoryManager.GetCategory(CategoryId);
             }
             else
             {
