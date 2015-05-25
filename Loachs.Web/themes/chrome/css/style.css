@@ -1,0 +1,98 @@
+﻿/*  
+Theme Name: GoogleChrome
+Theme URI: http://ericulous.com/2008/09/09/wp-theme-google-chrome
+Description: Based on Google Chrome Browser
+Version: 1.2
+Author: Genkisan
+Author URI: http://ericulous.com/
+Tags: white, blue, fixed width, two columns, widgets
+
+修改：沩水老农
+时间：2010.4.20
+http://www.loachs.com
+
+*/
+
+html, body {height: 100%;}
+body {background: #fff url(../images/headerbg.gif) repeat-x;margin: 0 0;   font:14px/1.5  tahoma, arial, \5b8b\4f53, sans-serif; }
+a { color: #0000cc; text-decoration: none; }
+a:hover{ color:#000;}
+blockquote {background: url(../images/quote.gif) no-repeat; margin:10px; padding: 0 0 0 50px;}
+input, textarea {border: 1px solid #d1d1d1;}
+
+/*更改此宽度即可改变布局，支持改成百分比*/
+#wrapper {  width:950px;margin:0 auto;}
+#container {margin-top:10px; padding-right:330px; }
+#content {  float:left;   width:100%; overflow:hidden; }
+#header {}
+
+/* 头部 */
+#header  .nav{height: 25px;}
+#header  .nav{list-style-type: none;margin: 0;margin-top: 1px; padding:0;}
+#header  .nav li{float: left;margin: 0;background: url(../images/navtab.gif) no-repeat right top;}
+#header  .nav  a{display: block;padding: 5px 48px 5px 10px;font-weight: bold;text-decoration: none;color: #333;font-size: 12px;font-weight:normal;}
+#header  .nav  a:hover{color: #f9f7ed;}
+#header  .nav  .first a{padding: 5px 48px 5px 39px;background: url(../images/navtab_first.gif) no-repeat;}
+#header  .nav  .firstcurrent{ background: #f4f8fd url(../images/navtab_current.gif) no-repeat right top;}
+#header  .nav  .firstcurrent a{ background: url(../images/navtab_current_first.gif) no-repeat;color: #000;}
+#header  .nav  .current{ margin-left: -38px;background: #f4f8fd url(../images/navtab_current.gif) no-repeat right top;}
+#header  .nav  .current a{ padding: 5px 48px;background: url(../images/navtab_current_left.gif) no-repeat;color: #000;}
+#header  .nav  .last{ background: url(../images/navtab_last.gif) no-repeat right top;}
+#header  .nav  .last a{ padding: 5px 39px 5px 10px;}
+#header  .nav  .lastcurrent{ margin-left: -38px;background: #f4f8fd url(../images/navtab_current_last.gif) no-repeat right top;}
+#header  .nav  .lastcurrent a{ padding: 5px 39px 5px 48px;background: url(../images/navtab_current_left.gif) no-repeat;color: #000;}
+
+#header .site {padding: 6px 0;height: 40px;}
+#header .blogtitle {color:#f60;display:inline-block;font-size:20px;height:30px;vertical-align:top; font-weight:bold;}
+#header .blogtitle a {color: #f60;}
+#header .blogtitle a:hover {color: #000;}
+#header a.menuhome {background: url(../images/menuhome.png) no-repeat;float: left;height: 27px;width: 29px;}
+#header a.menuhome:hover {background: url(../images/menuhome.png) no-repeat 0 -27px;}
+#header a.menubookmark {background: url(../images/menubookmark.png) no-repeat;float: left;height: 27px;width: 29px;}
+#header a.menubookmark:hover {background: url(../images/menubookmark.png) no-repeat 0 -27px;}
+#header a.menufeed {background: url(../images/menufeed.png) no-repeat;float: left;margin-left: 6px;height: 27px;width: 29px;}
+#header a.menufeed:hover {background: url(../images/menufeed.png) no-repeat 0 -27px;}
+#header #searchbox {float: right;width: 237px;height: 27px;background: url(../images/searchbox.png) no-repeat;}
+#header #searchbox #keyword {color: #f60;font-weight: bold;float: left;padding: 0;margin: 6px 0 0 6px;border: 0;width: 195px;background: none;}
+#header #searchbox #searchsubmit {float: right;margin: 0;width: 29px;height: 27px;border: 0;}
+#header .msgbartop {height: 5px;}
+#header .msgbar {background: url(../images/msgbar.gif) repeat-y;color: #646464;padding: 0 8px;}
+#header .msgbarbottom {height: 5px;}
+#header .alignright {float: right;}
+
+
+/* 文章 */
+.post .post-title {font-size: 18px;font-weight: bold; margin:5px 0;}
+.post .post-title a {color: #f60;text-decoration:none;}
+.post .post-title a:hover {color: #555;}
+.post .postmeta {margin: 30px 0;padding-bottom: 50px;margin-right:25px;border-bottom: 1px solid #ccc;}
+.post .post-related  {  margin:0 15px; padding:0;  list-style-type:none;  }
+
+/* 评论*/
+#commentlist {margin: 0 ;padding: 0;}
+#commentlist li {margin: 15px 0 3px 0;padding: 5px 10px 3px 10px;list-style: none;border: 1px solid #efefef; background: #fafafa;}
+#commentlist li .avatar { float: right;border: 1px solid #eee;padding: 2px;margin: 0 0 10px 10px;background: #fff;}
+#commentlist p {margin: 10px 5px 10px 0;  word-wrap:break-word;}
+#commentform p {margin: 8px 0; }
+
+/* 侧栏 */
+#sidebar {   float:left;   width:308px; margin-right:-9999px; margin-left:20px; }
+.sidebarboxtop {height: 5px;}
+.sidebarbox {background-color: #e1ecfe;padding: 3px 15px;}
+.sidebarboxbottom {height: 5px;margin-bottom: 25px;}
+.sidebarbox h3 {font-size: 16px;margin: 5px 0 10px 0;}
+.sidebarbox ul {margin: 0;padding: 0;}
+.sidebarbox ul li {background: url(../images/sidebarbullet.gif) no-repeat left 3px;list-style: none;padding: 0 0 5px 19px;}
+.sidebarbox   span {margin:0 3px; color:Gray;}
+#recenttags div {   display:inline; white-space:nowrap; line-height:180%;}
+
+/* 页脚 */
+#footer {clear: both;}
+#footer .copyright { float:left; background: url(../images/footer.gif) no-repeat right   #deeaf8;color: #646464;font-size: 12px;line-height:19px; padding:0 3px; }
+#footer .copyright a {color: #646464;}
+#footer .copyright a:hover {color: #000;}
+
+/*分页*/
+.pager{   margin: 10px 0 10px 0; padding:5px 0; text-align:right;}
+.pager a,.pager span { line-height:20px;margin-right:5px;padding:3px 6px;   }
+.pager .current { background-color:#e1ecfe;  font-weight:bold;}

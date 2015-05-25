@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>#if(${isdefault}==0) ${pagetitle} - #end ${sitename}</title>
+<meta name="keywords" content="${metakeywords}" />
+<meta name="description" content="${metadescription}" />
+<link rel="stylesheet" type="text/css" media="all" href="${themepath}css/style.css" />
+<script type="text/javascript" src="${siteurl}common/scripts/jquery.js"></script>
+<script type="text/javascript" src="${siteurl}common/scripts/common.js"></script>
+${head}
+</head>
+<body>
+<div id="wrapper">
+    <div id="header">      
+        <ul class="nav">
+            #set( $ncount = "0" )  
+            #foreach($item in $navlinks)
+                
+                #set( $ncount=$ncount+1 )
+                
+                #set( $class = "")
+                               
+                #if($url==$item.url)
+                   #set( $class="current")
+                #end
+                    
+                #if($ncount==1)
+                    #set ($class="first")
+                    #if($url==$item.url)
+                       #set( $class="firstcurrent")
+                    #end
+                #end
+                                
+                #if($ncount==$navlinks.count)
+                    #set ($class="last")
+                    #if($url==$item.url)
+                       #set( $class="lastcurrent")
+                    #end
+                #end
+               
+                <li class="${class}"><a href="${item.url}" title="${item.description}" target="${item.target}">${item.name}</a></li>
+            #end
+        </ul>
+      
+        <div class="site">
+            <div class="alignright" style="width:310px">
+			    <div id="searchbox">
+                    <form method="get" id="searchform" action="${siteurl}search.aspx">
+			            <input type="text" name="keyword" id="keyword" class="search_input" value="${searchkeyword}" />
+			            <input type="image" src="${themepath}images/transparent.gif" id="searchsubmit" />
+			        </form>
+                </div>
+	            <a class="menubookmark" href="http://www.addthis.com/bookmark.php" title="Bookmark and Share"></a>
+                <a class="menufeed" href="${feedurl}" title="订阅"></a>
+
+            </div>
+            <a class="menuhome" href="${siteurl}" title="${sitename}"></a>&nbsp;
+            <span class="blogtitle"><a href="${siteurl}">${sitename}</a></span>
+        </div>
+        
+        <div class="msgbartop"><img src="${themepath}images/msgbartop.gif" alt="msgbartop" /></div>
+        <div class="msgbar">${sitedescription}</div>
+        <div class="msgbarbottom"><img src="${themepath}images/msgbarbottom.gif" alt="msgbarbottom" /></div>  
+        
+    
+    </div>
+    <div id="container"> 

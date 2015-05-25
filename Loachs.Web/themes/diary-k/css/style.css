@@ -1,0 +1,90 @@
+﻿/*
+THEME NAME: diary-k
+THEME URI: http://pageblogging.net/2009/10/free-wordpress-theme-diary-k-released.html
+Description: This theme supports widget, threaded-comments, theme-options,and translation is ready. Also including multi level dropdown menu and PSD files. Simple,Practical and Stay updated.
+VERSION: 1.0.7
+AUTHOR: page
+AUTHOR URI: http://pageblogging.net
+TAGS: brown,two-columns,right-sidebar,fixed-width,theme-options,threaded-comments,translation-ready
+	The CSS, XHTML and design is released under GPL:
+	http://www.opensource.org/licenses/gpl-license.php
+*/
+
+ 
+body { font:12px  tahoma, arial, \5b8b\4f53, sans-serif; background: #e1e1e1 url(../images/bg_n.gif) repeat top center;color: #282c2f;margin:0 auto; }
+div{ margin:0 auto; }
+a{color: #678E04;text-decoration: none;}
+a:hover {color: #06c; }
+h3{font-size:14px; }
+   
+
+#wrapper{ background:url(../images/bg.gif) repeat-x left top;}
+
+#header { width:948px; height:100px;  color: #8C8858;  background:url(../images/header_bg.gif) no-repeat top center; border:0px solid red;}
+#container{ width:950px;margin:0px auto 0; }
+
+#content{ width:650px;float:left;line-height:1.5em;overflow:hidden;}
+
+#sidebar{ margin-top:30px;width:280px;float:right;text-align:left;overflow:hidden;}
+#sidebar-left{padding:3px 25px;background:url(../images/sidebar_m.png) repeat-y left;}
+.sidebar-b,.sidebar-t{height:20px;background:url(../images/sidebar.png) no-repeat;}
+.sidebar-t{background-position:left top;}
+.sidebar-b{background-position:left bottom;}
+
+#header h2 {    margin:0; padding:15px 0 0 8px; }
+#header h2 a { color:#4C5A0F; font-size:22px;text-align:left;  }
+#header h2 a:hover {  text-decoration:none;}
+#header p{color:#4C5A0F; margin:0; padding:5px 0 0 12px; text-shadow:0 1px 0 #dfdfdf;}
+
+.nav{ float:right;list-style-type:none;text-align: center;  margin-top:-55px; }
+.nav li{ display:inline; float:left;}
+.nav li a{ float:left;color:#404A10;padding:0px 1.2em 0; text-decoration:none;line-height:80px;text-shadow:0 1px 0 #dfdfdf;}
+.nav li a:hover {text-decoration: none;}
+
+.topcorner,.bottomcorner{ height:30px;background:url(../images/content.png) no-repeat;}
+.topcorner{ background-position:left top;}
+.bottomcorner{background-position:left bottom;}
+.contentpadding{ padding:5px 30px;background:url(../images/content_m.png) repeat-y left;}
+
+  
+.post{ padding-bottom:0px;}
+
+.post-title{ color:#4C5A0F;text-decoration: none;font-size:16px;}
+.post-title a { color:#4C5A0F;  }
+.post-title a:hover { color: #06c;text-decoration: none;}
+.post-content{ font-size:14px;}
+ 
+.post-meta{ border-top:1px solid #D6D6D6;margin:3px 0;padding:4px 0;}
+
+.post-meta span { padding-right:5px;}
+
+#sidebar h3{   color:#4C5A0F;border-bottom:1px solid #ccc; margin-top:1em;padding-bottom:2px;}
+#sidebar ul { padding:0 ; margin:0;}
+#sidebar li{ list-style-type:none; margin:6px 5px;background:url(../images/ul.gif) no-repeat left 6px;padding-left:8px;}
+#sidebar li a{ padding:1px 0 1px 2px;color:#555555;}
+#sidebar li a:hover{color:#0066CC;text-decoration: underline;}
+#sidebar span { padding-left:3px; color:Gray;}
+#searchform input {margin:3px 0;width:225px;height:23px;border:0;padding:5px 0 0 5px;color:#6D6D6D;background:url(../images/search.png) no-repeat top left;}
+ 
+ 
+
+#commentlist { margin:0; padding:0;list-style:none;}
+#commentform input ,#commentform textarea { border:1px solid #ccc;margin:3px 0;padding:3px;}
+#commentform label { color:#777; font-size:0.9em; }
+#commentlist li{ text-align:left; }
+#commentlist p{ padding:2px 0; margin:0; word-wrap:break-word; overflow:auto; }
+.comment-body{ background:#F7F7F7;border-top:1px solid #ccc;margin:8px 0 8px 55px;padding:5px;position:relative;}
+#commentlist li img { position:absolute;left:-55px; _left:-58px; top:1px;padding:2px;border:1px solid #ddd;}
+#commentlist li .comment-data{ position:absolute;right:5px;_right:35px;top:2px;font-size:11px;font-style:italic;text-align:right;}
+  
+
+#footer-top{clear:both; height:100px;background:url(../images/footer.gif) repeat-x;}
+#footer{ height:60px;width:928px;margin:auto; padding:45px 10px 0; background:url(../images/footer_bg.gif) no-repeat top center;text-shadow:0 1px 0 #E9E9E9;}
+#footer-left{float:left;}
+#footer-right{float:right;}
+
+.pager{   margin: 10px 0 10px 0; padding:5px 0; text-align:right;}
+.pager a,.pager span { line-height:20px;margin-right:5px;padding:3px 6px;   }
+.pager .current { background-color:#d0cebb; color:#fff; font-weight:bold;}
+
+

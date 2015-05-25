@@ -1,0 +1,33 @@
+#parse("_header.html")
+<div id="content">
+
+    <div class="post">
+        <div class="post-date">
+                 <div class="date">
+                 $post.createdate.tostring("MMMM")<br />
+                 <span style="font-size:2em; font-weight:bold;">$post.createdate.tostring("dd")</span><br />
+                 $post.createdate.tostring("yyyy")         
+                 </div>
+        </div>
+        <div class="post-detail">
+            <h2 class="post-title">${post.title}</h2>
+            <div class="post-content">
+              ${post.content}
+            </div>
+            <div class="post-meta">
+               作者: ${post.author.link}
+               |
+               分类: ${post.category.link}
+               | 
+               标签:
+                #foreach($item in $post.tags)
+                    <a href="${item.url}" title="${item.description}">${item.name}</a>
+                #end
+
+            </div>
+            #parse("_comment.html")
+         </div>
+    </div>
+</div>
+#parse("_sidebar.html")
+#parse("_footer.html")

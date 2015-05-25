@@ -1,0 +1,28 @@
+#parse("_header.html")
+
+    <div id="content">
+        <div class="post" id="post-17">
+            <h2 class="post-title"> ${post.title}</h2>
+            <div class="post-content">
+                ${post.content}
+            </div>
+            <p>
+                标签: 
+                #foreach($item2 in $post.tags)
+                <a href="${item2.url}" title="${item2.description}">${item2.name}</a>(${item2.count})
+                #end
+            </p>                                
+            <div style="clear:both;"></div>
+            <div class="postmeta">${post.author.link} $post.createdate.tostring("yyyy-MM-dd") ${post.category.link} 浏览(${post.viewcount}) <a href="#comments">评论($post.commentcount)</a></div>
+            <h3>相关文章</h3>
+            <ul class="post-related">
+                #foreach($item in $post.relatedposts)
+                <li><a href="${item.url}">${item.title}</a>(${item.viewcount})</li>
+                #end
+            </ul>
+            #parse("_comment.html")
+        </div>
+    </div>
+
+#parse("_sidebar.html")
+#parse("_footer.html")

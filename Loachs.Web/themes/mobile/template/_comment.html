@@ -1,0 +1,20 @@
+﻿<h3 id="comments">评论(${post.commentcount})</h3>
+<ul id="commentlist">
+    #foreach($item in $comments)
+    <li>
+        <div class="commentmetadata">
+            <span class="author">${item.name} </span>
+            <span class="date" > 发表于 ${item.createdate.tostring("yyyy-MM-dd HH:mm")}</span>
+        </div>
+        <p>
+            #if($item.approved==1)
+                ${item.content}
+            #else
+                [待审核]
+            #end
+        </p>
+    </li>
+    #end
+</ul>
+${pager}
+<p>手机版暂未开通评论</p>

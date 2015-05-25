@@ -1,0 +1,20 @@
+#parse("_header.html")
+<div id="content">
+    <div class="post">
+        <h1>$post.title</h1>
+        <div class="post_meta">
+             ${post.author.link} $post.createdate.tostring("yyyy-MM-dd") 浏览(${post.viewcount}) <a href="#comments">评论($post.commentcount)</a>
+        </div>
+        <div class="post_content">
+            $post.content
+        </div>
+        <h3>相关文章:</h3>
+        <ul>
+            #foreach($item in $post.relatedposts)
+            <li><a href="${item.url}">${item.title}</a></li>
+            #end
+        </ul>
+        #parse("_comment.html")
+    </div>
+</div>
+#parse("_footer.html")

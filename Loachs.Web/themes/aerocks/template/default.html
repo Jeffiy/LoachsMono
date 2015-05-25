@@ -1,0 +1,86 @@
+#parse("_header.html")
+<div id="content">
+    ${postmessage}
+    #if($isdefault==1)
+        #foreach($item in $topposts)
+    
+    <div class="post">
+        <div class="post-date">
+                 <div class="date">
+                 $item.createdate.tostring("MMMM")<br />
+                 <span style="font-size:2em; font-weight:bold;">$item.createdate.tostring("dd")</span><br />
+                 $item.createdate.tostring("yyyy")
+                 </div>
+                 <div class="commy">
+                    <a href="${item.url}#comments" title="查看评论(${item.commentcount})">${item.commentcount}</a>
+		         </div>
+        </div>
+         <div class="post-detail">
+            <h2 class="post-title">[置顶]<a href="${item.url}">${item.title}</a></h2>
+            <div class="post-content">
+                ${item.detail}
+                <p>
+                    <a href="${item.url}">详情...</a>
+                </p>
+            </div>
+            <div class="post-meta">
+               作者: ${item.author.link}
+               |
+               分类: ${item.category.link}
+               | 
+               标签:
+                #foreach($item2 in $item.tags)
+                    <a href="${item2.url}" title="${item2.description}">${item2.name}</a>
+                #end
+
+            </div>
+         </div>
+    </div>
+        #end
+    #end
+    
+    #foreach($item in $posts)
+    <div class="post">
+        <div class="post-date">
+                 <div class="date">
+                 $item.createdate.tostring("MMMM")<br />
+                 <span style="font-size:2em; font-weight:bold;">$item.createdate.tostring("dd")</span><br />
+                 $item.createdate.tostring("yyyy")         
+                 </div>
+                 <div class="commy">
+                    <a href="${item.url}#comments" title="查看评论(${item.commentcount})">${item.commentcount}</a>
+		         </div>
+        </div>
+        <div class="post-detail">
+            <h2 class="post-title"><a href="${item.url}">${item.title}</a></h2>
+            <div class="post-content">
+                ${item.detail}
+                <p>
+                    <a href="${item.url}">详情...</a>
+                </p>
+            </div>
+            <div class="post-meta">
+               作者: ${item.author.link}
+               |
+               分类: ${item.category.link}
+               | 
+               标签:
+                #foreach($item in $item.tags)
+                    <a href="${item.url}" title="${item.description}">${item.name}</a>
+                #end
+
+            </div>
+         </div>
+        
+    </div>
+
+    #end
+    #if($posts.count==0)
+    <div class="post">
+        <p>暂无对应文章</p>
+    </div>
+    #end
+    ${pager}
+</div>
+#parse("_sidebar.html")
+#parse("_footer.html")

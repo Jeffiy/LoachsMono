@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Loachs.Common;
+﻿using System.Collections.Generic;
 using Loachs.Data;
 using Loachs.Entity;
 
@@ -26,7 +22,7 @@ namespace Loachs.Business
         /// <summary>
         /// lock
         /// </summary>
-        private static object lockHelper = new object();
+        private static readonly object lockHelper = new object();
 
         static UserManager()
         {
