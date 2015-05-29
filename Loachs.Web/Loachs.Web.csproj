@@ -405,7 +405,7 @@
   <ItemGroup>
     <None Include="App_Data\loachs.db" />
     <Content Include="packages.config" />
-    <None Include="Properties\PublishProfiles\配置文件1.pubxml" />
+    <None Include="Properties\PublishProfiles\pub.pubxml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
