@@ -1,5 +1,4 @@
 ﻿using System;
-using Loachs.Business;
 using Loachs.Common;
 
 namespace Loachs.Entity
@@ -9,19 +8,6 @@ namespace Loachs.Entity
     /// </summary>
     public class ArchiveInfo
     {
-        //  private string _name;
-        //  private string _url;
-        //  private string _link;
-
-        //[Obsolete]
-        ///// <summary>
-        ///// 名称
-        ///// </summary>
-        //public string Name
-        //{
-        //    set { _name = value; }
-        //    get { return _name; }
-        //}
         /// <summary>
         ///     日期,用于拼Url
         /// </summary>
@@ -44,7 +30,7 @@ namespace Loachs.Entity
                 else
                 {
                     return ConfigHelper.SiteUrl + "archive/" + Date.ToString("yyyyMM") +
-                           SettingManager.GetSetting().RewriteExtension;
+                           Sites.GetSetting().RewriteExtension;
                 }
                 return Utils.CheckPreviewThemeUrl(url);
             }

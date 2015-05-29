@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Loachs.Business;
-using Loachs.Common;
 using Loachs.Entity;
+using XCode;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {
@@ -21,9 +21,9 @@ namespace Loachs.Web
         /// </remarks>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public List<PostInfo> GetPosts(string condition)
+        public List<Posts> GetPosts(string condition)
         {
-            return PostManager.GetPostList();
+            return Posts.FindAllWithCache();
         }
 
         ///// <summary>
@@ -51,13 +51,13 @@ namespace Loachs.Web
         /// </summary>
         /// <param name="key">userid or username</param>
         /// <returns></returns>
-        public UserInfo GetUser(string key)
+        public Users GetUser(string key)
         {
             if (StringHelper.IsInt(key))
             {
-                return UserManager.GetUser(Convert.ToInt32(key));
+                return Users.FindById(Convert.ToInt32(key));
             }
-            return UserManager.GetUser(key);
+            return Users.FindByName(key);
         }
 
         /// <summary>
@@ -68,12 +68,12 @@ namespace Loachs.Web
         /// </remarks>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public List<CommentInfo> GetComments(string condition)
+        public EntityList<Comments> GetComments(string condition)
         {
             int pageSize = 10;
             int pageIndex = 1;
             int recordCount = 0;
-            int order = SettingManager.GetSetting().CommentOrder;
+            int order = Sites.GetSetting().CommentOrder;
             int userid = -1;
             int postid = -1;
             int parentid = -1;
@@ -83,13 +83,13 @@ namespace Loachs.Web
 
             // int pageSize, int pageIndex, out int totalRecord, int order, int userId, int postId, int parentId, int approved, int emailNotify, string keyword)
 
-            return CommentManager.GetCommentList(pageSize, pageIndex, out recordCount, order, userid, postid, parentid,
+            return Comments.GetCommentList(pageSize, pageIndex, out recordCount, order, userid, postid, parentid,
                 approved, emailNotify, keyword);
         }
 
-        public List<TagInfo> GetTags(string filter)
+        public EntityList<Tags> GetTags(string filter)
         {
-            return TagManager.GetTagList();
+            return Tags.FindAllWithCache();
         }
 
         public string GetPager(string filter)

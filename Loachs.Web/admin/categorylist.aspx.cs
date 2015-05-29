@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {
@@ -58,7 +57,7 @@ namespace Loachs.Web
 
         protected void Delete()
         {
-            CategoryManager.DeleteCategory(CategoryId);
+            Categorys.DeleteById(CategoryId);
             Response.Redirect("categorylist.aspx?result=3");
         }
 
@@ -67,13 +66,13 @@ namespace Loachs.Web
         /// </summary>
         protected void BindCategory()
         {
-            CategoryInfo term = CategoryManager.GetCategory(CategoryId);
-            if (term != null)
+            Categorys category = Categorys.FindById(CategoryId);
+            if (category != null)
             {
-                txtName.Text = StringHelper.HtmlDecode(term.Name);
-                txtSlug.Text = StringHelper.HtmlDecode(term.Slug);
-                txtDescription.Text = StringHelper.HtmlDecode(term.Description);
-                txtDisplayOrder.Text = term.Displayorder.ToString();
+                txtName.Text = StringHelper.HtmlDecode(category.Name);
+                txtSlug.Text = StringHelper.HtmlDecode(category.Slug);
+                txtDescription.Text = StringHelper.HtmlDecode(category.Description);
+                txtDisplayOrder.Text = category.DisplayOrder.ToString();
             }
         }
 
@@ -82,8 +81,7 @@ namespace Loachs.Web
         /// </summary>
         protected void BindCategoryList()
         {
-            List<CategoryInfo> list = CategoryManager.GetCategoryList();
-            rptCategory.DataSource = list;
+            rptCategory.DataSource = Categorys.FindAllWithCache();
             rptCategory.DataBind();
         }
 
@@ -94,29 +92,29 @@ namespace Loachs.Web
         /// <param name="e"></param>
         protected void btnEdit_Click(object sender, EventArgs e)
         {
-            CategoryInfo term = new CategoryInfo();
+            Categorys category = new Categorys();
             if (Operate == OperateType.Update)
             {
-                term = CategoryManager.GetCategory(CategoryId);
+                category = Categorys.FindById(CategoryId);
             }
             else
             {
-                term.CreateDate = DateTime.Now;
-                term.Count = 0;
+                category.CreateDate = DateTime.Now;
+                category.Count = 0;
             }
-            term.Name = StringHelper.HtmlEncode(txtName.Text);
-            term.Slug = txtSlug.Text.Trim();
-            if (string.IsNullOrEmpty(term.Slug))
+            category.Name = StringHelper.HtmlEncode(txtName.Text);
+            category.Slug = txtSlug.Text.Trim();
+            if (string.IsNullOrEmpty(category.Slug))
             {
-                term.Slug = term.Name;
+                category.Slug = category.Name;
             }
 
-            term.Slug = StringHelper.HtmlEncode(PageUtils.FilterSlug(term.Slug, "cate"));
+            category.Slug = StringHelper.HtmlEncode(PageUtils.FilterSlug(category.Slug, "cate"));
 
-            term.Description = StringHelper.HtmlEncode(txtDescription.Text);
-            term.Displayorder = StringHelper.StrToInt(txtDisplayOrder.Text, 1000);
+            category.Description = StringHelper.HtmlEncode(txtDescription.Text);
+            category.DisplayOrder = StringHelper.StrToInt(txtDisplayOrder.Text, 1000);
 
-            if (term.Name == "")
+            if (category.Name == "")
             {
                 ShowError("请输入名称!");
                 return;
@@ -124,12 +122,12 @@ namespace Loachs.Web
 
             if (Operate == OperateType.Update)
             {
-                CategoryManager.UpdateCategory(term);
+                category.Update();
                 Response.Redirect("categorylist.aspx?result=2");
             }
             else
             {
-                CategoryManager.InsertCategory(term);
+                category.Insert();
                 Response.Redirect("categorylist.aspx?result=1");
             }
         }

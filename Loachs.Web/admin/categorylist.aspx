@@ -26,12 +26,12 @@
         <asp:Repeater ID="rptCategory" runat="server">
             <ItemTemplate>
                 <tr class="row">
-                    <td><%# DataBinder.Eval(Container.DataItem, "Displayorder")%></td>
+                    <td><%# DataBinder.Eval(Container.DataItem, "DisplayOrder")%></td>
                     <td><a href="<%# DataBinder.Eval(Container.DataItem, "Url")%>" ><%# DataBinder.Eval(Container.DataItem, "Name")%></a></td>
                     <td><%# DataBinder.Eval(Container.DataItem, "Description")%></td>
                     <td><%#  DataBinder.Eval(Container.DataItem,"Count")%></td>
                     <td><%# Convert.ToDateTime( DataBinder.Eval(Container.DataItem, "CreateDate")).ToString("yyyy-MM-dd")%></td>            
-                    <td><a href="categorylist.aspx?operate=update&categoryid=<%# DataBinder.Eval(Container.DataItem, "categoryid")%>">编辑</a> <a href="categorylist.aspx?operate=delete&categoryid=<%# DataBinder.Eval(Container.DataItem, "categoryid")%>" onclick="return confirm('删除分类不会删除所属的文章,确定要删除吗?');">删除</a></td>
+                    <td><a href="categorylist.aspx?operate=update&categoryid=<%# DataBinder.Eval(Container.DataItem, "Id")%>">编辑</a> <a href="categorylist.aspx?operate=delete&categoryid=<%# DataBinder.Eval(Container.DataItem, "Id")%>" onclick="return confirm('删除分类不会删除所属的文章,确定要删除吗?');">删除</a></td>
                 </tr>
             </ItemTemplate>
         </asp:Repeater>

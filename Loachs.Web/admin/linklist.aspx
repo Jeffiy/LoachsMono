@@ -31,7 +31,7 @@
         <asp:Repeater ID="rptLink" runat="server">
             <ItemTemplate>
                 <tr class="row">
-                    <td><%# DataBinder.Eval(Container.DataItem, "Displayorder")%></td>
+                    <td><%# DataBinder.Eval(Container.DataItem, "DisplayOrder")%></td>
                     <td>
                         <a href="<%# DataBinder.Eval(Container.DataItem, "Url")%>" ><%# DataBinder.Eval(Container.DataItem, "Name")%></a>
                         <%# Convert.ToInt32(DataBinder.Eval(Container.DataItem, "Position")) == (int)Loachs.Entity.LinkPosition.Navigation ? "[导航]" : ""%>
@@ -42,8 +42,8 @@
                     <td><%# Convert.ToDateTime( DataBinder.Eval(Container.DataItem, "CreateDate")).ToString("yyyy-MM-dd")%></td>
                            
                     <td>
-                        <a href="linklist.aspx?operate=update&LinkId=<%# DataBinder.Eval(Container.DataItem, "LinkId")%>">编辑</a> 
-                        <a href="linklist.aspx?operate=delete&LinkId=<%# DataBinder.Eval(Container.DataItem, "LinkId") %> " onclick="return confirm('确定要删除吗?');">删除</a></td>
+                        <a href="linklist.aspx?operate=update&LinkId=<%# DataBinder.Eval(Container.DataItem, "Id")%>">编辑</a> 
+                        <a href="linklist.aspx?operate=delete&LinkId=<%# DataBinder.Eval(Container.DataItem, "Id") %> " onclick="return confirm('确定要删除吗?');">删除</a></td>
                     
                 </tr>
             </ItemTemplate>

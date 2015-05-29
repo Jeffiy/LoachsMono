@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Web;
-using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
 using Loachs.Web;
+using StringHelper = Loachs.Common.StringHelper;
+
 //using Loachs.Core;
 
 namespace Loachs.MetaWeblog
@@ -66,20 +68,15 @@ namespace Loachs.MetaWeblog
                         throw new MetaWeblogException("10", "获取用户方法未实现.");
                     case "wp.newPage":
                         throw new MetaWeblogException("10", "创建页面未实现.");
-                        break;
                     case "wp.getPageList":
                     case "wp.getPages":
                         throw new MetaWeblogException("10", "获取页面列表未实现.");
-                        break;
                     case "wp.getPage":
                         throw new MetaWeblogException("10", "获取页面未实现.");
-                        break;
                     case "wp.editPage":
                         throw new MetaWeblogException("10", "编辑页面未实现.");
-                        break;
                     case "wp.deletePage":
                         throw new MetaWeblogException("10", "删除页面未实现.");
-                        break;
                     case "wp.getAuthors":
                         output.Authors = GetAuthors(input.BlogID, input.UserName, input.Password);
                         break;
@@ -135,22 +132,22 @@ namespace Loachs.MetaWeblog
             {
                 if (!string.IsNullOrEmpty(n))
                 {
-                    TagInfo t = TagManager.GetTag(StringHelper.HtmlEncode(n));
+                    Tags t = Tags.FindByName(StringHelper.HtmlEncode(n));
 
                     if (t == null)
                     {
-                        t = new TagInfo
+                        t = new Tags
                         {
                             Count = 0,
                             CreateDate = DateTime.Now,
                             Description = StringHelper.HtmlEncode(n),
-                            Displayorder = 1000,
+                            DisplayOrder = 1000,
                             Name = StringHelper.HtmlEncode(n),
-                            Slug = PageUtils.FilterSlug(n, "tag", false),
-                            TagId = TagManager.InsertTag(t)
+                            Slug = PageUtils.FilterSlug(n, "tag", false)
                         };
+                        t.Save();
                     }
-                    tagIds += "{" + t.TagId + "}";
+                    tagIds += "{" + t.Id + "}";
                 }
             }
             return tagIds;
@@ -173,11 +170,11 @@ namespace Loachs.MetaWeblog
         {
             ValidateRequest(userName, password);
 
-            PostInfo post = new PostInfo();
+            Posts post = new Posts();
 
             if (operate == OperateType.Update)
             {
-                post = PostManager.GetPost(StringHelper.StrToInt(postID, 0));
+                post = Posts.FindById(StringHelper.StrToInt(postID, 0));
             }
             else
             {
@@ -185,10 +182,10 @@ namespace Loachs.MetaWeblog
                 post.ViewCount = 0;
                 post.CreateDate = DateTime.Now;
 
-                UserInfo user = UserManager.GetUser(userName);
+                Users user = Users.FindByName(userName);
                 if (user != null)
                 {
-                    post.UserId = user.UserId;
+                    post.UserId = user.Id;
                 }
             }
 
@@ -216,39 +213,41 @@ namespace Loachs.MetaWeblog
 
             foreach (string item in sentPost.Categories)
             {
-                CategoryInfo cat;
+                Categorys cat;
                 if (LookupCategoryGuidByName(item, out cat))
                 {
-                    post.CategoryId = cat.CategoryId;
+                    post.CategoryId = cat.Id;
                 }
                 else
                 {
-                    CategoryInfo newcat = new CategoryInfo();
-                    newcat.Count = 0;
-                    newcat.CreateDate = DateTime.Now;
-                    newcat.Description = "由离线工具创建";
-                    newcat.Displayorder = 1000;
-                    newcat.Name = StringHelper.HtmlEncode(item);
-                    newcat.Slug = PageUtils.FilterSlug(item, "cate", false);
+                    Categorys newcat = new Categorys
+                    {
+                        Count = 0,
+                        CreateDate = DateTime.Now,
+                        Description = "由离线工具创建",
+                        DisplayOrder = 1000,
+                        Name = StringHelper.HtmlEncode(item),
+                        Slug = PageUtils.FilterSlug(item, "cate", false)
+                    };
+                    newcat.Insert();
 
-                    newcat.CategoryId = CategoryManager.InsertCategory(newcat);
-                    post.CategoryId = newcat.CategoryId;
+                    post.CategoryId = newcat.Id;
                 }
             }
             post.Tag = GetTagIdList(sentPost.Tags);
 
             if (operate == OperateType.Update)
             {
-                PostManager.UpdatePost(post);
+                post.Update();
             }
             else
             {
-                post.PostId = PostManager.InsertPost(post);
+                post.Insert();
 
                 //    SendEmail(p);
             }
 
-            return post.PostId;
+            return post.Id;
         }
 
         /// <summary>
@@ -298,9 +297,9 @@ namespace Loachs.MetaWeblog
 
             MWAPost sendPost = new MWAPost();
 
-            PostInfo post = PostManager.GetPost(StringHelper.StrToInt(postID, 0));
+            Posts post = Posts.FindById(StringHelper.StrToInt(postID));
 
-            sendPost.PostId = post.PostId.ToString();
+            sendPost.PostId = post.Id.ToString();
             sendPost.PostDate = post.CreateDate;
             sendPost.Title = StringHelper.HtmlDecode(post.Title);
             sendPost.Description = post.Content;
@@ -402,13 +401,15 @@ namespace Loachs.MetaWeblog
 
             List<MWACategory> categories = new List<MWACategory>();
 
-            foreach (CategoryInfo cat in CategoryManager.GetCategoryList())
+            foreach (Categorys cat in Categorys.FindAllWithCache())
             {
-                MWACategory temp = new MWACategory();
-                temp.Title = StringHelper.HtmlDecode(cat.Name);
-                temp.Description = StringHelper.HtmlDecode(cat.Description);
-                temp.HtmlUrl = cat.Url;
-                temp.RssUrl = cat.FeedUrl;
+                MWACategory temp = new MWACategory
+                {
+                    Title = StringHelper.HtmlDecode(cat.Name),
+                    Description = StringHelper.HtmlDecode(cat.Description),
+                    HtmlUrl = cat.Url,
+                    RssUrl = cat.FeedUrl
+                };
                 categories.Add(temp);
             }
 
@@ -428,7 +429,7 @@ namespace Loachs.MetaWeblog
 
             List<string> keywords = new List<string>();
 
-            foreach (TagInfo tag in TagManager.GetTagList(100))
+            foreach (Tags tag in Tags.GetTagList(100))
             {
                 keywords.Add(StringHelper.HtmlDecode(tag.Name));
             }
@@ -451,40 +452,33 @@ namespace Loachs.MetaWeblog
             List<MWAPost> sendPosts = new List<MWAPost>();
 
             int userid = 0;
-            UserInfo user = UserManager.GetUser(userName);
+            Users user = Users.FindByName(userName);
             if (user != null)
             {
-                userid = user.UserId;
+                userid = user.Id;
             }
 
-            List<PostInfo> posts = PostManager.GetPostList(numberOfPosts, -1, userid, -1, -1, -1, -1);
+            var posts = Posts.GetPostList(numberOfPosts, -1, userid, -1, -1, -1, -1);
 
-            foreach (PostInfo post in posts)
+            foreach (Posts post in posts)
             {
                 MWAPost tempPost = new MWAPost();
                 List<string> tempCats = new List<string>();
-                List<string> tempTags = new List<string>();
 
-                tempPost.PostId = post.PostId.ToString();
+                tempPost.PostId = post.Id.ToString();
                 tempPost.PostDate = post.CreateDate;
                 tempPost.Title = StringHelper.HtmlDecode(post.Title);
                 tempPost.Description = post.Content;
                 tempPost.Link = post.Url;
                 tempPost.Slug = StringHelper.HtmlDecode(post.Slug);
                 tempPost.Excerpt = post.Summary;
-                if (post.CommentStatus == 1)
-                    tempPost.CommentPolicy = "";
-                else
-                    tempPost.CommentPolicy = "0";
+                tempPost.CommentPolicy = post.CommentStatus == 1 ? "" : "0";
                 tempPost.Publish = post.Status == 1;
 
                 tempCats.Add(StringHelper.HtmlDecode(post.Category.Name));
                 tempPost.Categories = tempCats;
 
-                for (int i = 0; i < post.Tags.Count; i++)
-                {
-                    tempTags.Add(StringHelper.HtmlDecode(post.Tags[i].Name));
-                }
+                List<string> tempTags = post.Tags.ToList().Select(t => StringHelper.HtmlDecode(t.Name)).ToList();
                 tempPost.Tags = tempTags;
 
                 sendPosts.Add(tempPost);
@@ -506,10 +500,12 @@ namespace Loachs.MetaWeblog
 
             List<MWABlogInfo> blogs = new List<MWABlogInfo>();
 
-            MWABlogInfo temp = new MWABlogInfo();
-            temp.Url = rootUrl;
-            temp.BlogId = "1000";
-            temp.BlogName = SettingManager.GetSetting().SiteName;
+            MWABlogInfo temp = new MWABlogInfo
+            {
+                Url = rootUrl,
+                BlogId = "1000",
+                BlogName = Sites.GetSetting().SiteName
+            };
             blogs.Add(temp);
 
             return blogs;
@@ -527,7 +523,7 @@ namespace Loachs.MetaWeblog
         internal bool DeletePost(string appKey, string postID, string userName, string password, bool publish)
         {
             ValidateRequest(userName, password);
-            PostManager.DeletePost(StringHelper.StrToInt(postID, 0));
+            Posts.DeleteById(StringHelper.StrToInt(postID, 0));
             return true;
         }
 
@@ -538,10 +534,10 @@ namespace Loachs.MetaWeblog
             List<MWAAuthor> authors = new List<MWAAuthor>();
 
             MWAAuthor temp = new MWAAuthor();
-            UserInfo user = UserManager.GetUser(userName);
+            Users user = Users.FindByName(userName);
             if (user != null)
             {
-                temp.UserId = user.UserId.ToString();
+                temp.UserId = user.Id.ToString();
                 temp.UserLogin = user.UserName;
                 temp.DisplayName = user.Name;
                 temp.UserEmail = user.Email;
@@ -564,7 +560,7 @@ namespace Loachs.MetaWeblog
         private void ValidateRequest(string userName, string password)
         {
             password = StringHelper.GetMD5(password);
-            if (UserManager.GetUser(userName, password) == null)
+            if (Users.Login(userName, password) == null)
             {
                 throw new MetaWeblogException("11", "用户名或密码错误");
             }
@@ -580,12 +576,12 @@ namespace Loachs.MetaWeblog
         /// <param name="name"></param>
         /// <param name="cat"></param>
         /// <returns></returns>
-        private bool LookupCategoryGuidByName(string name, out CategoryInfo cat)
+        private bool LookupCategoryGuidByName(string name, out Categorys cat)
         {
             name = StringHelper.HtmlEncode(name);
 
-            cat = new CategoryInfo();
-            foreach (CategoryInfo item in CategoryManager.GetCategoryList())
+            cat = new Categorys();
+            foreach (Categorys item in Categorys.FindAllWithCache())
             {
                 if (item.Name == name)
                 {

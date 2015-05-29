@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Web;
 using System.Web.Security;
-using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
 
@@ -48,7 +47,7 @@ namespace Loachs.Web
         public AdminPage()
         {
             CheckLoginAndPermission();
-            Setting = SettingManager.GetSetting();
+            Setting = Sites.GetSetting();
         }
 
         /// <summary>
@@ -88,7 +87,7 @@ namespace Loachs.Web
                 HttpContext.Current.Response.Redirect("login.aspx?returnurl=" +
                                                       HttpContext.Current.Server.UrlEncode(RequestHelper.CurrentUrl));
             }
-            UserInfo user = UserManager.GetUser(PageUtils.CurrentUserId);
+            Users user = Users.FindById(PageUtils.CurrentUserId);
 
             if (user == null) //删除已登陆用户时有效
             {

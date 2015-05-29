@@ -1,7 +1,6 @@
 ﻿<%@ Page Language="C#" MasterPageFile="admin.master" AutoEventWireup="true" validateRequest="false" Inherits="Loachs.Web.admin_postedit" Title="无标题页" Codebehind="postedit.aspx.cs" %>
-<%@ Import Namespace="Loachs.Common" %>
-<%@ Import Namespace="Loachs.Business" %>
 <%@ Import Namespace="Loachs.Entity" %>
+<%@ Import Namespace="Loachs.Common" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
 <link rel="stylesheet" href="../common/css/thickbox.css" type="text/css" media="screen" />
 <script type="text/javascript" src="../common/scripts/jquery.js"></script>
@@ -103,8 +102,8 @@ function createSummary(type) {
         <div id="taglist" style=" border:2px solid #ccc;display:none;  line-height:135%; padding:3px ;  ">
             
             <%
-                System.Collections.Generic.List<TagInfo> tagList = TagManager.GetTagList(20);
-                foreach (TagInfo tag in  tagList)
+                var tagList = Tags.GetTagList(20);
+                foreach (Tags tag in  tagList)
               { %>
               
                   <a href="###" style="padding-left:3px;"><%=tag.Name %></a><span class="gray small">(<%=tag.Count %>)</span>

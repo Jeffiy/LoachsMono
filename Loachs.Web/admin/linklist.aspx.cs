@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {
@@ -72,7 +71,7 @@ namespace Loachs.Web
             //{
             //    Response.Redirect("linklist.aspx?result=4");
             //}
-            LinkManager.DeleteLink(LinkId);
+            Links.DeleteById(LinkId);
             Response.Redirect("linklist.aspx?result=3");
         }
 
@@ -81,13 +80,13 @@ namespace Loachs.Web
         /// </summary>
         protected void BindLink()
         {
-            LinkInfo link = LinkManager.GetLink(LinkId);
+            Links link = Links.FindById(LinkId);
             if (link != null)
             {
                 txtName.Text = StringHelper.HtmlDecode(link.Name);
                 txtHref.Text = StringHelper.HtmlDecode(link.Href);
                 txtDescription.Text = StringHelper.HtmlDecode(link.Description);
-                txtDisplayOrder.Text = link.Displayorder.ToString();
+                txtDisplayOrder.Text = link.DisplayOrder.ToString();
                 chkStatus.Checked = link.Status == 1;
                 chkPosition.Checked = link.Position == (int) LinkPosition.Navigation;
                 chkTarget.Checked = link.Target == "_blank";
@@ -99,8 +98,7 @@ namespace Loachs.Web
         /// </summary>
         protected void BindLinkList()
         {
-            List<LinkInfo> list = LinkManager.GetLinkList();
-            rptLink.DataSource = list;
+            rptLink.DataSource = Links.FindAllWithCache();
             rptLink.DataBind();
         }
 
@@ -111,10 +109,10 @@ namespace Loachs.Web
         /// <param name="e"></param>
         protected void btnEdit_Click(object sender, EventArgs e)
         {
-            LinkInfo link = new LinkInfo();
+            Links link = new Links();
             if (Operate == OperateType.Update)
             {
-                link = LinkManager.GetLink(LinkId);
+                link = Links.FindById(LinkId);
             }
             else
             {
@@ -124,7 +122,7 @@ namespace Loachs.Web
             link.Name = StringHelper.HtmlEncode(txtName.Text.Trim());
             link.Href = StringHelper.HtmlEncode(txtHref.Text.Trim());
             link.Description = StringHelper.HtmlEncode(txtDescription.Text);
-            link.Displayorder = StringHelper.StrToInt(txtDisplayOrder.Text, 1000);
+            link.DisplayOrder = StringHelper.StrToInt(txtDisplayOrder.Text, 1000);
             link.Status = chkStatus.Checked ? 1 : 0;
             link.Position = chkPosition.Checked ? (int) LinkPosition.Navigation : (int) LinkPosition.General;
             link.Target = chkTarget.Checked ? "_blank" : "_self";
@@ -137,13 +135,13 @@ namespace Loachs.Web
 
             if (Operate == OperateType.Update)
             {
-                LinkManager.UpdateLink(link);
+                link.Update();
 
                 Response.Redirect("linklist.aspx?result=2");
             }
             else
             {
-                LinkManager.InsertLink(link);
+                link.Insert();
                 Response.Redirect("linklist.aspx?result=1");
             }
         }

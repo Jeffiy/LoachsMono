@@ -50,13 +50,13 @@ function chooseAll()
         <asp:Repeater ID="rptComment" runat="server">
             <ItemTemplate>
                 <tr class="row">
-                    <td><input type="checkbox" id="chkRow" runat="server" value='<%# DataBinder.Eval(Container.DataItem, "CommentId")%>' /></td>
+                    <td><input type="checkbox" id="chkRow" runat="server" value='<%# DataBinder.Eval(Container.DataItem, "Id")%>' /></td>
                     <td style="line-height:150%;">
                       <%# GetPostLink(Convert.ToInt32(DataBinder.Eval(Container.DataItem, "PostId")))%>
                     <br />
                     <a href="<%#DataBinder.Eval(Container.DataItem, "Url") %>">
                         <span title="<%#DataBinder.Eval(Container.DataItem, "Content") %>">
-                        <%# StringHelper.CutString( StringHelper.RemoveHtml( DataBinder.Eval(Container.DataItem, "Content").ToString()),60,"...")%>
+                        <%# Loachs.Common.StringHelper.CutString( Loachs.Common.StringHelper.RemoveHtml( DataBinder.Eval(Container.DataItem, "Content").ToString()),60,"...")%>
                         </span>
                     </a>
                         <br />
@@ -80,9 +80,9 @@ function chooseAll()
                      
                     <td><%# DataBinder.Eval(Container.DataItem, "Approved").ToString()=="1" ?"<img src=\"../common/images/admin/yes.gif\" title=\"已审核\"/>" : "<img src=\"../common/images/admin/no.gif\" title=\"未审核\"/>"%></td>
                     <td>
-                            <%#  DataBinder.Eval(Container.DataItem, "Approved").ToString()=="0"?"<a href=\"commentlist.aspx?operate=update&commentid="+DataBinder.Eval(Container.DataItem, "commentId")+"&page="+Pager1.PageIndex+"\">审核</a>":""%>
+                            <%#  DataBinder.Eval(Container.DataItem, "Approved").ToString()=="0"?"<a href=\"commentlist.aspx?operate=update&commentid="+DataBinder.Eval(Container.DataItem, "id")+"&page="+Pager1.PageIndex+"\">审核</a>":""%>
                          
-                         <a href="commentlist.aspx?operate=delete&commentid=<%#DataBinder.Eval(Container.DataItem, "commentId")%>&page=<%=Pager1.PageIndex %>" onclick="return confirm('确定要删除吗?')">删除</a>   
+                         <a href="commentlist.aspx?operate=delete&commentid=<%#DataBinder.Eval(Container.DataItem, "id")%>&page=<%=Pager1.PageIndex %>" onclick="return confirm('确定要删除吗?')">删除</a>   
                     </td>
                 </tr>
             </ItemTemplate>

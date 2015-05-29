@@ -29,7 +29,7 @@
             </div>
             <h2>
                 <a href="default.aspx" style="color: #000; font-family: 'Microsoft Yahei'; font-size: 24px;">
-                    <%=SettingManager.GetSetting().SiteName %>管理中心</a></h2>
+                    <%=Sites.GetSetting().SiteName %>管理中心</a></h2>
         </div>
         <div id="container">
             <div id="sidebar">
@@ -67,9 +67,9 @@
             </div>
         </div>
         <div id="footer">
-            Powered by <a href="http://www.loachs.com" title="Loachs <%= SettingManager.GetSetting().Version %>"
+            Powered by <a href="http://www.loachs.com" title="Loachs <%= Sites.GetSetting().Version %>"
                 target="_blank">Loachs
-                <%= SettingManager.GetSetting().Version %></a></div>
+                <%= Sites.GetSetting().Version %></a></div>
     </div>
     </form>
 </body>

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Web.UI.WebControls;
-using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {
@@ -48,10 +48,10 @@ namespace Loachs.Web
                     switch (Message)
                     {
                         case 1:
-                            ShowMessage(string.Format("添加成功! <a href=\"{0}\">{0}</a>", PostManager.GetPost(PostId).Url));
+                            ShowMessage(string.Format("添加成功! <a href=\"{0}\">{0}</a>", Posts.FindById(PostId).Url));
                             break;
                         case 2:
-                            ShowMessage(string.Format("修改成功! <a href=\"{0}\">{0}</a>", PostManager.GetPost(PostId).Url));
+                            ShowMessage(string.Format("修改成功! <a href=\"{0}\">{0}</a>", Posts.FindById(PostId).Url));
                             break;
                     }
                 }
@@ -71,27 +71,12 @@ namespace Loachs.Web
         /// </summary>
         protected void LoadDefault()
         {
-            List<CategoryInfo> list = CategoryManager.GetCategoryList();
-            if (list.Count == 0)
-            {
-                CategoryInfo c = new CategoryInfo
-                {
-                    Name = "默认分类",
-                    CreateDate = DateTime.Now,
-                    Description = "这是系统自动添加的默认分类",
-                    Slug = "default",
-                    Displayorder = 1000,
-                    Count = 0
-                };
-
-                CategoryManager.InsertCategory(c);
-            }
-            list = CategoryManager.GetCategoryList();
+            List<Categorys> list = Categorys.FindAllWithCache();
             ddlCategory.Items.Clear();
             ddlCategory.Items.Add(new ListItem("无分类", "0"));
-            foreach (CategoryInfo c in list)
+            foreach (Categorys c in list)
             {
-                ddlCategory.Items.Add(new ListItem(c.Name + " (" + c.Count + ") ", c.CategoryId.ToString()));
+                ddlCategory.Items.Add(new ListItem(c.Name + " (" + c.Count + ") ", c.Id.ToString()));
             }
 
             ddlUrlType.Items.Clear();
@@ -118,7 +103,7 @@ namespace Loachs.Web
         /// </summary>
         protected void BindPost()
         {
-            PostInfo p = PostManager.GetPost(PostId);
+            Posts p = Posts.FindById(PostId);
             if (p != null)
             {
                 txtTitle.Text = StringHelper.HtmlDecode(p.Title);
@@ -139,15 +124,20 @@ namespace Loachs.Web
 
                 //绑定标签,需改进
                 string tag = p.Tag;
-                tag = tag.Replace("{", "");
-                string[] taglist = tag.Split('}');
-                foreach (TagInfo taginfo in taglist.Select(tagId => TagManager.GetTag(StringHelper.StrToInt(tagId, 0))).Where(taginfo => taginfo != null))
+                if (!string.IsNullOrWhiteSpace(tag))
                 {
-                    txtTags.Text += taginfo.Name + ",";
+                    tag = tag.Replace("{", "");
+                    string[] taglist = tag.Split('}');
+                    foreach (
+                        Tags tagInfo in
+                            taglist.Select(tagId => Tags.FindById(StringHelper.StrToInt(tagId)))
+                                .Where(taginfo => taginfo != null))
+                    {
+                        txtTags.Text += tagInfo.Name + ",";
+                    }
+                    txtTags.Text = txtTags.Text.TrimEnd(',');
                 }
-                txtTags.Text = txtTags.Text.TrimEnd(',');
-
-                if (p.UserId != PageUtils.CurrentUser.UserId &&
+                if (p.UserId != PageUtils.CurrentUser.Id &&
                     PageUtils.CurrentUser.Type != (int) UserType.Administrator)
                 {
                     Response.Redirect("postlist.aspx?result=444");
@@ -157,11 +147,11 @@ namespace Loachs.Web
 
         protected void btnEdit_Click(object sender, EventArgs e)
         {
-            PostInfo p = new PostInfo();
+            Posts p = new Posts();
 
             if (Operate == OperateType.Update)
             {
-                p = PostManager.GetPost(PostId);
+                p = Posts.FindById(PostId);
             }
             else
             {
@@ -198,19 +188,19 @@ namespace Loachs.Web
 
             if (Operate == OperateType.Update)
             {
-                PostManager.UpdatePost(p);
+                p.Update();
                 //  TagManager.ResetTag(oldTag + p.Tag);
                 Response.Redirect("postedit.aspx?operate=update&postid=" + PostId + "&message=2");
             }
             else
             {
-                p.PostId = PostManager.InsertPost(p);
+                p.Insert();
 
                 SendEmail(p);
 
                 // TagManager.ResetTag(p.Tag);
 
-                Response.Redirect("postedit.aspx?operate=update&postid=" + p.PostId + "&message=1");
+                Response.Redirect("postedit.aspx?operate=update&postid=" + p.Id + "&message=1");
             }
         }
 
@@ -218,22 +208,20 @@ namespace Loachs.Web
         ///     发邮件
         /// </summary>
         /// <param name="post"></param>
-        private void SendEmail(PostInfo post)
+        private void SendEmail(Posts post)
         {
-            if (SettingManager.GetSetting().SendMailAuthorByPost == 1)
+            var site = Sites.GetSetting();
+            if (site.SendMailAuthorByPost == 1)
             {
-                List<UserInfo> list = UserManager.GetUserList();
+                var list = Users.FindAllWithCache().ToList();
                 List<string> emailList = new List<string>();
 
-                foreach (UserInfo user in from user in list where StringHelper.IsEmail(user.Email) where PageUtils.CurrentUser.Email != user.Email where !emailList.Contains(user.Email) select user)
+                foreach (Users user in from user in list where StringHelper.IsEmail(user.Email) where PageUtils.CurrentUser.Email != user.Email where !emailList.Contains(user.Email) select user)
                 {
                     emailList.Add(user.Email);
 
-                    string subject = string.Empty;
-                    string body = string.Empty;
-
-                    subject = string.Format("[新文章通知]{0}", post.Title);
-                    body += string.Format("{0}有新文章了:<br/>", SettingManager.GetSetting().SiteName);
+                    var subject = string.Format("[新文章通知]{0}", post.Title);
+                    string body = string.Format("{0}有新文章了:<br/>", site.SiteName);
                     body += "<hr/>";
                     body += "<br />标题: " + post.Link;
                     body += post.Detail;
@@ -268,7 +256,7 @@ namespace Loachs.Web
             {
                 if (!string.IsNullOrEmpty(n))
                 {
-                    TagInfo t = TagManager.GetTag(n);
+                    Tags t = Tags.FindByName(n);
 
                     //if (t == null)
                     //{
@@ -279,19 +267,19 @@ namespace Loachs.Web
 
                     if (t == null)
                     {
-                        t = new TagInfo
+                        t = new Tags
                         {
                             Count = 0,
                             CreateDate = DateTime.Now,
                             Description = n,
-                            Displayorder = 1000,
+                            DisplayOrder = 1000,
                             Name = n,
                             Slug = StringHelper.HtmlEncode(PageUtils.FilterSlug(n, "tag"))
                         };
 
-                        t.TagId = TagManager.InsertTag(t);
+                        t.Save();
                     }
-                    tagIds += "{" + t.TagId + "}";
+                    tagIds += "{" + t.Id + "}";
                 }
             }
             return tagIds;

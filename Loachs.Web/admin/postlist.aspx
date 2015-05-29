@@ -48,8 +48,8 @@
                    
                     <td><%# Convert.ToDateTime( DataBinder.Eval(Container.DataItem, "CreateDate")).ToString("yyyy-MM-dd")%></td>
                     <td>
-                       <%#GetEditLink(DataBinder.Eval(Container.DataItem, "postid"), DataBinder.Eval(Container.DataItem, "userid"))%>
-                       <%#GetDeleteLink(DataBinder.Eval(Container.DataItem, "postid"), DataBinder.Eval(Container.DataItem, "userid"))%>
+                       <%#GetEditLink(DataBinder.Eval(Container.DataItem, "id"), DataBinder.Eval(Container.DataItem, "userid"))%>
+                       <%#GetDeleteLink(DataBinder.Eval(Container.DataItem, "id"), DataBinder.Eval(Container.DataItem, "userid"))%>
                        
                     </td>
                 </tr>

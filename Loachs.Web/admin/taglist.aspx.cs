@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {
@@ -60,7 +59,7 @@ namespace Loachs.Web
 
         protected void Delete()
         {
-            TagManager.DeleteTag(TagId);
+            Tags.DeleteById(TagId);
             Response.Redirect("taglist.aspx?result=3&page=" + Pager1.PageIndex);
         }
 
@@ -69,13 +68,13 @@ namespace Loachs.Web
         /// </summary>
         protected void BindCategory()
         {
-            TagInfo tag = TagManager.GetTag(TagId);
+            Tags tag = Tags.FindById(TagId);
             if (tag != null)
             {
                 txtName.Text = StringHelper.HtmlDecode(tag.Name);
                 //    txtSlug.Text = StringHelper.HtmlDecode(tag.Slug);
                 txtDescription.Text = StringHelper.HtmlDecode(tag.Description);
-                txtDisplayOrder.Text = tag.Displayorder.ToString();
+                txtDisplayOrder.Text = tag.DisplayOrder.ToString();
             }
         }
 
@@ -86,8 +85,7 @@ namespace Loachs.Web
         {
             int recordCount = 0;
 
-            List<TagInfo> list = TagManager.GetTagList(Pager1.PageSize, Pager1.PageIndex, out recordCount);
-            rptCategory.DataSource = list;
+            rptCategory.DataSource = Tags.GetTagList(Pager1.PageSize, Pager1.PageIndex, out recordCount);
             rptCategory.DataBind();
 
             Pager1.RecordCount = recordCount;
@@ -100,10 +98,10 @@ namespace Loachs.Web
         /// <param name="e"></param>
         protected void btnEdit_Click(object sender, EventArgs e)
         {
-            TagInfo tag = new TagInfo();
+            Tags tag = new Tags();
             if (Operate == OperateType.Update)
             {
-                tag = TagManager.GetTag(TagId);
+                tag = Tags.FindById(TagId);
             }
             else
             {
@@ -125,7 +123,7 @@ namespace Loachs.Web
 
             tag.Slug = PageUtils.FilterSlug(tag.Name, "tag");
             tag.Description = StringHelper.HtmlEncode(txtDescription.Text);
-            tag.Displayorder = StringHelper.StrToInt(txtDisplayOrder.Text, 1000);
+            tag.DisplayOrder = StringHelper.StrToInt(txtDisplayOrder.Text, 1000);
 
             if (tag.Name == "")
             {
@@ -135,12 +133,12 @@ namespace Loachs.Web
 
             if (Operate == OperateType.Update)
             {
-                TagManager.UpdateTag(tag);
+                tag.Save();
                 Response.Redirect("taglist.aspx?result=2&page=" + Pager1.PageIndex);
             }
             else
             {
-                TagManager.InsertTag(tag);
+                tag.Save();
                 Response.Redirect("taglist.aspx?result=1&page=" + Pager1.PageIndex);
             }
         }

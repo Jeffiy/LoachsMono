@@ -84,16 +84,18 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NewLife.Core">
+      <HintPath>..\Library\NewLife.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
+    <Reference Include="XCode">
+      <HintPath>..\Library\XCode.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\CacheHelper.cs" />
-    <Compile Include="Common\Caches.cs" />
     <Compile Include="Common\ConfigHelper.cs" />
     <Compile Include="Common\EmailHelper.cs" />
     <Compile Include="Common\NetHelper.cs" />
@@ -102,38 +104,25 @@
     <Compile Include="Common\Utils.cs" />
     <Compile Include="Controls\Pager.cs" />
     <Compile Include="Controls\UrlRewriter.cs" />
-    <Compile Include="Data\DataAccess.cs" />
-    <Compile Include="Data\Interface\IComment.cs" />
-    <Compile Include="Data\Interface\IDbHelper.cs" />
-    <Compile Include="Data\Interface\IPost.cs" />
-    <Compile Include="Data\Interface\IUser.cs" />
-    <Compile Include="Data\Interface\ILink.cs" />
-    <Compile Include="Data\Interface\ITag.cs" />
-    <Compile Include="Data\Interface\ICategory.cs" />
-    <Compile Include="Data\Interface\IStatistics.cs" />
-    <Compile Include="Data\Interface\ISetting.cs" />
     <Compile Include="Entity\ArchiveInfo.cs" />
-    <Compile Include="Entity\CategoryInfo.cs" />
-    <Compile Include="Entity\CommentInfo.cs" />
     <Compile Include="Entity\Common\Enums.cs" />
-    <Compile Include="Entity\LinkInfo.cs" />
-    <Compile Include="Entity\PostInfo.cs" />
     <Compile Include="Entity\SettingInfo.cs" />
-    <Compile Include="Entity\TagInfo.cs" />
     <Compile Include="Entity\ThemeInfo.cs" />
-    <Compile Include="Entity\UserInfo.cs" />
-    <Compile Include="Entity\StatisticsInfo.cs" />
+    <Compile Include="Entity\标签.Biz.cs" />
+    <Compile Include="Entity\类型.Biz.cs" />
+    <Compile Include="Entity\类型.cs" />
+    <Compile Include="Entity\帖子.Biz.cs" />
+    <Compile Include="Entity\帖子.cs" />
+    <Compile Include="Entity\用户信息.Biz.cs" />
+    <Compile Include="Entity\用户信息.cs" />
+    <Compile Include="Entity\站点设置信息.Biz.cs" />
+    <Compile Include="Entity\站点设置信息.cs" />
+    <Compile Include="Entity\评论.Biz.cs" />
+    <Compile Include="Entity\评论.cs" />
+    <Compile Include="Entity\链接.Biz.cs" />
+    <Compile Include="Entity\链接.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Service\ArchiveManager.cs" />
-    <Compile Include="Service\CommentManager.cs" />
-    <Compile Include="Service\LinkManager.cs" />
-    <Compile Include="Service\PostManager.cs" />
-    <Compile Include="Service\SettingManager.cs" />
-    <Compile Include="Service\TagManager.cs" />
     <Compile Include="Service\ThemeManager.cs" />
-    <Compile Include="Service\UserManager.cs" />
-    <Compile Include="Service\CategoryManager.cs" />
-    <Compile Include="Service\StatisticsManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -151,6 +140,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Entity\分类.Biz.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

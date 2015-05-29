@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Web.UI;
-using Loachs.Common;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {

@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {
@@ -38,17 +37,17 @@ namespace Loachs.Web
             int commentId = RequestHelper.QueryInt("commentid", 0);
             if (Operate == OperateType.Delete)
             {
-                CommentManager.DeleteComment(commentId);
+                Comments.DeleteById(commentId);
 
                 Response.Redirect("commentlist.aspx?result=3&page=" + Pager1.PageIndex);
             }
             else if (Operate == OperateType.Update)
             {
-                CommentInfo comment = CommentManager.GetComment(commentId);
+                Comments comment = Comments.FindById(commentId);
                 if (comment != null)
                 {
                     comment.Approved = (int) ApprovedStatus.Success;
-                    CommentManager.UpdateComment(comment);
+                    comment.Save();
 
                     Response.Redirect("commentlist.aspx?result=4&page=" + Pager1.PageIndex);
                 }
@@ -81,7 +80,7 @@ namespace Loachs.Web
         {
             int totalRecord = 0;
 
-            List<CommentInfo> list = CommentManager.GetCommentList(Pager1.PageSize, Pager1.PageIndex, out totalRecord, 1,
+            var list = Comments.GetCommentList(Pager1.PageSize, Pager1.PageIndex, out totalRecord, 1,
                 -1, -1, -1, _approved, -1, string.Empty);
             rptComment.DataSource = list;
             rptComment.DataBind();
@@ -95,7 +94,7 @@ namespace Loachs.Web
         /// <returns></returns>
         protected string GetPostLink(int postId)
         {
-            PostInfo post = PostManager.GetPost(postId);
+            Posts post = Posts.FindById(postId);
             if (post != null)
             {
                 return string.Format(" 评: {0}", StringHelper.CutString(post.Title, 20, "..."));
@@ -117,7 +116,7 @@ namespace Loachs.Web
                 if (box.Checked)
                 {
                     int commentId = Convert.ToInt32(box.Value);
-                    CommentManager.DeleteComment(commentId);
+                    Comments.DeleteById(commentId);
                     i++;
                 }
             }
@@ -132,15 +131,12 @@ namespace Loachs.Web
         /// <param name="e"></param>
         protected void btnApproved_Click(object sender, EventArgs e)
         {
-            int i = 0;
-            foreach (CommentInfo c in from RepeaterItem item in rptComment.Items select ((HtmlInputCheckBox) item.FindControl("chkRow")) into box where box.Checked select Convert.ToInt32(box.Value) into commentID select CommentManager.GetComment(commentID) into c where c != null select c)
+            foreach (Comments c in from RepeaterItem item in rptComment.Items select ((HtmlInputCheckBox)item.FindControl("chkRow")) into box where box.Checked select Convert.ToInt32(box.Value) into commentID select Comments.FindById(commentID) into c where c != null select c)
             {
                 c.Approved = (int) ApprovedStatus.Success;
-                if (CommentManager.UpdateComment(c) > 0)
-                {
-                    i++;
-                }
+                c.Save();
             }
+            
             Response.Redirect("commentlist.aspx?result=4&page=" + Pager1.PageIndex + "&approved=" + _approved);
         }
     }

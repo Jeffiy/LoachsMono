@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Web.Security;
-using Loachs.Business;
-using Loachs.Common;
 using Loachs.Entity;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {
@@ -30,7 +29,7 @@ namespace Loachs.Web
                 return;
             }
 
-            UserInfo user = UserManager.GetUser(userName, password);
+            Users user = Users.Login(userName, password);
 
             if (user != null)
             {
@@ -39,8 +38,8 @@ namespace Loachs.Web
                     lblMessage.Text = "此用户已停用!";
                     return;
                 }
-                FormsAuthentication.SetAuthCookie(user.UserId.ToString(), false);
-                PageUtils.WriteUserCookie(user.UserId, user.UserName, user.Password, expires);
+                FormsAuthentication.SetAuthCookie(user.Id.ToString(), false);
+                PageUtils.WriteUserCookie(user.Id, user.UserName, user.Password, expires);
                 Response.Redirect("default.aspx");
             }
             else

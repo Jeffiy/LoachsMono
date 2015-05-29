@@ -310,9 +310,9 @@ namespace Loachs.Common
         ///     string型转换为int型,转换失败返回缺省值
         /// </summary>
         /// <param name="str">要转换的字符串</param>
-        /// <param name="def">缺省值</param>
+        /// <param name="def">缺省值 0 </param>
         /// <returns>转换后的int类型结果</returns>
-        public static int StrToInt(string str, int def)
+        public static int StrToInt(string str, int def = 0)
         {
             if (IsInt(str))
             {

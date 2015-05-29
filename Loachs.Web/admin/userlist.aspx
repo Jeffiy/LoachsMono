@@ -56,7 +56,7 @@
                 <tr class="row">                 
                     <td>
                     
-                    <%# DataBinder.Eval(Container.DataItem, "Displayorder")%></td>
+                    <%# DataBinder.Eval(Container.DataItem, "DisplayOrder")%></td>
                     <td>
                         [<%#GetUserType(DataBinder.Eval(Container.DataItem, "Type"))%>]
                         <%# DataBinder.Eval(Container.DataItem, "Link")%>(<%# DataBinder.Eval(Container.DataItem, "UserName")%>)
@@ -66,7 +66,7 @@
                     
                     <td><%# DataBinder.Eval(Container.DataItem, "Status").ToString() == "1" ? "<img src=\"../common/images/admin/yes.gif\" title=\"使用\"/>" : "<img src=\"../common/images/admin/no.gif\" title=\"停用\"/>"%></td>
                     <td><%# Convert.ToDateTime( DataBinder.Eval(Container.DataItem, "CreateDate")).ToString("yyyy-MM-dd")%></td>
-                    <td><a href="userlist.aspx?operate=update&userId=<%# DataBinder.Eval(Container.DataItem, "userId")%>">编辑</a> <a href="userlist.aspx?operate=delete&userId=<%# DataBinder.Eval(Container.DataItem, "userId")%>" onclick="return confirm('删除作者不会删除作者发表的文章和评论,确定要删除吗?');">删除</a></td>
+                    <td><a href="userlist.aspx?operate=update&userId=<%# DataBinder.Eval(Container.DataItem, "Id")%>">编辑</a> <a href="userlist.aspx?operate=delete&userId=<%# DataBinder.Eval(Container.DataItem, "Id")%>" onclick="return confirm('删除作者不会删除作者发表的文章和评论,确定要删除吗?');">删除</a></td>
                 </tr>
             </ItemTemplate>
         </asp:Repeater>

@@ -44,20 +44,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NewLife.Core">
+      <HintPath>..\Library\NewLife.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Web.ApplicationServices" />
-    <Reference Include="System.Web.DynamicData" />
-    <Reference Include="System.Web.Entity" />
-    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Xml.Linq" />
+    <Reference Include="XCode">
+      <HintPath>..\Library\XCode.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="admin\categorylist.aspx" />
@@ -79,8 +76,6 @@
     <Content Include="admin\userlist.aspx" />
     <Content Include="bin\Loachs.Core.dll" />
     <Content Include="bin\Loachs.Core.pdb" />
-    <Content Include="bin\Loachs.Data.Access.dll" />
-    <Content Include="bin\Loachs.Data.Access.pdb" />
     <Content Include="bin\NVelocity.dll" />
     <Content Include="common\css\admin.css" />
     <Content Include="common\css\thickbox.css" />
@@ -224,7 +219,6 @@
     <Content Include="common\tools\verifyimage.aspx" />
     <Content Include="default.aspx" />
     <Content Include="favicon.ico" />
-    <Content Include="HelloService.svc" />
     <Content Include="themes\default\css\style.css" />
     <Content Include="themes\default\template\default.html" />
     <Content Include="themes\default\template\post.html" />
@@ -386,10 +380,6 @@
     <Compile Include="default.aspx.designer.cs">
       <DependentUpon>default.aspx</DependentUpon>
     </Compile>
-    <Compile Include="HelloService.svc.cs">
-      <DependentUpon>HelloService.svc</DependentUpon>
-    </Compile>
-    <Compile Include="IHelloService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -407,10 +397,6 @@
       <Project>{91A74915-3B8A-4CDA-B6AB-84B25AE1BCFF}</Project>
       <Name>Loachs.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Loachs.Data.Access\Loachs.Data.Access.csproj">
-      <Project>{0426F6E8-F31C-4D0B-BC11-B96D11D52D11}</Project>
-      <Name>Loachs.Data.Access</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Loachs.UI\Loachs.UI.csproj">
       <Project>{8BBBC9E1-6D73-45B1-8C65-F60B77B432B7}</Project>
       <Name>Loachs.UI</Name>
@@ -419,6 +405,7 @@
   <ItemGroup>
     <None Include="App_Data\loachs.db" />
     <Content Include="packages.config" />
+    <None Include="Properties\PublishProfiles\配置文件1.pubxml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

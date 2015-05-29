@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Web.UI.WebControls;
-using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {
@@ -54,18 +53,18 @@ namespace Loachs.Web
 
         protected void Delete()
         {
-            PostInfo post = PostManager.GetPost(PostId);
+            Posts post = Posts.FindById(PostId);
             if (post == null)
             {
                 return;
             }
             if (PageUtils.CurrentUser.Type != (int) UserType.Administrator &&
-                PageUtils.CurrentUser.UserId != post.UserId)
+                PageUtils.CurrentUser.Id != post.UserId)
             {
                 Response.Redirect("postlist.aspx?result=444");
             }
 
-            PostManager.DeletePost(PostId);
+            Posts.DeleteById(PostId);
 
             Response.Redirect("postlist.aspx?result=3");
         }
@@ -73,7 +72,7 @@ namespace Loachs.Web
         protected string GetEditLink(object postId, object userId)
         {
             string t = " <a href=\"postedit.aspx?operate=update&postid=" + postId + "\">编辑</a>";
-            if (Convert.ToInt32(userId) == PageUtils.CurrentUser.UserId ||
+            if (Convert.ToInt32(userId) == PageUtils.CurrentUser.Id ||
                 PageUtils.CurrentUser.Type == (int) UserType.Administrator)
             {
                 return t;
@@ -85,7 +84,7 @@ namespace Loachs.Web
         {
             string t = " <a href=\"postlist.aspx?operate=delete&postid=" + postId +
                        "\" onclick=\"return confirm('删除文章同时会删除该文章的相关评论,确定要删除吗?');\">删除</a>";
-            if (Convert.ToInt32(userId) == PageUtils.CurrentUser.UserId ||
+            if (Convert.ToInt32(userId) == PageUtils.CurrentUser.Id ||
                 PageUtils.CurrentUser.Type == (int) UserType.Administrator)
             {
                 return t;
@@ -100,16 +99,16 @@ namespace Loachs.Web
         {
             ddlCategory.Items.Clear();
             ddlCategory.Items.Add(new ListItem("不限", "-1"));
-            foreach (CategoryInfo term in CategoryManager.GetCategoryList())
+            foreach (Categorys category in Categorys.FindAllWithCache())
             {
-                ddlCategory.Items.Add(new ListItem(term.Name, term.CategoryId.ToString()));
+                ddlCategory.Items.Add(new ListItem(category.Name, category.Id.ToString()));
             }
 
             ddlAuthor.Items.Clear();
             ddlAuthor.Items.Add(new ListItem("不限", "-1"));
-            foreach (UserInfo user in UserManager.GetUserList())
+            foreach (Users user in Users.FindAllWithCache())
             {
-                ddlAuthor.Items.Add(new ListItem(user.Name, user.UserId.ToString()));
+                ddlAuthor.Items.Add(new ListItem(user.Name, user.Id.ToString()));
             }
         }
 
@@ -132,7 +131,7 @@ namespace Loachs.Web
 
             int totalRecord = 0;
 
-            List<PostInfo> list = PostManager.GetPostList(Pager1.PageSize, Pager1.PageIndex, out totalRecord, categoryId,
+            var list = Posts.GetPostList(Pager1.PageSize, Pager1.PageIndex, out totalRecord, categoryId,
                 -1, userId, recommend, -1, -1, hide, string.Empty, string.Empty, keyword);
             rptPost.DataSource = list;
             rptPost.DataBind();

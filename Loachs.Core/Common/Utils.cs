@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using Loachs.Business;
+using Loachs.Entity;
 
 namespace Loachs.Common
 {
@@ -18,11 +18,12 @@ namespace Loachs.Common
         {
             get
             {
-                if (_rewriteExtension == "unknow" || _rewriteExtension != SettingManager.GetSetting().RewriteExtension)
+                var site = Sites.GetSetting();
+                if (_rewriteExtension == "unknow" || _rewriteExtension != site.RewriteExtension)
                 {
-                    _rewriteExtension = SettingManager.GetSetting().RewriteExtension;
+                    _rewriteExtension = site.RewriteExtension;
 
-                    var url = ConfigHelper.SiteUrl + "checkurlrewriter" + SettingManager.GetSetting().RewriteExtension;
+                    var url = ConfigHelper.SiteUrl + "checkurlrewriter" + site.RewriteExtension;
 
                     var code = NetHelper.GetHttpStatusCode(url);
                     _isSupportUrlRewriter = code == HttpStatusCode.OK;

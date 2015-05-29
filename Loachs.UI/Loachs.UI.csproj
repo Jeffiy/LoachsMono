@@ -32,14 +32,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NewLife.Core">
+      <HintPath>..\Library\NewLife.Core.dll</HintPath>
+    </Reference>
     <Reference Include="NVelocity">
       <HintPath>..\Loachs.Web\bin\NVelocity.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
+    <Reference Include="XCode">
+      <HintPath>..\Library\XCode.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdminPage.cs">
@@ -63,10 +68,6 @@
     <ProjectReference Include="..\Loachs.Core\Loachs.Core.csproj">
       <Project>{91A74915-3B8A-4CDA-B6AB-84B25AE1BCFF}</Project>
       <Name>Loachs.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Loachs.Data.Access\Loachs.Data.Access.csproj">
-      <Project>{0426F6E8-F31C-4D0B-BC11-B96D11D52D11}</Project>
-      <Name>Loachs.Data.Access</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

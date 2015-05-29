@@ -5,9 +5,9 @@ using System.Globalization;
 using System.Net;
 using System.Net.Mail;
 using System.Web.UI.WebControls;
-using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {
@@ -49,7 +49,7 @@ namespace Loachs.Web
         {
             LoadDefaultData();
 
-            SettingInfo s = SettingManager.GetSetting();
+            SettingInfo s = Sites.GetSetting();
             if (s != null)
             {
                 txtSiteName.Text = StringHelper.HtmlDecode(s.SiteName);
@@ -171,7 +171,7 @@ namespace Loachs.Web
         /// <param name="e"></param>
         protected void btnEdit_Click(object sender, EventArgs e)
         {
-            SettingInfo s = SettingManager.GetSetting();
+            SettingInfo s = Sites.GetSetting();
             if (s != null)
             {
                 s.SiteName = StringHelper.HtmlEncode(txtSiteName.Text);
@@ -248,10 +248,9 @@ namespace Loachs.Web
                 s.SendMailAuthorByComment = chkSendMailAuthorByComment.Checked ? 1 : 0;
                 s.SendMailNotifyByComment = chkSendMailNotifyByComment.Checked ? 1 : 0;
 
-                if (SettingManager.UpdateSetting())
-                {
-                    Response.Redirect("setting.aspx?result=2");
-                }
+                Sites.UpdateSetting(s);
+                
+                Response.Redirect("setting.aspx?result=2");
             }
         }
 

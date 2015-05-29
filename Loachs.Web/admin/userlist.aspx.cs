@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {
@@ -75,7 +74,7 @@ namespace Loachs.Web
         /// </summary>
         protected void BindUser()
         {
-            UserInfo u = UserManager.GetUser(UserId);
+            Users u = Users.FindById(UserId);
             if (u != null)
             {
                 txtUserName.Text = StringHelper.HtmlDecode(u.UserName);
@@ -87,9 +86,9 @@ namespace Loachs.Web
 
                 ddlUserType.SelectedValue = u.Type.ToString();
 
-                txtDisplayOrder.Text = u.Displayorder.ToString();
+                txtDisplayOrder.Text = u.DisplayOrder.ToString();
             }
-            if (u.UserId == PageUtils.CurrentUserId)
+            if (u != null && u.Id == PageUtils.CurrentUserId)
             {
                 ddlUserType.Enabled = false;
                 chkStatus.Enabled = false;
@@ -101,8 +100,7 @@ namespace Loachs.Web
         /// </summary>
         protected void BindUserList()
         {
-            List<UserInfo> list = UserManager.GetUserList();
-            rptUser.DataSource = list;
+            rptUser.DataSource = Users.FindAllWithCache();
             rptUser.DataBind();
         }
 
@@ -115,7 +113,7 @@ namespace Loachs.Web
             {
                 Response.Redirect("userlist.aspx?result=4");
             }
-            UserManager.DeleteUser(UserId);
+            Users.DeleteById(UserId);
             Response.Redirect("userlist.aspx?result=3");
         }
 
@@ -140,10 +138,10 @@ namespace Loachs.Web
         /// <param name="e"></param>
         protected void btnEdit_Click(object sender, EventArgs e)
         {
-            UserInfo u = new UserInfo();
+            Users u = new Users();
             if (Operate == OperateType.Update)
             {
-                u = UserManager.GetUser(UserId);
+                u = Users.FindById(UserId);
             }
             else
             {
@@ -160,7 +158,7 @@ namespace Loachs.Web
             u.Type = StringHelper.StrToInt(ddlUserType.SelectedValue, 0);
             u.Name = StringHelper.HtmlEncode(txtNickName.Text.Trim());
             u.AvatarUrl = string.Empty;
-            u.Displayorder = StringHelper.StrToInt(txtDisplayOrder.Text, 1000);
+            u.DisplayOrder = StringHelper.StrToInt(txtDisplayOrder.Text, 1000);
 
             if (!string.IsNullOrEmpty(txtPassword.Text.Trim()))
             {
@@ -176,12 +174,12 @@ namespace Loachs.Web
 
             if (Operate == OperateType.Update)
             {
-                UserManager.UpdateUser(u);
+                u.Save();
 
                 //  如果修改自己,更新COOKIE
-                if (!string.IsNullOrEmpty(txtPassword.Text.Trim()) && u.UserId == PageUtils.CurrentUserId)
+                if (!string.IsNullOrEmpty(txtPassword.Text.Trim()) && u.Id == PageUtils.CurrentUserId)
                 {
-                    PageUtils.WriteUserCookie(u.UserId, u.UserName, u.Password, 0);
+                    PageUtils.WriteUserCookie(u.Id, u.UserName, u.Password, 0);
                 }
                 Response.Redirect("userlist.aspx?result=2");
             }
@@ -217,13 +215,14 @@ namespace Loachs.Web
                     ShowError("请输入密码!");
                     return;
                 }
-                if (UserManager.ExistsUserName(u.UserName))
+                if (Users.FindByName(u.UserName) != null)
                 {
                     ShowError("该登陆用户名已存在,请换之");
                     return;
                 }
 
-                u.UserId = UserManager.InsertUser(u);
+                u.Save();
+
                 Response.Redirect("userlist.aspx?result=1");
             }
         }

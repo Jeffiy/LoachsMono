@@ -37,10 +37,10 @@ namespace Loachs.Controls
 
         private string _cssclass = "pager";
         //public int intStartRecord;	//起始记录
-        private string _currenturl = string.Empty; //当前页面路径
+//        private string _currenturl = string.Empty; //当前页面路径
         public int Pageindex = 1;
         private string _rewriteurl = string.Empty; //重写地址
-        private int _totalrecord = 0;
+//        private int _totalrecord = 0;
         public int IntPageIndex = 1; //当时页
         public int IntPageSize = 10; //每页显示的记录数
         //public int intPageCount;	//计算总共有多少页

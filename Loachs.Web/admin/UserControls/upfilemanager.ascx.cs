@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
-using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {
@@ -367,24 +367,25 @@ namespace Loachs.Web
                         string newFileName = System.IO.Path.GetFileNameWithoutExtension(postedFile.FileName) + "w(" + iCounter +
                                              ")" + System.IO.Path.GetExtension(postedFile.FileName);
                         string newImagePath = Server.MapPath(uploadPath + newFileName);
+                        var site = Sites.GetSetting();
                         string waterImagePath =
                             Server.MapPath(ConfigHelper.SitePath + "common/images/watermark/" +
-                                           SettingManager.GetSetting().WatermarkImage);
+                                           site.WatermarkImage);
 
-                        if (SettingManager.GetSetting().WatermarkType == 2 && File.Exists(waterImagePath))
+                        if (site.WatermarkType == 2 && File.Exists(waterImagePath))
                         {
                             Watermark.CreateWaterImage(fileSavePath2, fileSavePath,
-                                SettingManager.GetSetting().WatermarkPosition, waterImagePath,
-                                SettingManager.GetSetting().WatermarkTransparency,
-                                SettingManager.GetSetting().WatermarkQuality);
+                                site.WatermarkPosition, waterImagePath,
+                                site.WatermarkTransparency,
+                                site.WatermarkQuality);
                         }
                         else
                         {
                             Watermark.CreateWaterText(fileSavePath2, fileSavePath,
-                                SettingManager.GetSetting().WatermarkPosition, SettingManager.GetSetting().WatermarkText,
-                                SettingManager.GetSetting().WatermarkQuality,
-                                SettingManager.GetSetting().WatermarkFontName,
-                                SettingManager.GetSetting().WatermarkFontSize);
+                                site.WatermarkPosition, site.WatermarkText,
+                                site.WatermarkQuality,
+                                site.WatermarkFontName,
+                                site.WatermarkFontSize);
                         }
                         File.Delete(fileSavePath2);
                     }

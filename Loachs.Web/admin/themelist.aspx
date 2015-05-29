@@ -2,6 +2,7 @@
 <%@ Import Namespace="System.IO" %>
 <%@ Import Namespace="Loachs.Business" %>
 <%@ Import Namespace="Loachs.Common" %>
+<%@ Import Namespace="Loachs.Entity" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server"></asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
 <h2>主题管理</h2>
@@ -14,7 +15,8 @@
         {
             if (d.Name == ".svn") continue;
 %>
-    <li <%=(SettingManager.GetSetting().Theme == d.Name || SettingManager.GetSetting().MobileTheme == d.Name)?" class=\"current\"":"" %>  >
+<% var site = Sites.GetSetting(); %>
+    <li <%=(site.Theme == d.Name || site.MobileTheme == d.Name)?" class=\"current\"":"" %>  >
         <p class="gray"><%=ConfigHelper.SitePath %>themes/<%=d.Name %>/</p>
         <p><img src="../themes/<%=d.Name %>/theme.jpg" width="200" height="150" alt=""  style="border:1px solid #ccc;" /></p>
         <h5 style="margin:5px 0 3px 0 ;"><%=ThemeManager.GetTemplate(d.FullName).Name %></h5>
@@ -23,7 +25,7 @@
         <p class="gray" style="border-bottom:1px solid #ccc; padding-bottom:5px;">发布: <%=ThemeManager.GetTemplate(d.FullName).PubDate %></p>
        
         <p style="border-bottom:1px solid #ccc; padding:5px 0;">
-        <%if (SettingManager.GetSetting().Theme == d.Name)
+        <%if (site.Theme == d.Name)
           {%>     电脑版使用
         <%}
           else
@@ -32,7 +34,7 @@
            
         <%} %>
        
-        <%if (SettingManager.GetSetting().MobileTheme == d.Name)
+        <%if (site.MobileTheme == d.Name)
           {%>     手机版使用
         <%}
           else

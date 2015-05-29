@@ -2,9 +2,9 @@
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Security;
-using Loachs.Business;
 using Loachs.Common;
 using Loachs.Entity;
+using StringHelper = Loachs.Common.StringHelper;
 
 namespace Loachs.Web
 {
@@ -78,13 +78,13 @@ namespace Loachs.Web
         /// <summary>
         ///     当前用户
         /// </summary>
-        public static UserInfo CurrentUser
+        public static Users CurrentUser
         {
             get
             {
                 if (IsLogin)
                 {
-                    return UserManager.GetUser(CurrentUserId);
+                    return Users.FindById(CurrentUserId);
                 }
                 return null;
             }

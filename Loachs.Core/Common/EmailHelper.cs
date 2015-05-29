@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading;
-using Loachs.Business;
+using Loachs.Entity;
 
 namespace Loachs.Common
 {
@@ -25,10 +25,10 @@ namespace Loachs.Common
         {
             try
             {
-                MailAddress from = new MailAddress(SettingManager.GetSetting().SmtpEmail,
-                    SettingManager.GetSetting().SiteName);
-                MailMessage m = new MailMessage();
-                m.From = from;
+                var site = Sites.GetSetting();
+                MailAddress from = new MailAddress(site.SmtpEmail,
+                    site.SiteName);
+                MailMessage m = new MailMessage {From = from};
                 //   m.ReplyTo = new MailAddress(recipients);
 
                 m.To.Add(recipients); //收件人处会显示所有人的邮箱
@@ -50,12 +50,14 @@ namespace Loachs.Common
                 m.Priority = MailPriority.Normal;
                 m.BodyEncoding = Encoding.GetEncoding("utf-8");
 
-                SmtpClient smtp = new SmtpClient();
-                smtp.Host = SettingManager.GetSetting().SmtpServer;
-                smtp.Credentials = new NetworkCredential(SettingManager.GetSetting().SmtpUserName,
-                    SettingManager.GetSetting().SmtpPassword);
-                smtp.EnableSsl = Convert.ToBoolean(SettingManager.GetSetting().SmtpEnableSsl);
-                smtp.Port = SettingManager.GetSetting().SmtpServerPost;
+                SmtpClient smtp = new SmtpClient
+                {
+                    Host = site.SmtpServer,
+                    Credentials = new NetworkCredential(site.SmtpUserName,
+                        site.SmtpPassword),
+                    EnableSsl = Convert.ToBoolean(site.SmtpEnableSsl),
+                    Port = site.SmtpServerPost
+                };
                 smtp.Send(m);
             }
             catch

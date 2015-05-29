@@ -26,12 +26,12 @@
         <asp:Repeater ID="rptCategory" runat="server">
             <ItemTemplate>
                 <tr class="row">
-                    <td><%# DataBinder.Eval(Container.DataItem, "Displayorder")%></td>
+                    <td><%# DataBinder.Eval(Container.DataItem, "DisplayOrder")%></td>
                     <td><a href="<%# DataBinder.Eval(Container.DataItem, "Url")%>"  ><%# DataBinder.Eval(Container.DataItem, "Name")%></a></td>
                     <td><%# DataBinder.Eval(Container.DataItem, "Description")%></td>
                     <td><%#  DataBinder.Eval(Container.DataItem,"Count")%></td>
                     <td><%# Convert.ToDateTime( DataBinder.Eval(Container.DataItem, "CreateDate")).ToString("yyyy-MM-dd")%></td>            
-                    <td><a href="taglist.aspx?operate=update&tagid=<%# DataBinder.Eval(Container.DataItem, "TagId")%>&page=<%=Pager1.PageIndex %>">编辑</a> <a href="taglist.aspx?operate=delete&tagid=<%# DataBinder.Eval(Container.DataItem, "TagId")%>&page=<%=Pager1.PageIndex %>" onclick="return confirm('确定要删除吗?');">删除</a></td>
+                    <td><a href="taglist.aspx?operate=update&tagid=<%# DataBinder.Eval(Container.DataItem, "Id")%>&page=<%=Pager1.PageIndex %>">编辑</a> <a href="taglist.aspx?operate=delete&tagid=<%# DataBinder.Eval(Container.DataItem, "Id")%>&page=<%=Pager1.PageIndex %>" onclick="return confirm('确定要删除吗?');">删除</a></td>
                 </tr>
             </ItemTemplate>
         </asp:Repeater>

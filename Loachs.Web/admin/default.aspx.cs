@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Loachs.Business;
+using System.Web;
 using Loachs.Common;
 using Loachs.Entity;
+using NewLife;
+using XCode;
 
 namespace Loachs.Web
 {
@@ -19,11 +20,18 @@ namespace Loachs.Web
         {
             SetPageTitle("首页");
 
+            if (Request["Act"] == "Restart")
+            {
+                HttpRuntime.UnloadAppDomain();
+                Response.Redirect(Path.GetFileName(Request.Path));
+                return;
+            }
+
             if (!IsPostBack)
             {
                 CheckStatistics();
 
-                commentlist = CommentManager.GetCommentList(15, 1, -1, -1, -1, (int) ApprovedStatus.Wait, -1,
+                commentlist = Comments.GetCommentList(15, 1, -1, -1, -1, (int) ApprovedStatus.Wait, -1,
                     string.Empty);
                 //rptComment.DataSource = list;
                 //rptComment.DataBind();
@@ -45,11 +53,9 @@ namespace Loachs.Web
 
                 GetDirectoryCount(Server.MapPath(UpfilePath));
 
-                GetSystemInfo();
             }
 
             ShowResult();
-
 
             if (string.IsNullOrEmpty(ResponseMessage))
             {
@@ -85,23 +91,23 @@ namespace Loachs.Web
 
         protected void CheckStatistics()
         {
-            StatisticsInfo s = StatisticsManager.GetStatistics();
+            Sites s = Sites.SiteInfo;
             bool update = false;
 
-            int totalPosts = PostManager.GetPostCount(-1, -1, -1, (int) PostStatus.Published, 0);
+            int totalPosts = Posts.GetPostCount(-1, -1, -1, (int) PostStatus.Published, 0);
             if (totalPosts != s.PostCount)
             {
                 s.PostCount = totalPosts;
                 update = true;
             }
 
-            int totalComments = CommentManager.GetCommentCount(true);
+            int totalComments = Comments.GetCommentCount(true);
             if (totalComments != s.CommentCount)
             {
                 s.CommentCount = totalComments;
                 update = true;
             }
-            int totalTags = TagManager.GetTagList().Count;
+            int totalTags = Tags.FindCount();
             if (totalTags != s.TagCount)
             {
                 s.TagCount = totalTags;
@@ -109,7 +115,7 @@ namespace Loachs.Web
             }
             if (update)
             {
-                StatisticsManager.UpdateStatistics();
+                s.Save();
             }
         }
 
@@ -171,7 +177,6 @@ namespace Loachs.Web
             {
                 if (fsi is FileInfo)
                 {
-                    //   FileInfo fi = (FileInfo)fsi;
                     UpfileCount += 1;
                 }
                 else
@@ -186,148 +191,58 @@ namespace Loachs.Web
 
         protected void btnCategory_Click(object sender, EventArgs e)
         {
-            List<CategoryInfo> list = CategoryManager.GetCategoryList();
-            for (int i = 0; i < list.Count; i++)
+            EntityList<Categorys> list = Categorys.FindAllWithCache();
+            foreach (Categorys category in list)
             {
-                list[i].Count = PostManager.GetPostCount(list[i].CategoryId, -1, -1, (int) PostStatus.Published, 0);
-                CategoryManager.UpdateCategory(list[i]);
+                category.Count = Posts.GetPostCount(category.Id, -1, -1, (int)PostStatus.Published, 0);
+                category.Save();
             }
             Response.Redirect("default.aspx?result=11");
         }
 
         protected void btnTag_Click(object sender, EventArgs e)
         {
-            List<TagInfo> list = TagManager.GetTagList();
-            for (int i = 0; i < list.Count; i++)
+            var list = Tags.FindAllWithCache();
+            foreach (Tags tag in list)
             {
-                list[i].Count = PostManager.GetPostCount(-1, list[i].TagId, -1, (int) PostStatus.Published, 0);
-                TagManager.UpdateTag(list[i]);
+                tag.Count = Posts.GetPostCount(-1, tag.Id, -1, (int)PostStatus.Published, 0);
+                tag.Save();
             }
             Response.Redirect("default.aspx?result=12");
         }
 
         protected void btnUser_Click(object sender, EventArgs e)
         {
-            List<UserInfo> list = UserManager.GetUserList();
-            for (int i = 0; i < list.Count; i++)
+            var list = Users.FindAllWithCache();
+            foreach (Users user in list)
             {
-                list[i].PostCount = PostManager.GetPostCount(-1, -1, list[i].UserId, (int) PostStatus.Published, 0);
-                list[i].CommentCount = CommentManager.GetCommentCount(list[i].UserId, -1, false);
-                UserManager.UpdateUser(list[i]);
+                user.PostCount = Posts.GetPostCount(-1, -1, user.Id, (int)PostStatus.Published, 0);
+                user.CommentCount = Comments.GetCommentCount(user.Id, -1, false);
+                user.Save();
             }
             Response.Redirect("default.aspx?result=13");
         }
-
-        /// <summary>
-        ///     获取系统内存大小
-        /// </summary>
-        /// <returns>内存大小（单位GB）</returns>
-        private static int GetPhisicalMemory()
+        
+        protected String GetWebServerName()
         {
-            //try
-            //{
-            //    ManagementObjectSearcher searcher = new ManagementObjectSearcher();   //用于查询一些如系统信息的管理对象 
-            //    searcher.Query = new SelectQuery("Win32_PhysicalMemory ", "", new string[] { "Capacity" });//设置查询条件 
-            //    ManagementObjectCollection collection = searcher.Get();   //获取内存容量 
-            //    ManagementObjectCollection.ManagementObjectEnumerator em = collection.GetEnumerator();
+            String name = Request.ServerVariables["Server_SoftWare"];
+            if (String.IsNullOrEmpty(name)) name = Process.GetCurrentProcess().ProcessName;
 
-            //    long capacity = 0;
-            //    while (em.MoveNext())
-            //    {
-            //        ManagementBaseObject baseObj = em.Current;
-            //        if (baseObj.Properties["Capacity"].Value != null)
-            //        {
-            //            try
-            //            {
-            //                capacity += long.Parse(baseObj.Properties["Capacity"].Value.ToString());
-            //            }
-            //            catch
-            //            {
-            //                return 0;
-            //            }
-            //        }
-            //    }
-            //    return (int)(capacity / 1024 / 1024 / 1024);
-            //}
-            //catch
-            //{
-            //    return 0;
-            //}
-            return 0;
-        }
-
-        ////定义内存的信息结构   
-        //[StructLayout(LayoutKind.Sequential)]
-        //public struct MEMORY_INFO
-        //{
-        //    public uint dwLength;
-        //    public uint dwMemoryLoad;
-        //    public uint dwTotalPhys;
-        //    public uint dwAvailPhys;
-        //    public uint dwTotalPageFile;
-        //    public uint dwAvailPageFile;
-        //    public uint dwTotalVirtual;
-        //    public uint dwAvailVirtual;
-        //}
-
-        /// <summary>
-        ///     获取系统信息
-        /// </summary>
-        protected void GetSystemInfo()
-        {
+            // 检测集成管道，低版本.Net不支持，请使用者根据情况自行注释
             try
             {
-                OSVersion = Environment.OSVersion.ToString();
-
-                IISVersion = Request.ServerVariables["SERVER_SOFTWARE"];
-
-                if (OSVersion.IndexOf("Microsoft Windows NT 5.0") > -1)
-                {
-                    OSVersion = string.Concat("Microsoft Windows 2000 (", OSVersion, ")");
-                    IISVersion = "IIS 5";
-                }
-                else if (OSVersion.IndexOf("Microsoft Windows NT 5.1") > -1)
-                {
-                    OSVersion = string.Concat("Microsoft Windows XP (", OSVersion, ")");
-                    IISVersion = "IIS 5.1";
-                }
-                else if (OSVersion.IndexOf("Microsoft Windows NT 5.2") > -1)
-                {
-                    OSVersion = string.Concat("Microsoft Windows 2003 (", OSVersion, ")");
-                    IISVersion = "IIS 6";
-                }
-                else if (OSVersion.IndexOf("Microsoft Windows NT 6.0") > -1)
-                {
-                    OSVersion = string.Concat("Microsoft Windows Vista or Server 2008 (", OSVersion, ")");
-                    IISVersion = "IIS 7";
-                }
-                else if (OSVersion.IndexOf("Microsoft Windows NT 6.1") > -1)
-                {
-                    OSVersion = string.Concat("Microsoft Windows 7 or Server 2008 R2 (", OSVersion, ")");
-                    IISVersion = "IIS 7.5";
-                }
-
-                NETVersion = Environment.Version.ToString();
-
-                CPUInfo = Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER") + " (" + Environment.ProcessorCount +
-                          " 核)";
-
-
-                //MEMORY_INFO MemInfo;
-                //MemInfo = new MEMORY_INFO();
-                //GlobalMemoryStatus(ref   MemInfo);
-                if (Environment.OSVersion.Platform == PlatformID.Unix)
-                {
-                    PerformanceCounter p = new PerformanceCounter("Mono Memory", "Total Physical Memory");
-                    MemoryInfo = "物理内存:" + (p.RawValue/1024/1024) + " MB / 当前程序已占用物理内存:" +
-                                 (Environment.WorkingSet/1024/1024) + " MB";
-                }
+                if (UsingIntegratedPipeline()) name += " [集成管道]";
             }
-            catch (Exception  ex)
-            {
-            }
+            catch { }
+
+            return name;
         }
 
+        Boolean UsingIntegratedPipeline()
+        {
+            return HttpRuntime.UsingIntegratedPipeline;
+        }
+        
         #region 变量
 
         /// <summary>
@@ -355,36 +270,7 @@ namespace Loachs.Web
         /// </summary>
         protected int UpfileCount;
 
-        /// <summary>
-        ///     操作系统版本
-        /// </summary>
-        protected string OSVersion;
-
-        /// <summary>
-        ///     IIS 版本
-        /// </summary>
-        protected string IISVersion;
-
-        /// <summary>
-        ///     .net 版本
-        /// </summary>
-        protected string NETVersion;
-
-        /// <summary>
-        ///     CPU信息
-        /// </summary>
-        protected string CPUInfo;
-
-        /// <summary>
-        ///     使用内存大小
-        /// </summary>
-        protected string MemoryInfo;
-
-        //  protected MemoryInfo memoryInfo;  
-
-        //   private string CommentMessage = "";
-
-        protected List<CommentInfo> commentlist;
+        protected EntityList<Comments> commentlist;
 
         #endregion
     }
