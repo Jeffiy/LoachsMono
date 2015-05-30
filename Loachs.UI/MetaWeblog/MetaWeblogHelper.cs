@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using Loachs.Common;
+using Loachs.Core.Config;
 using Loachs.Entity;
 using Loachs.Web;
 using StringHelper = Loachs.Common.StringHelper;
@@ -504,7 +505,7 @@ namespace Loachs.MetaWeblog
             {
                 Url = rootUrl,
                 BlogId = "1000",
-                BlogName = Sites.GetSetting().SiteName
+                BlogName = SiteConfig.Current.SiteName
             };
             blogs.Add(temp);
 

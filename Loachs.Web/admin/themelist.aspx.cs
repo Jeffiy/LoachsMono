@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Loachs.Common;
+using Loachs.Core.Config;
 using Loachs.Entity;
 
 namespace Loachs.Web
@@ -20,7 +21,7 @@ namespace Loachs.Web
 
             if (Operate == OperateType.Update)
             {
-                SettingInfo s = Sites.GetSetting();
+                SiteConfig s = SiteConfig.Current;
 
                 switch (type)
                 {
@@ -32,7 +33,7 @@ namespace Loachs.Web
                         s.Theme = Themename;
                         break;
                 }
-                Sites.UpdateSetting(s);
+                s.Save();
 
                 Response.Redirect("themelist.aspx?result=2");
             }

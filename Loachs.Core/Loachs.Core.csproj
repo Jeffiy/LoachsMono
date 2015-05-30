@@ -102,11 +102,11 @@
     <Compile Include="Common\RequestHelper.cs" />
     <Compile Include="Common\StringHelper.cs" />
     <Compile Include="Common\Utils.cs" />
+    <Compile Include="Config\SiteConfig.cs" />
     <Compile Include="Controls\Pager.cs" />
     <Compile Include="Controls\UrlRewriter.cs" />
     <Compile Include="Entity\ArchiveInfo.cs" />
     <Compile Include="Entity\Common\Enums.cs" />
-    <Compile Include="Entity\SettingInfo.cs" />
     <Compile Include="Entity\ThemeInfo.cs" />
     <Compile Include="Entity\标签.Biz.cs" />
     <Compile Include="Entity\类型.Biz.cs" />

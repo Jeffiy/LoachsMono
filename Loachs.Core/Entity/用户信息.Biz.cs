@@ -1,6 +1,7 @@
 ﻿﻿using System;
 ﻿using System.ComponentModel;
 ﻿using Loachs.Common;
+﻿using Loachs.Core.Config;
 ﻿using NewLife.Data;
 ﻿using XCode;
 ﻿using XCode.Membership;
@@ -83,6 +84,36 @@ namespace Loachs.Entity
         #endregion
 
         #region 扩展属性﻿
+        /// <summary>
+        ///     地址
+        /// </summary>
+        public string Url
+        {
+            get
+            {
+                string url = string.Empty;
+
+                if (Utils.IsSupportUrlRewriter == false)
+                {
+                    url = string.Format("{0}default.aspx?type=author&username={1}", ConfigHelper.SiteUrl,
+                        StringHelper.UrlEncode(UserName));
+                }
+                else
+                {
+                    return ConfigHelper.SiteUrl + "author/" + StringHelper.UrlEncode(UserName) +
+                           SiteConfig.Current.RewriteExtension;
+                }
+                return Utils.CheckPreviewThemeUrl(url);
+            }
+        }
+
+        /// <summary>
+        ///     连接
+        /// </summary>
+        public string Link
+        {
+            get { return string.Format("<a href=\"{0}\" title=\"作者:{1}\">{1}</a>", Url, Name); }
+        }
         #endregion
 
         #region 扩展查询﻿
@@ -201,41 +232,6 @@ namespace Loachs.Entity
         {
             return Find(_.UserName== userName & _.Password == password);
         }
-        #endregion
-
-        #region 非字段
-
-        /// <summary>
-        ///     地址
-        /// </summary>
-        public string Url
-        {
-            get
-            {
-                string url = string.Empty;
-
-                if (Utils.IsSupportUrlRewriter == false)
-                {
-                    url = string.Format("{0}default.aspx?type=author&username={1}", ConfigHelper.SiteUrl,
-                        StringHelper.UrlEncode(UserName));
-                }
-                else
-                {
-                    return ConfigHelper.SiteUrl + "author/" + StringHelper.UrlEncode(UserName) +
-                           Sites.GetSetting().RewriteExtension;
-                }
-                return Utils.CheckPreviewThemeUrl(url);
-            }
-        }
-
-        /// <summary>
-        ///     连接
-        /// </summary>
-        public string Link
-        {
-            get { return string.Format("<a href=\"{0}\" title=\"作者:{1}\">{1}</a>", Url, Name); }
-        }
-
         #endregion
     }
 }

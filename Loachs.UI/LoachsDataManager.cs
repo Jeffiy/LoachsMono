@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Loachs.Core.Config;
 using Loachs.Entity;
 using XCode;
 using StringHelper = Loachs.Common.StringHelper;
@@ -73,7 +74,7 @@ namespace Loachs.Web
             int pageSize = 10;
             int pageIndex = 1;
             int recordCount = 0;
-            int order = Sites.GetSetting().CommentOrder;
+            int order = SiteConfig.Current.CommentOrder;
             int userid = -1;
             int postid = -1;
             int parentid = -1;

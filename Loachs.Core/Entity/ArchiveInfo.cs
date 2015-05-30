@@ -1,5 +1,6 @@
 ﻿using System;
 using Loachs.Common;
+using Loachs.Core.Config;
 
 namespace Loachs.Entity
 {
@@ -30,7 +31,7 @@ namespace Loachs.Entity
                 else
                 {
                     return ConfigHelper.SiteUrl + "archive/" + Date.ToString("yyyyMM") +
-                           Sites.GetSetting().RewriteExtension;
+                           SiteConfig.Current.RewriteExtension;
                 }
                 return Utils.CheckPreviewThemeUrl(url);
             }

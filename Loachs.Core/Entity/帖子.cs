@@ -1,5 +1,6 @@
 ﻿﻿using System;
 ﻿using System.ComponentModel;
+﻿using Loachs.Core.Config;
 ﻿using XCode;
 ﻿using XCode.Configuration;
 ﻿using XCode.DataAccessLayer;
@@ -124,7 +125,7 @@ namespace Loachs.Entity
         public virtual Int32 CommentStatus
         {
             get {
-                if (_CommentStatus == 1 && Sites.GetSetting().CommentStatus == 1)
+                if (_CommentStatus == 1 && SiteConfig.Current.CommentStatus == 1)
                 {
                     return 1;
                 }

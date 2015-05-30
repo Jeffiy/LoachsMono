@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using Loachs.Entity;
+using Loachs.Core.Config;
 
 namespace Loachs.Common
 {
@@ -18,7 +18,7 @@ namespace Loachs.Common
         {
             get
             {
-                var site = Sites.GetSetting();
+                var site = SiteConfig.Current;
                 if (_rewriteExtension == "unknow" || _rewriteExtension != site.RewriteExtension)
                 {
                     _rewriteExtension = site.RewriteExtension;

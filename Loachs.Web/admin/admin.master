@@ -2,8 +2,8 @@
     CodeBehind="admin.master.cs" %>
 
 <%@ Import Namespace="Loachs.Entity" %>
-<%@ Import Namespace="Loachs.Business" %>
 <%@ Import Namespace="Loachs.Web" %>
+<%@ Import Namespace="Loachs.Core.Config" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
@@ -29,7 +29,7 @@
             </div>
             <h2>
                 <a href="default.aspx" style="color: #000; font-family: 'Microsoft Yahei'; font-size: 24px;">
-                    <%=Sites.GetSetting().SiteName %>管理中心</a></h2>
+                    <%=SiteConfig.Current.SiteName %>管理中心</a></h2>
         </div>
         <div id="container">
             <div id="sidebar">
@@ -67,9 +67,9 @@
             </div>
         </div>
         <div id="footer">
-            Powered by <a href="http://www.loachs.com" title="Loachs <%= Sites.GetSetting().Version %>"
+            Powered by <a href="http://www.loachs.com" title="Loachs <%= SiteConfig.Current.Version %>"
                 target="_blank">Loachs
-                <%= Sites.GetSetting().Version %></a></div>
+                <%= SiteConfig.Current.Version %></a></div>
     </div>
     </form>
 </body>

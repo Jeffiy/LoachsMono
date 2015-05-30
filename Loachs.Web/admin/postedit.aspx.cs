@@ -6,6 +6,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Web.UI.WebControls;
 using Loachs.Common;
+using Loachs.Core.Config;
 using Loachs.Entity;
 using StringHelper = Loachs.Common.StringHelper;
 
@@ -210,7 +211,7 @@ namespace Loachs.Web
         /// <param name="post"></param>
         private void SendEmail(Posts post)
         {
-            var site = Sites.GetSetting();
+            var site = SiteConfig.Current;
             if (site.SendMailAuthorByPost == 1)
             {
                 var list = Users.FindAllWithCache().ToList();

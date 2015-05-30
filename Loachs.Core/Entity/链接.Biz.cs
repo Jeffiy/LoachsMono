@@ -77,6 +77,25 @@ namespace Loachs.Entity
         #endregion
 
         #region 扩展属性﻿
+        /// <summary>
+        ///     连接Url
+        /// </summary>
+        public string Url
+        {
+            get { return Href.Replace("${siteurl}", ConfigHelper.SiteUrl); }
+        }
+
+        /// <summary>
+        ///     连接地址
+        /// </summary>
+        public string Link
+        {
+            get
+            {
+                return string.Format("<a href=\"{0}\" title=\"{1}\" target=\"{2}\">{3}</a>", Url, Description, Target,
+                    Name);
+            }
+        }
         #endregion
 
         #region 扩展查询
@@ -172,30 +191,6 @@ namespace Loachs.Entity
 
             return FindAll(exp, null, null, 0, 0);
         }
-        #endregion
-
-        #region 非字段
-
-        /// <summary>
-        ///     连接Url
-        /// </summary>
-        public string Url
-        {
-            get { return Href.Replace("${siteurl}", ConfigHelper.SiteUrl); }
-        }
-
-        /// <summary>
-        ///     连接地址
-        /// </summary>
-        public string Link
-        {
-            get
-            {
-                return string.Format("<a href=\"{0}\" title=\"{1}\" target=\"{2}\">{3}</a>", Url, Description, Target,
-                    Name);
-            }
-        }
-
         #endregion
     }
 }

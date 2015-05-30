@@ -6,6 +6,7 @@ using System.Text;
 using System.Web;
 using System.Xml;
 using Loachs.Common;
+using Loachs.Core.Config;
 using Loachs.Entity;
 using Loachs.MetaWeblog;
 using StringHelper = Loachs.Common.StringHelper;
@@ -52,7 +53,7 @@ namespace Loachs.Web
 
             UpdateViewCount();
 
-            var site = Sites.GetSetting();
+            var site = SiteConfig.Current;
 
             if (site.SiteStatus == 0)
             {
@@ -81,7 +82,7 @@ namespace Loachs.Web
             //非预览时
             if (!Directory.Exists(_templatePath) && string.IsNullOrEmpty(PreviewThemeName))
             {
-                SettingInfo s = Sites.GetSetting();
+                SiteConfig s = SiteConfig.Current;
                 if (RequestHelper.IsMobile)
                 {
                     s.MobileTheme = "default";
@@ -92,7 +93,7 @@ namespace Loachs.Web
                 }
                 ThemeName = "default";
 
-                Sites.UpdateSetting(s);
+                s.Save();
 
                 _templatePath = Server.MapPath(string.Format("{0}/themes/default/template/", ConfigHelper.SitePath));
             }
@@ -154,7 +155,7 @@ namespace Loachs.Web
 
                 // Service 
                 rsd.WriteStartElement("service");
-                rsd.WriteElementString("engineName", "Loachs" + Sites.GetSetting().Version);
+                rsd.WriteElementString("engineName", "Loachs" + SiteConfig.Current.Version);
                 rsd.WriteElementString("engineLink", "http://www.loachs.com");
                 rsd.WriteElementString("homePageLink", ConfigHelper.SiteUrl);
 
@@ -264,7 +265,7 @@ namespace Loachs.Web
         {
             string cookie = "isview";
             int isview = StringHelper.StrToInt(PageUtils.GetCookie(cookie), 0);
-            var site = Sites.GetSetting();
+            var site = SiteConfig.Current;
             //未访问或按刷新统计
             if (isview == 0 || site.SiteTotalType == 1)
             {
@@ -296,7 +297,7 @@ namespace Loachs.Web
             }
             else
             {
-                var site = Sites.GetSetting();
+                var site = SiteConfig.Current;
                 if (string.IsNullOrEmpty(type) && string.IsNullOrEmpty(key))
                 {
                     url = (ConfigHelper.SiteUrl.EndsWith("/")
@@ -398,7 +399,7 @@ namespace Loachs.Web
                 enddate = date.AddMonths(1).ToString("yyy-MM-dd");
                 th.Put(TagFields.META_KEYWORDS, "归档");
                 th.Put(TagFields.META_DESCRIPTION,
-                    Sites.GetSetting().SiteName + date.ToString("yyyy-MM") + "的归档");
+                    SiteConfig.Current.SiteName + date.ToString("yyyy-MM") + "的归档");
                 th.Put(TagFields.PAGE_TITLE, "归档:" + date.ToString("yyyy-MM"));
                 messageinfo = string.Format("<h2 class=\"post-message\">归档:{0}</h2>", date.ToString("yyyy-MM"));
 
@@ -417,7 +418,7 @@ namespace Loachs.Web
             //     th.Put(TagFields.PAGER_INDEX, pageindex);
 
             int recordCount = 0;
-            var site = Sites.GetSetting();
+            var site = SiteConfig.Current;
             th.Put(TagFields.POSTS,
                 Posts.GetPostList(site.PageSizePostCount, pageindex, out recordCount,
                     categoryId, tagId, userId, -1, 1, -1, 0, begindate, enddate, keyword));
@@ -463,7 +464,7 @@ namespace Loachs.Web
             th.Put(TagFields.COMMENT_SITEURL, siteurl);
             th.Put(TagFields.COMMENT_CONTENT, content);
 
-            var site = Sites.GetSetting();
+            var site = SiteConfig.Current;
             if (site.EnableVerifyCode == 1 &&
                 (verifycode != PageUtils.VerifyCode || string.IsNullOrEmpty(verifycode)))
             {
@@ -646,7 +647,7 @@ namespace Loachs.Web
         {
             #region 全局
 
-            var site = Sites.GetSetting();
+            var site = SiteConfig.Current;
 
             th.Put(TagFields.SITE_NAME, site.SiteName);
             th.Put(TagFields.SITE_DESCRIPTION, site.SiteDescription);
@@ -832,7 +833,7 @@ namespace Loachs.Web
 
             string cookie = "isviewpost" + post.Id;
             int isview = StringHelper.StrToInt(PageUtils.GetCookie(cookie), 0);
-            var site = Sites.GetSetting();
+            var site = SiteConfig.Current;
             //未访问或按刷新统计
             if (isview == 0 || site.SiteTotalType == 1)
             {
@@ -904,7 +905,7 @@ namespace Loachs.Web
 
             //   Response.Clear();
             Response.ContentType = "text/xml";
-            var site = Sites.GetSetting();
+            var site = SiteConfig.Current;
             if (site.RssStatus == 1)
             {
                 switch (action)

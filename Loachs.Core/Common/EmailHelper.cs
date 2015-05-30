@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Threading;
+using Loachs.Core.Config;
 using Loachs.Entity;
 
 namespace Loachs.Common
@@ -25,7 +26,7 @@ namespace Loachs.Common
         {
             try
             {
-                var site = Sites.GetSetting();
+                var site = SiteConfig.Current;
                 MailAddress from = new MailAddress(site.SmtpEmail,
                     site.SiteName);
                 MailMessage m = new MailMessage {From = from};

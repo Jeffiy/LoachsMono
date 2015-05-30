@@ -2,6 +2,7 @@
 using System.Web;
 using System.Web.Security;
 using Loachs.Common;
+using Loachs.Core.Config;
 using Loachs.Entity;
 
 /// <summary>
@@ -42,12 +43,12 @@ namespace Loachs.Web
         /// </summary>
         protected string ResponseMessage = string.Empty;
 
-        protected SettingInfo Setting;
+        protected SiteConfig Setting;
 
         public AdminPage()
         {
             CheckLoginAndPermission();
-            Setting = Sites.GetSetting();
+            Setting = SiteConfig.Current;
         }
 
         /// <summary>

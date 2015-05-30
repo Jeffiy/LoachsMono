@@ -4,6 +4,7 @@
 ﻿using System.Linq;
 ﻿using System.Xml.Serialization;
 ﻿using Loachs.Common;
+﻿using Loachs.Core.Config;
 ﻿using NewLife.Data;
 ﻿using XCode;
 ﻿using XCode.Membership;
@@ -142,6 +143,271 @@ namespace Loachs.Entity
         #region 扩展属性﻿
         [XmlIgnore]
         public string Date { get; set; }
+
+        /// <summary>
+        ///     内容地址
+        /// </summary>
+        /// <remarks>
+        ///     desc:自动判断是否支持URL重写
+        ///     date:2012.7.5
+        /// </remarks>
+        public string Url
+        {
+            get
+            {
+                string url = string.Empty;
+
+                if (Utils.IsSupportUrlRewriter == false)
+                {
+                    url = string.Format("{0}default.aspx?type=post&name={1}", ConfigHelper.SiteUrl,
+                        !string.IsNullOrEmpty(Slug) ? StringHelper.UrlEncode(Slug) : Id.ToString());
+                }
+                else
+                {
+                    var site = SiteConfig.Current;
+                    switch ((PostUrlFormat)UrlFormat)
+                    {
+                        //case PostUrlFormat.Category:
+                        //    url = string.Format("{0}post/{1}/{2}{3}", ConfigHelper.AppUrl, StringHelper.UrlEncode(this.Category.Slug), !string.IsNullOrEmpty(this.Slug) ? StringHelper.UrlEncode(this.Slug) : this.PostId.ToString(), SettingManager.GetSetting().RewriteExtension);
+                        //    break;
+
+                        case PostUrlFormat.Slug:
+                            url = string.Format("{0}post/{1}{2}", ConfigHelper.SiteUrl,
+                                !string.IsNullOrEmpty(Slug) ? StringHelper.UrlEncode(Slug) : Id.ToString(),
+                                site.RewriteExtension);
+                            break;
+                        case PostUrlFormat.Date:
+                        default:
+                            url = string.Format("{0}post/{1}/{2}{3}", ConfigHelper.SiteUrl,
+                                CreateDate.ToString(@"yyyy\/MM\/dd"),
+                                !string.IsNullOrEmpty(Slug) ? StringHelper.UrlEncode(Slug) : Id.ToString(),
+                                site.RewriteExtension);
+                            break;
+                    }
+                }
+                return Utils.CheckPreviewThemeUrl(url);
+            }
+        }
+
+        /// <summary>
+        ///     分页URL
+        /// </summary>
+        public string PageUrl
+        {
+            get
+            {
+                string url = string.Empty;
+
+                if (Utils.IsSupportUrlRewriter == false)
+                {
+                    url = string.Format("{0}default.aspx?type=post&name={1}&page={2}", ConfigHelper.SiteUrl,
+                        !string.IsNullOrEmpty(Slug) ? StringHelper.UrlEncode(Slug) : Id.ToString(), "{0}");
+                }
+                else
+                {
+                    var site = SiteConfig.Current;
+                    switch ((PostUrlFormat)UrlFormat)
+                    {
+                        case PostUrlFormat.Slug:
+
+                            url = string.Format("{0}post/{1}/page/{2}{3}", ConfigHelper.SiteUrl,
+                                !string.IsNullOrEmpty(Slug) ? StringHelper.UrlEncode(Slug) : Id.ToString(), "{0}",
+                                site.RewriteExtension);
+                            break;
+
+                        case PostUrlFormat.Date:
+                        default:
+                            url = string.Format("{0}post/{1}/{2}/page/{3}{4}", ConfigHelper.SiteUrl,
+                                CreateDate.ToString(@"yyyy\/MM\/dd"),
+                                !string.IsNullOrEmpty(Slug) ? StringHelper.UrlEncode(Slug) : Id.ToString(), "{0}",
+                                site.RewriteExtension);
+                            break;
+                    }
+                }
+                return Utils.CheckPreviewThemeUrl(url);
+            }
+        }
+
+        /// <summary>
+        ///     连接
+        /// </summary>
+        public string Link
+        {
+            get { return string.Format("<a href=\"{0}\">{1}</a>", Url, Title); }
+        }
+
+        /// <summary>
+        ///     订阅URL
+        /// </summary>
+        public string FeedUrl
+        {
+            get
+            {
+                //return string.Format("{0}feed/comment/postid/{1}{2}", ConfigHelper.SiteUrl, this.PostId, SiteConfig.Current.RewriteExtension);
+                return string.Format("{0}feed/comment/postid/{1}.aspx", ConfigHelper.SiteUrl, Id);
+            }
+        }
+
+        /// <summary>
+        ///     订阅连接
+        /// </summary>
+        public string FeedLink
+        {
+            get { return string.Format("<a href=\"{0}\" title=\"订阅:{1} 的评论\">订阅</a>", FeedUrl, Title); }
+        }
+
+        /// <summary>
+        ///     文章 详情
+        ///     根据设置而定,可为摘要,正文
+        /// </summary>
+        public string Detail
+        {
+            get
+            {
+                switch (SiteConfig.Current.PostShowType)
+                {
+                    case 1:
+                        return string.Empty;
+                    case 2:
+                    default:
+                        return Summary;
+
+                    case 3:
+                        return StringHelper.CutString(StringHelper.RemoveHtml(Content), 200, "...");
+                    case 4:
+                        return Content;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Rss 详情
+        ///     根据设置而定,可为摘要,正文,前200字,空等
+        /// </summary>
+        public string FeedDetail
+        {
+            get
+            {
+                switch (SiteConfig.Current.RssShowType)
+                {
+                    case 1:
+                        return string.Empty;
+                    case 2:
+                    default:
+                        return Summary;
+
+                    case 3:
+                        return StringHelper.CutString(StringHelper.RemoveHtml(Content), 200, "...");
+                    case 4:
+                        return Content;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     作者
+        /// </summary>
+        public Users Author
+        {
+            get
+            {
+                return Users.FindById(UserId);
+            }
+        }
+
+        /// <summary>
+        ///     所属分类
+        /// </summary>
+        public Categorys Category
+        {
+            get
+            {
+                return Categorys.FindById(CategoryId);
+            }
+        }
+
+        /// <summary>
+        ///     对应标签
+        /// </summary>
+        public EntityList<Tags> Tags
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(Tag))
+                {
+                    string temptags = Tag.Replace("{", "").Replace("}", ",");
+
+                    if (temptags.Length > 0)
+                    {
+                        temptags = temptags.TrimEnd(',');
+                    }
+
+                    return Entity.Tags.GetTagList(temptags);
+                }
+                return new EntityList<Tags>();
+            }
+        }
+
+        /// <summary>
+        ///     下一篇文章(新)
+        /// </summary>
+        public Posts Next
+        {
+            get
+            {
+                return Find(_.HideStatus == 0 & _.Status == 1 & _.Id > Id);
+            }
+        }
+
+        /// <summary>
+        ///     上一篇文章(旧)
+        /// </summary>
+        public Posts Previous
+        {
+            get
+            {
+                return Find(_.HideStatus == 0 & _.Status == 1 & _.Id < Id);
+            }
+        }
+
+        /// <summary>
+        ///     相关文章
+        /// </summary>
+        public List<Posts> RelatedPosts
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Tag))
+                {
+                    return new List<Posts>();
+                }
+
+                string tags = Tag.Replace("}", "},");
+                tags = tags.TrimEnd(',');
+
+                string[] temparray = tags.Split(',');
+
+                int num = 0;
+                List<Posts> list = FindAll(_.HideStatus == 0 & _.Status == 1, null)
+                    .ToList()
+                    .FindAll(p =>
+                    {
+                        if (num >= SiteConfig.Current.PostRelatedCount)
+                        {
+                            return false;
+                        }
+
+                        if (temparray.Any(tag => p.Tag.IndexOf(tag) != -1 && p.Id != Id))
+                        {
+                            num++;
+                            return true;
+                        }
+                        return false;
+                    });
+
+                return list;
+            }
+        }
         #endregion
 
         #region 扩展查询﻿
@@ -358,31 +624,12 @@ namespace Loachs.Entity
         {
             var exp = new WhereExpression();
             
-            if (categoryId != -1)
-            {
-                exp &= _.CategoryId == categoryId;
-            }
-
-            if (userId != -1)
-            {
-                exp &= _.UserId == userId;
-            }
-            if (recommend != -1)
-            {
-                exp &= _.Recommend == recommend;
-            }
-            if (status != -1)
-            {
-                exp &= _.Status == status;
-            }
-            if (topstatus != -1)
-            {
-                exp &= _.TopStatus == topstatus;
-            }
-            if (hidestatus != -1)
-            {
-                exp &= _.HideStatus == hidestatus;
-            }
+            if (categoryId != -1) exp &= _.CategoryId == categoryId;
+            if (userId != -1) exp &= _.UserId == userId;
+            if (recommend != -1) exp &= _.Recommend == recommend;
+            if (status != -1) exp &= _.Status == status;
+            if (topstatus != -1) exp &= _.TopStatus == topstatus;
+            if (hidestatus != -1) exp &= _.HideStatus == hidestatus;
 
             return FindAll(exp, null, null, 0, rowCount);
         }
@@ -406,282 +653,6 @@ namespace Loachs.Entity
             }
             return listArchiveInfo;
         }
-        #endregion
-
-        #region 非字段
-        
-        /// <summary>
-        ///     内容地址
-        /// </summary>
-        /// <remarks>
-        ///     desc:自动判断是否支持URL重写
-        ///     date:2012.7.5
-        /// </remarks>
-        public string Url
-        {
-            get
-            {
-                string url = string.Empty;
-
-                if (Utils.IsSupportUrlRewriter == false)
-                {
-                    url = string.Format("{0}default.aspx?type=post&name={1}", ConfigHelper.SiteUrl,
-                        !string.IsNullOrEmpty(Slug) ? StringHelper.UrlEncode(Slug) : Id.ToString());
-                }
-                else
-                {
-                    var site = Sites.GetSetting();
-                    switch ((PostUrlFormat)UrlFormat)
-                    {
-                        //case PostUrlFormat.Category:
-                        //    url = string.Format("{0}post/{1}/{2}{3}", ConfigHelper.AppUrl, StringHelper.UrlEncode(this.Category.Slug), !string.IsNullOrEmpty(this.Slug) ? StringHelper.UrlEncode(this.Slug) : this.PostId.ToString(), SettingManager.GetSetting().RewriteExtension);
-                        //    break;
-
-                        case PostUrlFormat.Slug:
-                            url = string.Format("{0}post/{1}{2}", ConfigHelper.SiteUrl,
-                                !string.IsNullOrEmpty(Slug) ? StringHelper.UrlEncode(Slug) : Id.ToString(),
-                                site.RewriteExtension);
-                            break;
-                        case PostUrlFormat.Date:
-                        default:
-                            url = string.Format("{0}post/{1}/{2}{3}", ConfigHelper.SiteUrl,
-                                CreateDate.ToString(@"yyyy\/MM\/dd"),
-                                !string.IsNullOrEmpty(Slug) ? StringHelper.UrlEncode(Slug) : Id.ToString(),
-                                site.RewriteExtension);
-                            break;
-                    }
-                }
-                return Utils.CheckPreviewThemeUrl(url);
-            }
-        }
-
-        /// <summary>
-        ///     分页URL
-        /// </summary>
-        public string PageUrl
-        {
-            get
-            {
-                string url = string.Empty;
-
-                if (Utils.IsSupportUrlRewriter == false)
-                {
-                    url = string.Format("{0}default.aspx?type=post&name={1}&page={2}", ConfigHelper.SiteUrl,
-                        !string.IsNullOrEmpty(Slug) ? StringHelper.UrlEncode(Slug) : Id.ToString(), "{0}");
-                }
-                else
-                {
-                    var site = Sites.GetSetting();
-                    switch ((PostUrlFormat)UrlFormat)
-                    {
-                        case PostUrlFormat.Slug:
-
-                            url = string.Format("{0}post/{1}/page/{2}{3}", ConfigHelper.SiteUrl,
-                                !string.IsNullOrEmpty(Slug) ? StringHelper.UrlEncode(Slug) : Id.ToString(), "{0}",
-                                site.RewriteExtension);
-                            break;
-
-                        case PostUrlFormat.Date:
-                        default:
-                            url = string.Format("{0}post/{1}/{2}/page/{3}{4}", ConfigHelper.SiteUrl,
-                                CreateDate.ToString(@"yyyy\/MM\/dd"),
-                                !string.IsNullOrEmpty(Slug) ? StringHelper.UrlEncode(Slug) : Id.ToString(), "{0}",
-                                site.RewriteExtension);
-                            break;
-                    }
-                }
-                return Utils.CheckPreviewThemeUrl(url);
-            }
-        }
-
-        /// <summary>
-        ///     连接
-        /// </summary>
-        public string Link
-        {
-            get { return string.Format("<a href=\"{0}\">{1}</a>", Url, Title); }
-        }
-
-        /// <summary>
-        ///     订阅URL
-        /// </summary>
-        public string FeedUrl
-        {
-            get
-            {
-                //return string.Format("{0}feed/comment/postid/{1}{2}", ConfigHelper.SiteUrl, this.PostId, Sites.GetSetting().RewriteExtension);
-                return string.Format("{0}feed/comment/postid/{1}.aspx", ConfigHelper.SiteUrl, Id);
-            }
-        }
-
-        /// <summary>
-        ///     订阅连接
-        /// </summary>
-        public string FeedLink
-        {
-            get { return string.Format("<a href=\"{0}\" title=\"订阅:{1} 的评论\">订阅</a>", FeedUrl, Title); }
-        }
-
-        /// <summary>
-        ///     文章 详情
-        ///     根据设置而定,可为摘要,正文
-        /// </summary>
-        public string Detail
-        {
-            get
-            {
-                switch (Sites.GetSetting().PostShowType)
-                {
-                    case 1:
-                        return string.Empty;
-                    case 2:
-                    default:
-                        return Summary;
-
-                    case 3:
-                        return StringHelper.CutString(StringHelper.RemoveHtml(Content), 200, "...");
-                    case 4:
-                        return Content;
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Rss 详情
-        ///     根据设置而定,可为摘要,正文,前200字,空等
-        /// </summary>
-        public string FeedDetail
-        {
-            get
-            {
-                switch (Sites.GetSetting().RssShowType)
-                {
-                    case 1:
-                        return string.Empty;
-                    case 2:
-                    default:
-                        return Summary;
-
-                    case 3:
-                        return StringHelper.CutString(StringHelper.RemoveHtml(Content), 200, "...");
-                    case 4:
-                        return Content;
-                }
-            }
-        }
-
-        /// <summary>
-        ///     作者
-        /// </summary>
-        public Users Author
-        {
-            get
-            {
-                return Users.FindById(UserId);
-            }
-        }
-
-        /// <summary>
-        ///     所属分类
-        /// </summary>
-        public Categorys Category
-        {
-            get
-            {
-                return Categorys.FindById(CategoryId);
-            }
-        }
-
-        /// <summary>
-        ///     对应标签
-        /// </summary>
-        public EntityList<Tags> Tags
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(Tag))
-                {
-                    string temptags = Tag.Replace("{", "").Replace("}", ",");
-
-                    if (temptags.Length > 0)
-                    {
-                        temptags = temptags.TrimEnd(',');
-                    }
-
-                    return Entity.Tags.GetTagList(temptags);
-                }
-                return new EntityList<Tags>();
-            }
-        }
-
-        /// <summary>
-        ///     下一篇文章(新)
-        /// </summary>
-        public Posts Next
-        {
-            get
-            {
-                return
-                    FindAllWithCache()
-                        .ToList()
-                        .FirstOrDefault(p => p.HideStatus == 0 && p.Status == 1 && p.Id > this.Id);
-            }
-        }
-
-        /// <summary>
-        ///     上一篇文章(旧)
-        /// </summary>
-        public Posts Previous
-        {
-            get
-            {
-                return
-                    FindAllWithCache()
-                        .ToList()
-                        .FirstOrDefault(p => p.HideStatus == 0 && p.Status == 1 && p.Id < this.Id);
-            }
-        }
-
-        /// <summary>
-        ///     相关文章
-        /// </summary>
-        public List<Posts> RelatedPosts
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(Tag))
-                {
-                    return new List<Posts>();
-                }
-
-                string tags = Tag.Replace("}", "},");
-                tags = tags.TrimEnd(',');
-
-                string[] temparray = tags.Split(',');
-
-                int num = 0;
-                List<Posts> list = FindAllWithCache()
-                    .ToList()
-                    .FindAll(p => p.HideStatus == 0 && p.Status == 1)
-                    .FindAll(p =>
-                    {
-                        if (num >= Sites.GetSetting().PostRelatedCount)
-                        {
-                            return false;
-                        }
-
-                        if (temparray.Any(tag => p.Tag.IndexOf(tag) != -1 && p.Id != this.Id))
-                        {
-                            num++;
-                            return true;
-                        }
-                        return false;
-                    });
-
-                return list;
-            }
-        }
-
         #endregion
     }
 }

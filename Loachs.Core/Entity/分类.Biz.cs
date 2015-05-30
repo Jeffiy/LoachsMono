@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using Loachs.Common;
+using Loachs.Core.Config;
 using NewLife.Log;
 using XCode;
 using StringHelper = Loachs.Common.StringHelper;
@@ -28,7 +29,7 @@ namespace Loachs.Entity
 
             // 在新插入数据或者修改了指定字段时进行唯一性验证，CheckExist内部抛出参数异常
 //            if (isNew || Dirtys[__.Slug]) CheckExist(__.Slug);
-            if (isNew && !Dirtys[__.CreateDate]) CreateDate = DateTime.Now;
+//            if (isNew && !Dirtys[__.CreateDate]) CreateDate = DateTime.Now;
             if (HasDirty) Type = (int)TermType.Category;
         }
 
@@ -78,6 +79,62 @@ namespace Loachs.Entity
         #endregion
 
         #region 扩展属性﻿
+        /// <summary>
+        ///     地址
+        /// </summary>
+        public string Url
+        {
+            get
+            {
+                string url;
+
+                string slug = Id.ToString();
+                if (!string.IsNullOrEmpty(Slug))
+                {
+                    slug = StringHelper.UrlEncode(Slug);
+                }
+
+
+                if (Utils.IsSupportUrlRewriter == false)
+                {
+                    url = string.Format("{0}default.aspx?type=category&slug={1}", ConfigHelper.SiteUrl, slug);
+                }
+                else
+                {
+                    url = string.Format("{0}category/{1}{2}", ConfigHelper.SiteUrl, slug,
+                        SiteConfig.Current.RewriteExtension);
+                }
+                return Utils.CheckPreviewThemeUrl(url);
+            }
+        }
+
+        /// <summary>
+        ///     连接
+        /// </summary>
+        public string Link
+        {
+            get { return string.Format("<a href=\"{0}\" title=\"分类:{1}\">{2}</a>", Url, Name, Name); }
+        }
+
+        /// <summary>
+        ///     订阅URL
+        /// </summary>
+        public string FeedUrl
+        {
+            get
+            {
+                return string.Format("{0}feed/post/categoryid/{1}{2}", ConfigHelper.SiteUrl, Id,
+                    SiteConfig.Current.RewriteExtension);
+            }
+        }
+
+        /// <summary>
+        ///     订阅连接
+        /// </summary>
+        public string FeedLink
+        {
+            get { return string.Format("<a href=\"{0}\" title=\"订阅:{1}\">订阅</a>", FeedUrl, Name); }
+        }
         #endregion
 
         #region 扩展查询﻿
@@ -135,67 +192,6 @@ namespace Loachs.Entity
         #endregion
 
         #region 业务
-        #endregion
-
-        #region 非字段
-
-        /// <summary>
-        ///     地址
-        /// </summary>
-        public string Url
-        {
-            get
-            {
-                string url;
-
-                string slug = Id.ToString();
-                if (!string.IsNullOrEmpty(Slug))
-                {
-                    slug = StringHelper.UrlEncode(Slug);
-                }
-
-
-                if (Utils.IsSupportUrlRewriter == false)
-                {
-                    url = string.Format("{0}default.aspx?type=category&slug={1}", ConfigHelper.SiteUrl, slug);
-                }
-                else
-                {
-                    url = string.Format("{0}category/{1}{2}", ConfigHelper.SiteUrl, slug,
-                        Sites.GetSetting().RewriteExtension);
-                }
-                return Utils.CheckPreviewThemeUrl(url);
-            }
-        }
-
-        /// <summary>
-        ///     连接
-        /// </summary>
-        public string Link
-        {
-            get { return string.Format("<a href=\"{0}\" title=\"分类:{1}\">{2}</a>", Url, Name, Name); }
-        }
-
-        /// <summary>
-        ///     订阅URL
-        /// </summary>
-        public string FeedUrl
-        {
-            get
-            {
-                return string.Format("{0}feed/post/categoryid/{1}{2}", ConfigHelper.SiteUrl, Id,
-                    Sites.GetSetting().RewriteExtension);
-            }
-        }
-
-        /// <summary>
-        ///     订阅连接
-        /// </summary>
-        public string FeedLink
-        {
-            get { return string.Format("<a href=\"{0}\" title=\"订阅:{1}\">订阅</a>", FeedUrl, Name); }
-        }
-
         #endregion
     }
 }

@@ -2,7 +2,7 @@
 <%@ Import Namespace="System.IO" %>
 <%@ Import Namespace="Loachs.Business" %>
 <%@ Import Namespace="Loachs.Common" %>
-<%@ Import Namespace="Loachs.Entity" %>
+<%@ Import Namespace="Loachs.Core.Config" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server"></asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
 <h2>主题管理</h2>
@@ -15,7 +15,7 @@
         {
             if (d.Name == ".svn") continue;
 %>
-<% var site = Sites.GetSetting(); %>
+<% var site = SiteConfig.Current; %>
     <li <%=(site.Theme == d.Name || site.MobileTheme == d.Name)?" class=\"current\"":"" %>  >
         <p class="gray"><%=ConfigHelper.SitePath %>themes/<%=d.Name %>/</p>
         <p><img src="../themes/<%=d.Name %>/theme.jpg" width="200" height="150" alt=""  style="border:1px solid #ccc;" /></p>

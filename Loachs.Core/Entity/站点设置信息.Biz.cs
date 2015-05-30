@@ -1,8 +1,5 @@
 ﻿﻿using System;
 ﻿using System.ComponentModel;
-﻿using System.IO;
-﻿using System.Text;
-﻿using System.Xml;
 ﻿using System.Xml.Serialization;
 ﻿using NewLife.Data;
 ﻿using NewLife.Log;
@@ -139,30 +136,6 @@ namespace Loachs.Entity
 
         #region 业务
         /// <summary>
-        /// 更新站点配置信息
-        /// </summary>
-        public static int UpdateSetting(SettingInfo setting)
-        {
-            SiteInfo.Setting = Serialize(setting);
-            return SiteInfo.Save();
-        }
-
-        /// <summary>
-        ///     获取站点配置信息
-        /// </summary>
-        /// <returns></returns>
-        public static SettingInfo GetSetting()
-        {
-            object obj = DeSerialize(typeof(SettingInfo), SiteInfo.Setting);
-            if (obj == null)
-            {
-                return new SettingInfo();
-            }
-
-            return (SettingInfo)obj;
-        }
-
-        /// <summary>
         ///     更新文章数
         /// </summary>
         /// <param name="addCount">增加数，可为负数</param>
@@ -183,70 +156,6 @@ namespace Loachs.Entity
             SiteInfo.CommentCount += addCount;
             return SiteInfo.Save();
         }
-        #endregion
-
-        #region 序列化
-
-        /// <summary>
-        ///     xml序列化成字符串
-        /// </summary>
-        /// <param name="obj">对象</param>
-        /// <returns>xml字符串</returns>
-        public static string Serialize(object obj)
-        {
-            string returnStr = "";
-
-            XmlSerializer serializer = new XmlSerializer(obj.GetType());
-
-
-            MemoryStream ms = new MemoryStream();
-            XmlTextWriter xtw = null;
-            StreamReader sr = null;
-            try
-            {
-                xtw = new XmlTextWriter(ms, Encoding.UTF8) {Formatting = Formatting.Indented};
-                serializer.Serialize(xtw, obj);
-                ms.Seek(0, SeekOrigin.Begin);
-                sr = new StreamReader(ms);
-                returnStr = sr.ReadToEnd();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (xtw != null)
-                    xtw.Close();
-                if (sr != null)
-                    sr.Close();
-                ms.Close();
-            }
-            return returnStr;
-        }
-
-        /// <summary>
-        ///     反序列化
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="s"></param>
-        /// <returns></returns>
-        public static object DeSerialize(Type type, string s)
-        {
-            byte[] b = Encoding.UTF8.GetBytes(s);
-            try
-            {
-                XmlSerializer serializer = new XmlSerializer(type);
-
-                return serializer.Deserialize(new MemoryStream(b));
-            }
-            catch
-            {
-                //  throw ex;
-                return null;
-            }
-        }
-
         #endregion
     }
 }

@@ -88,6 +88,85 @@ namespace Loachs.Entity
         #endregion
 
         #region 扩展属性﻿
+        /// <summary>
+        ///     标题(实为过滤html的正文某长度文字)
+        /// </summary>
+        public string Title
+        {
+            get { return StringHelper.CutString(StringHelper.RemoveHtml(Content), 20, ""); }
+        }
+        
+        /// <summary>
+        ///     URl地址
+        /// </summary>
+        /// <remarks>
+        ///     desc:考虑分页，总是跳到最后一页，需改进
+        ///     date:2012.7
+        /// </remarks>
+        public string Url
+        {
+            get
+            {
+                return Post != null ? string.Format("{0}#comment-{1}", Post.Url, Id) : "###";
+            }
+        }
+
+        /// <summary>
+        ///     评论连接
+        /// </summary>
+        public string Link
+        {
+            get { return string.Format("<a href=\"{0}\" title=\"{1} 发表于 {2}\">{3}</a>", Url, Name, CreateDate, Title); }
+        }
+
+
+        /// <summary>
+        ///     作者连接
+        /// </summary>
+        public string AuthorLink
+        {
+            get
+            {
+                if (UserId > 0)
+                {
+                    Users user = Users.FindById(UserId);
+                    if (user != null)
+                    {
+                        return user.Link;
+                    }
+                }
+                else if (StringHelper.IsHttpUrl(SiteUrl))
+                {
+                    return string.Format("<a href=\"{0}\" target=\"_blank\" title=\"{1}\">{1}</a>", SiteUrl, Name);
+                }
+                return Name;
+            }
+        }
+
+        /// <summary>
+        ///     层次
+        /// </summary>
+        public int Floor { set; get; }
+
+        /// <summary>
+        ///     Gravatar 加密后的字符串
+        /// </summary>
+        public string GravatarCode
+        {
+            get { return Email.MD5().ToLower(); }
+        }
+
+        /// <summary>
+        ///     评论对应文章
+        /// </summary>
+        public Posts Post
+        {
+            get
+            {
+                Posts post = Posts.FindById(PostId);
+                return post ?? new Posts();
+            }
+        }
         #endregion
 
         #region 扩展查询﻿
@@ -305,100 +384,6 @@ namespace Loachs.Entity
             }
             return list;
         }
-        #endregion
-
-        #region 非字段
-
-        /// <summary>
-        ///     标题(实为过滤html的正文某长度文字)
-        /// </summary>
-        public string Title
-        {
-            get { return StringHelper.CutString(StringHelper.RemoveHtml(Content), 20, ""); }
-        }
-
-
-        /// <summary>
-        ///     URl地址
-        /// </summary>
-        /// <remarks>
-        ///     desc:考虑分页，总是跳到最后一页，需改进
-        ///     date:2012.7
-        /// </remarks>
-        public string Url
-        {
-            get
-            {
-                Posts post = Posts.FindById(PostId);
-                if (post != null)
-                {
-                    return string.Format("{0}#comment-{1}", post.Url, Id);
-                }
-                return "###";
-            }
-        }
-
-        /// <summary>
-        ///     评论连接
-        /// </summary>
-        public string Link
-        {
-            get { return string.Format("<a href=\"{0}\" title=\"{1} 发表于 {2}\">{3}</a>", Url, Name, CreateDate, Title); }
-        }
-
-
-        /// <summary>
-        ///     作者连接
-        /// </summary>
-        public string AuthorLink
-        {
-            get
-            {
-                if (UserId > 0)
-                {
-                    Users user = Users.FindById(UserId);
-                    if (user != null)
-                    {
-                        return user.Link;
-                    }
-                }
-                else if (StringHelper.IsHttpUrl(SiteUrl))
-                {
-                    return string.Format("<a href=\"{0}\" target=\"_blank\" title=\"{1}\">{1}</a>", SiteUrl, Name);
-                }
-                return Name;
-            }
-        }
-
-        /// <summary>
-        ///     层次
-        /// </summary>
-        public int Floor { set; get; }
-
-        /// <summary>
-        ///     Gravatar 加密后的字符串
-        /// </summary>
-        public string GravatarCode
-        {
-            get { return Email.MD5().ToLower(); }
-        }
-
-        /// <summary>
-        ///     评论对应文章
-        /// </summary>
-        public Posts Post
-        {
-            get
-            {
-                Posts post = Posts.FindById(PostId);
-                if (post != null)
-                {
-                    return post;
-                }
-                return new Posts();
-            }
-        }
-
         #endregion
     }
 }

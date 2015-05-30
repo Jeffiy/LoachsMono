@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using Loachs.Common;
+using Loachs.Core.Config;
 using NewLife.Data;
 using NewLife.Log;
 using XCode;
@@ -30,7 +31,7 @@ namespace Loachs.Entity
 
             // 在新插入数据或者修改了指定字段时进行唯一性验证，CheckExist内部抛出参数异常
 //            if (isNew || Dirtys[__.Slug]) CheckExist(__.Slug);
-            if (isNew && !Dirtys[__.CreateDate]) CreateDate = DateTime.Now;
+//            if (isNew && !Dirtys[__.CreateDate]) CreateDate = DateTime.Now;
             if (HasDirty) Type = (int)TermType.Tag;
         }
 
@@ -80,6 +81,36 @@ namespace Loachs.Entity
         #endregion
 
         #region 扩展属性﻿
+        /// <summary>
+        ///     地址
+        /// </summary>
+        public string Url
+        {
+            get
+            {
+                string url = string.Empty;
+
+                if (Utils.IsSupportUrlRewriter == false)
+                {
+                    url = string.Format("{0}default.aspx?type=tag&slug={1}", ConfigHelper.SiteUrl,
+                        StringHelper.UrlEncode(Slug));
+                }
+                else
+                {
+                    url = string.Format("{0}tag/{1}{2}", ConfigHelper.SiteUrl, StringHelper.UrlEncode(Slug),
+                        SiteConfig.Current.RewriteExtension);
+                }
+                return Utils.CheckPreviewThemeUrl(url);
+            }
+        }
+
+        /// <summary>
+        ///     连接
+        /// </summary>
+        public string Link
+        {
+            get { return string.Format("<a href=\"{0}\" title=\"标签:{1}\">{2}</a>", Url, Name, Name); }
+        }
         #endregion
 
         #region 扩展查询﻿
@@ -229,41 +260,6 @@ namespace Loachs.Entity
             }
             return true;
         }
-        #endregion
-
-        #region 非字段
-
-        /// <summary>
-        ///     地址
-        /// </summary>
-        public string Url
-        {
-            get
-            {
-                string url = string.Empty;
-
-                if (Utils.IsSupportUrlRewriter == false)
-                {
-                    url = string.Format("{0}default.aspx?type=tag&slug={1}", ConfigHelper.SiteUrl,
-                        StringHelper.UrlEncode(Slug));
-                }
-                else
-                {
-                    url = string.Format("{0}tag/{1}{2}", ConfigHelper.SiteUrl, StringHelper.UrlEncode(Slug),
-                        Sites.GetSetting().RewriteExtension);
-                }
-                return Utils.CheckPreviewThemeUrl(url);
-            }
-        }
-
-        /// <summary>
-        ///     连接
-        /// </summary>
-        public string Link
-        {
-            get { return string.Format("<a href=\"{0}\" title=\"标签:{1}\">{2}</a>", Url, Name, Name); }
-        }
-
         #endregion
     }
 }

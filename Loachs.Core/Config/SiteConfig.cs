@@ -1,10 +1,14 @@
-﻿namespace Loachs.Entity
+﻿using System;
+using System.ComponentModel;
+using NewLife.Xml;
+
+namespace Loachs.Core.Config
 {
-    /// <summary>
-    ///     配置实体
-    ///     邮件设置,发邮件设置
-    /// </summary>
-    public class SettingInfo
+    /// <summary>站点通用设置</summary>
+    [XmlConfigFile("config/SiteConfig.config", 15000)]
+    [Description("站点通用设置")]
+    [Serializable]
+    public class SiteConfig : XmlConfig<SiteConfig>
     {
         private int _commentapproved = 1;
         private string _commentblackword = "";
@@ -27,7 +31,7 @@
         private int _sidebarpostcount = 10;
         private int _sidebartagcount = 10;
         private string _sitedescription = "";
-        private string _sitename = "小泥鳅";
+        private string _sitename = "Jeffiy' blog";
         private int _sitestatus = 1;
         private int _sitetotaltype = 1;
         private string _smtpemail = "yourname@gmail.com";
@@ -42,11 +46,11 @@
         private string _watermarkimage = "watermark.gif";
         private int _watermarkposition = 4;
         private int _watermarkquality = 80;
-        private string _watermarktext = "小泥鳅";
+        private string _watermarktext = "Jeffiy' blog";
         private int _watermarktransparency = 8;
         private int _watermarktype = 1;
 
-        public SettingInfo()
+        public SiteConfig()
         {
             CommentOrder = 0;
             SendMailAuthorByComment = 0;
@@ -63,8 +67,7 @@
         //    set { _rewritestatus = value; }
         //    get { return _rewritestatus; }
         //}
-
-
+        
         /// <summary>
         ///     重写扩展名
         /// </summary>
@@ -185,8 +188,7 @@
             set { _sitedescription = value; }
             get { return _sitedescription; }
         }
-
-
+        
         /// <summary>
         ///     Meta 关键字
         /// </summary>
@@ -350,8 +352,7 @@
             set { _pagesizepostcount = value; }
             get { return _pagesizepostcount; }
         }
-
-
+        
         /// <summary>
         ///     评论分页数量
         /// </summary>
@@ -360,8 +361,7 @@
             set { _pagesizecommentcount = value; }
             get { return _pagesizecommentcount; }
         }
-
-
+        
         ///// <summary>
         ///// 标签数
         ///// </summary>
@@ -406,7 +406,6 @@
             get { return _watermarktype; }
         }
 
-
         /// <summary>
         ///     水印定位 1:左上,2:左下,3:右上,4:右下,5:中心
         /// </summary>
@@ -415,8 +414,7 @@
             set { _watermarkposition = value; }
             get { return _watermarkposition; }
         }
-
-
+        
         /// <summary>
         ///     水印透明度 1-10,10为不透明
         /// </summary>
@@ -425,8 +423,7 @@
             set { _watermarktransparency = value; }
             get { return _watermarktransparency; }
         }
-
-
+        
         /// <summary>
         ///     图片质量,0-100,100 为最高
         /// </summary>
@@ -435,8 +432,7 @@
             set { _watermarkquality = value; }
             get { return _watermarkquality; }
         }
-
-
+        
         /// <summary>
         ///     水印文字
         /// </summary>
@@ -445,8 +441,7 @@
             set { _watermarktext = value; }
             get { return _watermarktext; }
         }
-
-
+        
         /// <summary>
         ///     水印文字大小
         /// </summary>
@@ -455,8 +450,7 @@
             set { _watermarkfontsize = value; }
             get { return _watermarkfontsize; }
         }
-
-
+        
         /// <summary>
         ///     水印文字字体
         /// </summary>
@@ -465,8 +459,7 @@
             set { _watermarkfontname = value; }
             get { return _watermarkfontname; }
         }
-
-
+        
         /// <summary>
         ///     水印图片名
         /// </summary>

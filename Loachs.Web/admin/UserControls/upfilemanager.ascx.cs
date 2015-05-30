@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using Loachs.Common;
+using Loachs.Core.Config;
 using Loachs.Entity;
 using StringHelper = Loachs.Common.StringHelper;
 
@@ -367,7 +368,7 @@ namespace Loachs.Web
                         string newFileName = System.IO.Path.GetFileNameWithoutExtension(postedFile.FileName) + "w(" + iCounter +
                                              ")" + System.IO.Path.GetExtension(postedFile.FileName);
                         string newImagePath = Server.MapPath(uploadPath + newFileName);
-                        var site = Sites.GetSetting();
+                        var site = SiteConfig.Current;
                         string waterImagePath =
                             Server.MapPath(ConfigHelper.SitePath + "common/images/watermark/" +
                                            site.WatermarkImage);
