@@ -189,7 +189,7 @@ namespace Loachs.Controls
             string next = "下一页";
             string last = "尾页";
 
-            if (RewriteUrl == string.Empty || RewriteUrl == null)
+            if (string.IsNullOrEmpty(RewriteUrl))
             {
                 Regex rx = new Regex(@"&Page=\d*|Page=\d*", RegexOptions.IgnoreCase);
 

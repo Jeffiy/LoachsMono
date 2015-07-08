@@ -751,16 +751,16 @@ namespace Loachs.Web
                 Users user = Users.FindById(PageUtils.CurrentUserId);
                 if (user != null)
                 {
-                    th.Put(TagFields.COMMENT_AUTHOR, user.Name);
-                    th.Put(TagFields.COMMENT_EMAIL, user.Email);
-                    th.Put(TagFields.COMMENT_SITEURL, user.SiteUrl);
+                    th.Put(TagFields.COMMENT_AUTHOR, user.Name ?? String.Empty);
+                    th.Put(TagFields.COMMENT_EMAIL, user.Email ?? String.Empty);
+                    th.Put(TagFields.COMMENT_SITEURL, user.SiteUrl ?? String.Empty);
                 }
             }
             else
             {
-                th.Put(TagFields.COMMENT_AUTHOR, Server.UrlDecode(PageUtils.GetCookie(TagFields.COMMENT_AUTHOR)));
-                th.Put(TagFields.COMMENT_EMAIL, Server.UrlDecode(PageUtils.GetCookie(TagFields.COMMENT_EMAIL)));
-                th.Put(TagFields.COMMENT_SITEURL, Server.UrlDecode(PageUtils.GetCookie(TagFields.COMMENT_SITEURL)));
+                th.Put(TagFields.COMMENT_AUTHOR, Server.UrlDecode(PageUtils.GetCookie(TagFields.COMMENT_AUTHOR)) ?? String.Empty);
+                th.Put(TagFields.COMMENT_EMAIL, Server.UrlDecode(PageUtils.GetCookie(TagFields.COMMENT_EMAIL)) ?? String.Empty);
+                th.Put(TagFields.COMMENT_SITEURL, Server.UrlDecode(PageUtils.GetCookie(TagFields.COMMENT_SITEURL)) ?? String.Empty);
             }
             th.Put(TagFields.COMMENT_CONTENT, string.Empty);
             th.Put(TagFields.COMMENT_MESSAGE, string.Empty);
@@ -880,6 +880,7 @@ namespace Loachs.Web
             }
 
             th.Put(TagFields.LOACHS, new LoachsDataManager());
+            th.Put(TagFields.POSTS_RELATED, post.RelatedPosts);
 
             if (
                 File.Exists(

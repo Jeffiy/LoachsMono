@@ -197,6 +197,11 @@ namespace Loachs.Web
         public const string POSTS = "posts";
 
         /// <summary>
+        ///     相关文章列表
+        /// </summary>
+        public const string POSTS_RELATED = "relatedposts";
+
+        /// <summary>
         ///     最近文章列表
         /// </summary>
         public const string RECENT_POSTS = "recentposts";

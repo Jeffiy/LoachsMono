@@ -3,7 +3,6 @@ using System.Web;
 using System.Web.UI;
 using Loachs.Common;
 using Loachs.Core.Config;
-using Loachs.Entity;
 using XCode.DataAccessLayer;
 
 namespace Loachs.Web

@@ -355,7 +355,7 @@ namespace Loachs.Entity
         {
             get
             {
-                return Find(_.HideStatus == 0 & _.Status == 1 & _.Id > Id);
+                return FindAll(_.HideStatus == 0 & _.Status == 1 & _.Id > Id, _.Id.Asc(), null, 0, 1).ToList().FirstOrDefault();
             }
         }
 
@@ -366,7 +366,7 @@ namespace Loachs.Entity
         {
             get
             {
-                return Find(_.HideStatus == 0 & _.Status == 1 & _.Id < Id);
+                return FindAll(_.HideStatus == 0 & _.Status == 1 & _.Id < Id, _.Id.Desc(), null, 0, 1).ToList().FirstOrDefault();
             }
         }
 
@@ -388,7 +388,7 @@ namespace Loachs.Entity
                 string[] temparray = tags.Split(',');
 
                 int num = 0;
-                List<Posts> list = FindAll(_.HideStatus == 0 & _.Status == 1, null)
+                List<Posts> list = FindAll(_.HideStatus == 0 & _.Status == 1, null, null, 0, 0)
                     .ToList()
                     .FindAll(p =>
                     {
@@ -397,7 +397,7 @@ namespace Loachs.Entity
                             return false;
                         }
 
-                        if (temparray.Any(tag => p.Tag.IndexOf(tag) != -1 && p.Id != Id))
+                        if (temparray.Any(tag => !string.IsNullOrEmpty(p.Tag) && p.Tag.IndexOf(tag) != -1 && p.Id != Id))
                         {
                             num++;
                             return true;

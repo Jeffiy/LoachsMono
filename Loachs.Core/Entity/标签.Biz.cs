@@ -235,7 +235,7 @@ namespace Loachs.Entity
         {
             string[] idArray = ids.Split(',');
 
-            return FindAll(_.Type == (int)TermType.Tag & _.Id.In(idArray), null);
+            return FindAll(_.Type == (int)TermType.Tag & _.Id.In(idArray), null, null, 0, 0);
         }
 
         /// <summary>
